@@ -20,7 +20,7 @@ parser.add_option("-m", type="string", dest="method", help = "the method you wan
 parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
 parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
-parser.add_option("-c",type = "int",dest="crossVal", help="Tells in how many parts we divide our dataset for the cross validation", default=5)
+parser.add_option("-c",type = "int",dest="crossVal", help="Number of iterations in the cross validation", default=5)
 parser.add_option("-a", dest="allBins", help = "Tells if all bins should be used", default=False)
 parser.add_option("-o",dest="output", help="The name of the outputfile", default="classification.txt")
 (options, args) = parser.parse_args()
