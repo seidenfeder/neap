@@ -35,6 +35,7 @@ with open(fileRep1) as f:
 	for line in f:
 		lineSplit = line.strip().split()
 		genesRep1[lineSplit[0]] = lineSplit[6]
+fileRep1.close()
 #Remove header line
 del genesRep1['gene_id']
        
@@ -44,6 +45,7 @@ with open(fileRep2) as f:
 	for line in f:
 		lineSplit = line.strip().split()
 		genesRep2[lineSplit[0]] = lineSplit[6]
+fileRep2.close()
 #Remove header line
 del genesRep2['gene_id']
   
@@ -79,6 +81,7 @@ with open(fileGencode) as f:
 						geneDirection[gene_id]="-"
 						geneTSS[gene_id]=int(lineSplit[4])
 						geneTTS[gene_id]=int(lineSplit[3])
+fileGencode.close()
 
 
 #Create file header
@@ -88,6 +91,7 @@ histonName=dict()
 for line in annotFile.readlines():
     lineSplit=line.split("\t")
     histonName[lineSplit[0]]=lineSplit[16]
+annotFile.close()
 #Assuming that all samples are from the same cell line
 cellLine=lineSplit[6]
 
@@ -158,4 +162,6 @@ for gene in geneTSS:
 		for row in geneMatrix:
 			row=['{:.4f}'.format(x) for x in row]
 			inputFile.write(','.join(row)+"\n")
-        
+
+#Close the file
+inputFile.close()			
