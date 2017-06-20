@@ -3,8 +3,7 @@
 
 #############################################################################################
 #
-# Variant of the script bins_adapted.py,
-# where additionally a header for the result file is created out of a ENCODE metadata file
+# This Method calculates the bins
 #
 ############################################################################################# 
 
@@ -24,18 +23,19 @@ parser.add_option("-n", type="int", dest="numberBins", help = "give the number o
 parser.add_option("-s", type="int", dest="sizeBins", help = "give the size of the bins",default=100)
 parser.add_option("-o", dest="onlyTSS", help = "show bins only around TSS", default=False)
 parser.add_option("--out", dest="output", help = "give the name of the output file", default="output.txt")
+parser.add_option("--protCod", action="store_true", dest="proteinCoding", default=False)
 
 (options, args) = parser.parse_args()
 
 fileRep1=options.fileRep1
 fileRep2=options.fileRep2
+
 #Parse the file of the first replicate
 genesRep1=dict()
 with open(fileRep1) as f:
 	for line in f:
 		lineSplit = line.strip().split()
 		genesRep1[lineSplit[0]] = lineSplit[6]
-fileRep1.close()
 #Remove header line
 del genesRep1['gene_id']
        
@@ -45,7 +45,6 @@ with open(fileRep2) as f:
 	for line in f:
 		lineSplit = line.strip().split()
 		genesRep2[lineSplit[0]] = lineSplit[6]
-fileRep2.close()
 #Remove header line
 del genesRep2['gene_id']
   
@@ -58,7 +57,8 @@ genesAverage=dict()
 for gene in genesRep1.keys():
 	genesAverage[gene]=(float(genesRep1[gene])+float(genesRep2[gene]))/2
 
-fileGencode = options.fileGencode         
+fileGencode = options.fileGencode
+proteinCoding=options.proteinCoding        
 #Get transcription start site of each gene
 geneTSS=dict()
 geneTTS=dict()
@@ -69,19 +69,20 @@ with open(fileGencode) as f:
 		if not line.startswith("##"):
 			lineSplit = line.strip().split()
 			if lineSplit[2]=='gene':
-				gene_id=lineSplit[9][1:-2]
-				if gene_id in genesAverage:
-					geneChr[gene_id]=lineSplit[0]
-					#save if it is on the + or on the minus strand 	
-					if(lineSplit[6]=='+'):
-						geneDirection[gene_id]="+"
-						geneTSS[gene_id]=int(lineSplit[3])
-						geneTTS[gene_id]=int(lineSplit[4])
-					else:
-						geneDirection[gene_id]="-"
-						geneTSS[gene_id]=int(lineSplit[4])
-						geneTTS[gene_id]=int(lineSplit[3])
-fileGencode.close()
+                #Option, nur die Protein-kodierenden Gene anzuschauen
+				if (not proteinCoding) or lineSplit[11]=='"protein_coding";':
+					gene_id=lineSplit[9][1:-2]
+					if gene_id in genesAverage:
+						geneChr[gene_id]=lineSplit[0]
+						#save if it is on the + or on the minus strand 	
+						if(lineSplit[6]=='+'):
+							geneDirection[gene_id]="+"
+							geneTSS[gene_id]=int(lineSplit[3])
+							geneTTS[gene_id]=int(lineSplit[4])
+						else:
+							geneDirection[gene_id]="-"
+							geneTSS[gene_id]=int(lineSplit[4])
+							geneTTS[gene_id]=int(lineSplit[3])
 
 
 #Create file header
@@ -91,7 +92,6 @@ histonName=dict()
 for line in annotFile.readlines():
     lineSplit=line.split("\t")
     histonName[lineSplit[0]]=lineSplit[16]
-annotFile.close()
 #Assuming that all samples are from the same cell line
 cellLine=lineSplit[6]
 
@@ -162,6 +162,4 @@ for gene in geneTSS:
 		for row in geneMatrix:
 			row=['{:.4f}'.format(x) for x in row]
 			inputFile.write(','.join(row)+"\n")
-
-#Close the file
-inputFile.close()			
+        
