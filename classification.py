@@ -21,8 +21,9 @@ parser.add_option("-i",dest="input", help="This gives the path to the file with 
 parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
 parser.add_option("-c",type = "int",dest="crossVal", help="Number of iterations in the cross validation", default=5)
-parser.add_option("-a", dest="allBins", help = "Tells if all bins should be used", default=False)
+parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
 parser.add_option("-o",dest="output", help="The name of the outputfile", default="classification.txt")
+parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
 (options, args) = parser.parse_args()
 method=options.method
 
@@ -35,10 +36,18 @@ labelDict = dict()
 for line in labelFile.readlines():
     lineSplit=line.split()
     labelDict[lineSplit[0]]=int(lineSplit[2])
-    
 
 #Read features
 featureFile=open(featureFilename)
+
+#In the new version of the annotated feature file there are additionally two header lines    
+if options.newFormat :
+    #Name of the data set (from the header)
+    dataset=featureFile.readline().rstrip()[2:]
+    #All modifications
+    modifications=featureFile.readline().rstrip()[2:].split(" ")
+    
+
 genesModis=dict()
 for line in featureFile.readlines():
     line=line.rstrip()
