@@ -19,6 +19,8 @@ parser.add_option("-m", type="string", dest="method", help = "cut-off method, va
                   default="median")
 parser.add_option("-o", type="string", dest="labelFileName", help= "output label file",
                   default="")
+parser.add_option("--protCod", action="store_true", dest="proteinCoding", default=False)
+parser.add_option("-g", type="string", dest="fileGencode", help = "gene annotation file")
 
 (options, args) = parser.parse_args()
 
@@ -26,6 +28,7 @@ fileRep1=options.fileRep1
 fileRep2=options.fileRep2
 method=options.method
 labelFileName=options.labelFileName
+
 
 #Parse the file of the first replicate
 genesRep1=dict()
@@ -63,13 +66,43 @@ elif(method=="zero"):
 else:
     print("The given method was not defined properly. Please enter either 'median' or 'zero' as proper method values.")
     exit()
-   
+ 
 #Create file with labels
 labelFile = open(labelFileName,'w')
-for gene in genesAverage.keys():
-    #Label each gene with one if the expression is above the threshold
-    if(genesAverage[gene]>cutOff):
-        label=1
-    else:
-        label=0
-    labelFile.write(gene+"\t"+str(genesAverage[gene])+"\t"+str(label)+"\t"+"\n")
+
+#Optionally save only labels for protein-coding genes
+proteinCoding=options.proteinCoding
+if proteinCoding:
+    fileGencode = options.fileGencode        
+    #Get all protein coding genes
+    genesPC=dict()
+    with open(fileGencode) as f:
+        for line in f:
+            if not line.startswith("##"):
+                lineSplit = line.strip().split()
+                if lineSplit[2]=='gene':
+                    geneID=lineSplit[9][1:-2]
+                    if lineSplit[11]=='"protein_coding";':
+                        genesPC[geneID]=True
+                    else:
+                        genesPC[geneID]=False
+    #Label protein coding genes
+    for gene in genesAverage.keys():
+            if gene in genesPC and genesPC[gene]:
+                #Label each gene with one if the expression is above the threshold
+                if(genesAverage[gene]>cutOff):
+                    label=1
+                else:
+                    label=0
+                labelFile.write(gene+"\t"+str(genesAverage[gene])+"\t"+str(label)+"\t"+"\n")
+#Save labels for all genes                        
+else:
+    for gene in genesAverage.keys():
+        #Label each gene with one if the expression is above the threshold
+        if(genesAverage[gene]>cutOff):
+            label=1
+        else:
+            label=0
+        labelFile.write(gene+"\t"+str(genesAverage[gene])+"\t"+str(label)+"\t"+"\n")
+
+labelFile.close()
