@@ -88,13 +88,15 @@ if(method=="SVM"):
     clf=svm.SVC(cache_size=500)
 #Random Forest
 elif(method=="RF"):
-    clf=RandomForestClassifier(n_estimators=16)
+    clf=RandomForestClassifier(n_estimators=12)
 
 scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
 
 #write the output into a file but don't delete the previous text
 #this is necessary that we can compare different data sets or binnings or methods
 fileHandle = open ( options.output, 'a' )
-fileHandle.write(method+"\t"+'\t'.join(map(str,scores))+"\n")
+if(not options.allBins):
+    fileHandle.write(method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
+else:
+    fileHandle.write(method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
 fileHandle.close()
-
