@@ -24,9 +24,11 @@ parser.add_option("-m", type="string", dest="method", help = "the method you wan
 parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
 parser.add_option("-c",type = "int",dest="crossVal", help="Number of iterations in the cross validation", default=5)
-parser.add_option("-a", dest="allBins", help = "Tells if all bins should be used", default=False)
+parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
 parser.add_option("-p", dest="plot", help = "True it makes you a plot, Flase(default) it makes no plot", default=False)
 parser.add_option("-o",dest="output", help="The name of the outputfile", default="regression.txt")
+parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
+
 (options, args) = parser.parse_args()
 method=options.method
 
@@ -34,6 +36,14 @@ featureFilename=options.input
 
 #Read values and features
 featureFile=open(featureFilename)
+
+#In the new version of the annotated feature file there are additionally two header lines    
+if options.newFormat :
+    #Name of the data set (from the header)
+    dataset=featureFile.readline().rstrip()[2:]
+    #All modifications
+    modifications=featureFile.readline().rstrip()[2:].split(" ")
+    
 genesModis=dict()
 values = dict()
 for line in featureFile.readlines():
