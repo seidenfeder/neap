@@ -104,6 +104,8 @@ if options.plot:
     ax.scatter(y, pred)
     ax.set_xlabel('Measured')
     ax.set_ylabel('Predicted')
+    corrCoef = np.mean(scores)
+    plt.title("Regression calculated with "+ method+"\nCorrelation Coefficient: "+str(corrCoef))
     plt.show()
 
 #write the output into a file but don't delete the previous text
