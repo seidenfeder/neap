@@ -21,7 +21,7 @@ parser.add_option("-b", type="string", dest="fileRep2", help = "gene expression 
 parser.add_option("-g", type="string", dest="fileGencode", help = "gene annotation file")
 parser.add_option("-n", type="int", dest="numberBins", help = "give the number of bins", default=160)
 parser.add_option("-s", type="int", dest="sizeBins", help = "give the size of the bins",default=100)
-parser.add_option("-o", dest="onlyTSS", help = "show bins only around TSS", default=False)
+parser.add_option("-o", dest="onlyTSS",action="store_true", help = "show bins only around TSS", default=False)
 parser.add_option("-out", dest="output", help = "give the name of the output file", default="output.txt")
 
 (options, args) = parser.parse_args()
