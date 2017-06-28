@@ -92,7 +92,7 @@ elif(method=="mean"):
     expVals=np.array(list(genesAverage.values()))
     cutOff=np.mean(expVals)   
 else:
-    print("The given method was not defined properly. Please enter either 'median' or 'zero' as proper method values.")
+    print("The given method was not defined properly. Please enter either 'median', 'mean' or 'zero' as proper method values.")
     exit()
 
 #Print the used method and chosen threshold

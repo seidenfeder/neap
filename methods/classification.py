@@ -34,8 +34,9 @@ featureFilename=options.input
 labelFile = open(labelFilename)
 labelDict = dict()
 for line in labelFile.readlines():
-    lineSplit=line.split()
-    labelDict[lineSplit[0]]=int(lineSplit[2])
+    if not line.startswith("##"):
+        lineSplit=line.split()
+        labelDict[lineSplit[0]]=int(lineSplit[2])
 
 #Read features
 featureFile=open(featureFilename)
