@@ -25,9 +25,10 @@ parser.add_option("-i",dest="input", help="This gives the path to the file with 
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
 parser.add_option("-c",type = "int",dest="crossVal", help="Number of iterations in the cross validation", default=5)
 parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
-parser.add_option("-p", dest="plot", help = "True it makes you a plot, Flase(default) it makes no plot", default=False)
+parser.add_option("-p", dest="plot", action="store_true", help = "True it makes you a plot, Flase(default) it makes no plot", default=False)
 parser.add_option("-o",dest="output", help="The name of the outputfile", default="regression.txt")
 parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
+parser.add_option("-z", action="store_true", dest="zeros", help="Tells if you want to include the expression values 0.0 (default=false)", default=False)
 
 (options, args) = parser.parse_args()
 method=options.method
@@ -71,18 +72,31 @@ if(not options.allBins):
 	#Create feature matrix of the given bin 
 	for geneID in genesModis:
 	    val = values[geneID]
-	    if not val==0:
+	    if options.zeros:
+		    val=val+0.0001
 		    y.append(log(val))
 		    valueMatrix=np.array(genesModis[geneID])
 		    X.append(valueMatrix[:,binNumber])
+	    else:
+		    if not val==0: 
+			    y.append(log(val))
+			    valueMatrix=np.array(genesModis[geneID])
+			    X.append(valueMatrix[:,binNumber])
 #if you want the regression with all bins
 else:
 	for geneID in genesModis:
 	    val = values[geneID]
-	    if not val==0:
+	    if options.zeros:
+		    val=val+0.0001
 		    y.append(log(val))
 		    valueMatrix=np.array(genesModis[geneID])
 		    X.append(valueMatrix.flatten())
+	    else:
+		    if not val==0:
+			    y.append(log(val))
+			    valueMatrix=np.array(genesModis[geneID])
+			    X.append(valueMatrix.flatten())
+
 
 
 #Support Vector Machines
@@ -105,7 +119,9 @@ if options.plot:
     ax.set_xlabel('Measured')
     ax.set_ylabel('Predicted')
     corrCoef = np.mean(scores)
-    plt.title("Regression calculated with "+ method+"\nCorrelation Coefficient: "+str(corrCoef))
+    ax.plot([min(y), max(y)], [min(y), max(y)], 'k', lw=2)
+    plt.title("Regression calculated with "+ method+"\nR2 score: "+"{0:.2f}".format(corrCoef))
+    plt.savefig(method+ "Regression.png") 
     plt.show()
 
 #write the output into a file but don't delete the previous text
