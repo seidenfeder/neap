@@ -64,6 +64,46 @@ for line in featureFile.readlines():
 		valueList=list(map(float,valueList))
 		genesModis[geneID].append(valueList)
 
+##Before deleting once every Histone Modification we want to check the verformance with all Histone Modifications
+
+#Sort labels according to the feature list
+#Maybe for some genes no GENCODE entry could be found, these are only in the features list
+y=[]
+X=[]
+#If not all bins should be used
+if(not options.allBins):
+	binNumber=options.bin
+	#Create feature matrix of the given bin 
+	for geneID in genesModis:
+	    y.append(labelDict[geneID])
+	    valueMatrix=np.array(genesModis[geneID])
+	    X.append(valueMatrix[:,binNumber])
+#if you want the classification with all bins
+else:
+	for geneID in genesModis:
+	    y.append(labelDict[geneID])
+	    valueMatrix=np.array(genesModis[geneID])
+	    X.append(valueMatrix.flatten())
+
+#Support Vector Machines
+if(method=="SVM"):
+    clf=svm.SVC(kernel="rbf")
+#Random Forest
+elif(method=="RF"):
+    clf=RandomForestClassifier(n_estimators=12)
+
+scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+
+#write the output into a file but don't delete the previous text
+#this is necessary that we can compare different data sets or binnings or methods
+fileHandle = open ( options.output, 'a' )
+if(not options.allBins):
+    fileHandle.write(method+"\t"+str(binNumber)+"\tNone\t"+'\t'.join(map(str,scores))+"\n")
+else:
+    fileHandle.write(method+"\tall\tNone\t"+'\t'.join(map(str,scores))+"\n")
+fileHandle.close()
+
+#Now we iterate through all Histone MOdifications and run the classification method without the histone modification
 i=0  
 for mod in modifications:
 		
@@ -113,17 +153,35 @@ for line in fileRF.readlines():
 	lineSplit=line.split()
 	aucs.append(list(map(float,lineSplit[3:])))
 
-modis = [""]
+modis = ["","None"]
 for mod in modifications:
 	name=re.split('-', mod) #we only need the name not the species
 	modis.append(name[0])
 
 #plot how the performance changes when we miss a histone modification
 plt.boxplot(aucs)
-plt.xlabel("Histone Modifications")
+plt.xlabel("Missing Histone Modification")
 plt.ylabel("AUC score")
-plt.xticks(list(range(0,len(modifications)+1)),modis)
+plt.title("Performance change with a missing histone modification")
+plt.xticks(list(range(0,len(modis))),modis)
 plt.savefig('HistImportance.png')
 plt.show()
 
+#calculate the mean for bar plots
+aucMean = np.mean(aucs, axis=1)
+aucMean = aucMean.flatten()
+aucMean= aucMean.tolist() 
+
+#remove one label because it's not needed for the barplot
+modis.remove("")
+
+# plot the mean as barplot
+plt.bar(range(0,len(aucMean)),aucMean,width=0.6, align="center")
+plt.xlabel("Missing Histone Modification")
+plt.ylabel("Mean of AUC score")
+plt.title("Performance change with a missing histone modification")
+plt.xticks(list(range(0,len(modis))),modis)
+plt.ylim(0.84,0.9)
+plt.savefig('HistImportanceBars.png')
+plt.show()
 
