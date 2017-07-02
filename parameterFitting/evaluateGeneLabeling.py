@@ -9,6 +9,8 @@
 ####################################################################################################
 
 import os
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 #For each label method run the label script and the classification ones
@@ -22,13 +24,13 @@ for m in methods:
     
     for cM in classificationMethods:
         print(cM)
-        os.system("python methods/classification.py -i ~/Desktop/input_mRNA.txt -l ~/Desktop/testLabels.txt "+ 
-                  "-c 10 -a -o ~/Desktop/evalLabels.txt -n -m "+cM)
+        os.system("python methods/classification.py -i ~/Desktop/input_mRNA_normalized.txt -l ~/Desktop/testLabels.txt "+ 
+                  "-c 10 -a -o ~/Desktop/Plots_ParameterFitting/evalLabels_normalized.txt -n -m "+cM)
 
 #Get the scores from the result file
 #get the calculated score values from the file
 scores=[]
-fileLabel = open("/home/sch/schmidka/Desktop/evalLabels.txt")
+fileLabel = open("/home/sch/schmidka/Desktop/Plots_ParameterFitting/evalLabels_normalized.txt")
 for line in fileLabel.readlines():
 	lineSplit=line.split()
 	scores.append(list(map(float,lineSplit[2:])))
@@ -40,6 +42,6 @@ plt.xticks(range(1,len(labels)+1),labels)
 plt.xlabel("Labeling method")
 plt.ylabel("AUC score")
 plt.title('AUC Score of RF for different labeled sets')
-plt.savefig('/home/sch/schmidka/Desktop/evalLabels.png')
-plt.show()
+plt.savefig('/home/sch/schmidka/Desktop/Plots_ParameterFitting/evalLabels_normalized.png')
+#plt.show()
                                                                                          

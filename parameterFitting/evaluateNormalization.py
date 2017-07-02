@@ -9,6 +9,8 @@
 ##################################################################################################################
 
 import os
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 #Normalize inputfile
@@ -28,7 +30,7 @@ for cM in classificationMethods:
                   "-c 10 -a -o ~/Desktop/classification_normalization.txt -n -m "+cM)
 
 #Plotting the classification results
-fileName="home/sch/schmidka/Desktop/classification_normalization.txt"
+fileName="/home/sch/schmidka/Desktop/classification_normalization.txt"
 
 resultFile=open(fileName)
 score=[]
@@ -46,8 +48,7 @@ plt.xlabel("Method (Normalization)")
 plt.ylabel("AUC score")
 plt.title('AUC Scores of RF and SVM with different normalizations')
 plt.tight_layout()
-plt.savefig('VergleichML.png')
-plt.show()
+plt.savefig('/home/sch/schmidka/Desktop/Vergleich_Klassifikation.png')
 
 #####################################################################################
 # For regression
@@ -56,8 +57,8 @@ for rM in regressionMethods:
     print(rM)
     for file in createdInputFiles:
         print(file)
-        os.system("python methods/classification.py -i "+ file +
-                  "-c 10 -a -o ~/Desktop/regression_normalization.txt -n -m "+rM)
+        os.system("python methods/regression.py -i "+ file +
+                  " -c 10 -a -o ~/Desktop/regression_normalization.txt -n -m "+rM)
         
 #Plotting the regression results
 fileName="/home/sch/schmidka/Desktop/regression_normalization.txt"
@@ -78,5 +79,4 @@ plt.xlabel("Method (Normalization)")
 plt.ylabel("R2 score")
 plt.title('R2 Scores of LR, RF and SVM with different normalizations')
 plt.tight_layout()
-plt.savefig('Vergleich_Regression.png')
-plt.show()
+plt.savefig('/home/sch/schmidka/Desktop/Vergleich_Regression.png')
