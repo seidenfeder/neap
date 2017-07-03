@@ -83,30 +83,39 @@ def inference(sequence_ph, keep_prob, num_hidden=1, dims=[75],dropouts=None):
 def inference_singh(bins,labels):
     k=10
     Nout=20
+    numberHists=5
+    numberBins=160
     
     #Mehrere convolutionary layers
-    i=1
-    #1) Create convolutionary network (mehrere Layer???)
-    with tf.name_scope("conv"+str(i)):
-        #Stimmen zahlen ??? -> wsl eher nicht ...
-        weights_con = tf.Variable(tf.truncated_normal(shape=[k, k], stddev=0.1), name="weights")
-        biases_con = tf.constant(0.1, shape=[k], name="bias")
-        conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, strides=k)+biases_con)
+    #i=1
+    ##1) Create convolutionary network (mehrere Layer???)
+    #with tf.name_scope("conv"+str(i)):
+    #    #Stimmen zahlen ??? -> wsl eher nicht ...
+    #    weights_con = tf.Variable(tf.truncated_normal(shape=[k, k], stddev=0.1), name="weights")
+    #    biases_con = tf.constant(0.1, shape=[k], name="bias")
+    #    conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, strides=k)+biases_con)
     
+    #Mein versuch convolution networks zu verwenden
+    weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
+    biases_con = tf.constant(0.1, shape=[Nout], name="bias")
+    bin_image = tf.reshape(bins, [-1,numberBins,numberHists])
+    conv1=tf.nn.relu(tf.nn.conv1d(bin_image, weights_con, stride=1,padding='SAME')+biases_con)
+
     #2) max pooling
     m=2
-    maxPool=tf.nn.max_pool(conv1,ksize=[1,m,m,1],strides=[1,m,m,1],padding='SAME') 
+    maxPool=tf.nn.pool(conv1,window_shape=[m],pooling_type="MAX",strides=[m],padding='SAME') 
             
     #3) drop out
     keep_prob = 0.5
     dropOut=tf.nn.dropout(maxPool, keep_prob)
+    print(dropOut)
     
     #4) multilayer perceptron
     #Wie viele hidden layer und welche dimensionen?
     #Wie alternierend linear und non-linear
     dims=[40]
     num_hidden=1
-    dims = [len(dropOut)] + dims + [NUM_CLASSES]
+    dims = [int((numberBins-k+1)*keep_prob/m)] + dims + [NUM_CLASSES]
     hiddens = [dropOut]
 
     for i in range(num_hidden):
@@ -178,7 +187,7 @@ def run_training(datasets, chkptfile=None):
         keep_prob = tf.placeholder(tf.float32)
         global_step = tf.Variable(0, name="global_step", trainable=False)
 
-        logits = inference(sequences_ph, keep_prob)
+        logits = inference_singh(sequences_ph, keep_prob)
 
         los = loss(logits, labels_ph)
 
@@ -468,6 +477,5 @@ if __name__ == "__main__":
 
 
     run_training(datasets)
-
 
 
