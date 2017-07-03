@@ -21,21 +21,6 @@ FLAGS={}
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-#def conv2d(x, W):
-#  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-#
-#def max_pool_2x2(x):
-#  return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
-#                        strides=[1, 2, 2, 1], padding='SAME')
-
-#def inf_conv(sequence_ph, keep_prob, num_conv, dims):
-#    filter_length
-#    for i in range(num_conv):
-#        weights = tf.Variable(tf.truncated_normal(shape=[filter_length, input_dim, output_dim], 0.1))
-#        bias = tf.constant(0.1, shape=[output_dim])
-#        conv1 = tf.nn.relu(tf.nn.conv1D(input, weights, strides=[1,1,1], padding='SAME') + bias)
-
-
 
 #Construct N fully connected layers with a softmax at the end
 #placeholder input
@@ -80,56 +65,59 @@ def inference(sequence_ph, keep_prob, num_hidden=1, dims=[75],dropouts=None):
 #    return 
 #
 #DNN according to Shingh et al
-def inference_singh(bins,labels):
-    k=10
-    Nout=20
+def inference_singh(bins,keep_prob):
+    
+    #######################################
+    #Parameter
+    #Data format
     numberHists=5
     numberBins=160
     
-    #Mehrere convolutionary layers
-    #i=1
-    ##1) Create convolutionary network (mehrere Layer???)
-    #with tf.name_scope("conv"+str(i)):
-    #    #Stimmen zahlen ??? -> wsl eher nicht ...
-    #    weights_con = tf.Variable(tf.truncated_normal(shape=[k, k], stddev=0.1), name="weights")
-    #    biases_con = tf.constant(0.1, shape=[k], name="bias")
-    #    conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, strides=k)+biases_con)
+    #Convolution
+    k=10
+    Nout=20
+
+    #Maxpooling
+    m=2
+    
+    #Hidden layers
+    num_hidden=1
+    dims=[60]
+    ############################################
     
     #Mein versuch convolution networks zu verwenden
-    weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
-    biases_con = tf.constant(0.1, shape=[Nout], name="bias")
-    bin_image = tf.reshape(bins, [-1,numberBins,numberHists])
-    conv1=tf.nn.relu(tf.nn.conv1d(bin_image, weights_con, stride=1,padding='SAME')+biases_con)
-
+    with tf.name_scope("convolution"):
+        weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
+        biases_con = tf.constant(0.1, shape=[Nout], name="bias")
+        bin_image = tf.reshape(bins, [-1,numberBins,numberHists])
+        conv1=tf.nn.relu(tf.nn.conv1d(bin_image, weights_con, stride=1,padding='SAME')+biases_con)
+    
     #2) max pooling
-    m=2
-    maxPool=tf.nn.pool(conv1,window_shape=[m],pooling_type="MAX",strides=[m],padding='SAME') 
+    with tf.name_scope("maxPooling"):
+        maxPool=tf.nn.pool(conv1,window_shape=[m],pooling_type="MAX",strides=[m],padding='SAME')
             
     #3) drop out
     keep_prob = 0.5
-    dropOut=tf.nn.dropout(maxPool, keep_prob)
-    print(dropOut)
+    with tf.name_scope("dropOut"):
+        dropOut=tf.nn.dropout(maxPool, keep_prob)
+        
+        #Reshape drop-out layer before starting the multilayer perceptron
+        dropOut_flat = tf.reshape(dropOut, [-1, int(numberBins/m)*Nout])
     
     #4) multilayer perceptron
-    #Wie viele hidden layer und welche dimensionen?
-    #Wie alternierend linear und non-linear
-    dims=[40]
-    num_hidden=1
-    dims = [int((numberBins-k+1)*keep_prob/m)] + dims + [NUM_CLASSES]
-    hiddens = [dropOut]
-
-    for i in range(num_hidden):
-
-        with tf.name_scope("hidden_fc"+str(i)):
-            weights = tf.Variable(tf.truncated_normal(shape=[dims[i], dims[i+1]], stddev=(1. / math.sqrt(dims[i]))),
-                                  name="weights")
-            bias = tf.constant(0.1, shape=[ dims[i+1] ], name="bias")
-            tmp_h = tf.nn.relu(tf.matmul(hiddens[i], weights)+bias)
+    dims = [int(numberBins/m)*Nout] + dims + [NUM_CLASSES]
+    hiddens = [dropOut_flat]
+    for i in range(num_hidden):            
+        with tf.name_scope("hiddenLayer"+str(i)):
+            weights = tf.Variable(tf.truncated_normal(shape=[dims[i], dims[i+1]], stddev=0.1, name="weights"))
+            bias = tf.constant(0.1, shape=[dims[i+1]], name="bias")
+            tmp_h = tf.nn.relu(tf.matmul(hiddens[i], weights)+bias)   
             hiddens.append(tmp_h)
-
+        
+    #softmax function    
     with tf.name_scope("softmax"):
-        weights = tf.Variable(tf.truncated_normal(shape=[dims[-2], dims[-1]], stddev=1.0/math.sqrt(dims[-2])), name="weights")
-        bias = tf.constant(0.1, shape=[dims[-1]], name="bias")
+        weights = tf.Variable(tf.truncated_normal(shape=[dims[-2], dims[-1]], stddev=0.1), name="weights")
+        bias = tf.constant(0.1, shape=[2], name="bias")
         logits=tf.matmul(hiddens[-1], weights) + bias
         
     return logits
