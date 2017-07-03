@@ -17,6 +17,7 @@ from sklearn.model_selection import cross_val_score,cross_val_predict
 from optparse import OptionParser
 from math import log
 import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
 
 #this is necessary to get the parameters from the comand line
 parser = OptionParser()
@@ -114,8 +115,11 @@ scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
 # plot the Regression if a plot is wanted
 if options.plot:
     pred = cross_val_predict(rg, X, y, cv=options.crossVal)
+    # Calculate the point density
+    xy = np.vstack([y,pred])
+    z = gaussian_kde(xy)(xy)
     fig, ax = plt.subplots()
-    ax.scatter(y, pred)
+    ax.scatter(y, pred,c=z,s=100,edgecolor='')
     ax.set_xlabel('Measured')
     ax.set_ylabel('Predicted')
     corrCoef = np.mean(scores)
