@@ -2,95 +2,49 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
-#from utils.data import *
-#from utils.file import *
+
 import os
-import sys
 import numpy as np
 import argparse
 import tensorflow as tf
-import math
 import time
-#import matplotlib.pyplot as plt
-#import seaborn as sns
+
 
 #default for PSIPRED
 NUM_CLASSES=2 #number of output classes
-NUM_INPUT=5*160 #input dimension
 FLAGS={}
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-#Construct N fully connected layers with a softmax at the end
-#placeholder input
-#keep probability for dropout
-#number of hidden layers
-#number of neurons per layes
-#dropouts = [True False] if layes should contain dropouts
-#TODO: same for conv layers
-def inference(sequence_ph, keep_prob, num_hidden=1, dims=[75],dropouts=None):
-
-    if len(dims) != num_hidden:
-        print("dimensions not matching")
-        sys.exit()
-
-    if dropouts == None:
-        dropouts = [False for i in range(num_hidden)]
-
-    dims = [NUM_INPUT] + dims + [NUM_CLASSES]
-    hiddens = [sequence_ph]
-
-    for i in range(num_hidden):
-
-        with tf.name_scope("hidden_fc"+str(i)):
-            weights = tf.Variable(tf.truncated_normal(shape=[dims[i], dims[i+1]], stddev=(1. / math.sqrt(dims[i]))),
-                                  name="weights")
-            bias = tf.constant(0.1, shape=[ dims[i+1] ], name="bias")
-            tmp_h = tf.nn.relu(tf.matmul(hiddens[i], weights)+bias)
-            if(dropouts[i]):
-                hiddens.append(tf.nn.dropout(tmp_h, keep_prob))
-                continue
-            hiddens.append(tmp_h)
-
-    with tf.name_scope("softmax"):
-        weights = tf.Variable(tf.truncated_normal(shape=[dims[-2], dims[-1]], stddev=1.0/math.sqrt(dims[-2])), name="weights")
-        bias = tf.constant(0.1, shape=[dims[-1]], name="bias")
-        logits=tf.matmul(hiddens[-1], weights) + bias
-
-    return logits
-
-##Do 1d convolution
-#def conv1d(x,W,k):
-#    return 
-#
 #DNN according to Shingh et al
-def inference_singh(bins,keep_prob):
-    
+def inference_singh(bins):
+        
     #######################################
     #Parameter
-    #Data format
-    numberHists=5
-    numberBins=160
-    
     #Convolution
-    k=10
-    Nout=20
+    k=FLAGS["conv"]
+    Nout=FLAGS["Nout"]
 
     #Maxpooling
-    m=2
+    m=FLAGS["mpool"]
     
     #Hidden layers
-    num_hidden=1
-    dims=[60]
+    dims=FLAGS["dims"]
+    num_hidden=len(dims)
     ############################################
+    
+    #Get number of bins and histone modifications
+    numberHists=FLAGS["numHistons"]
+    numberBins=FLAGS["numBins"]
     
     #Mein versuch convolution networks zu verwenden
     with tf.name_scope("convolution"):
         weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
         biases_con = tf.constant(0.1, shape=[Nout], name="bias")
-        bin_image = tf.reshape(bins, [-1,numberBins,numberHists])
-        conv1=tf.nn.relu(tf.nn.conv1d(bin_image, weights_con, stride=1,padding='SAME')+biases_con)
+        #bin_image = tf.reshape(bins, [-1,numberBins,numberHists])
+        #conv1=tf.nn.relu(tf.nn.conv1d(bin_image, weights_con, stride=1,padding='SAME')+biases_con)
+        conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, stride=1,padding='SAME')+biases_con)
     
     #2) max pooling
     with tf.name_scope("maxPooling"):
@@ -161,7 +115,9 @@ def run_training(datasets, chkptfile=None):
 
     learning_rate = FLAGS["learnrate"]
     batchsize = FLAGS["batchsize"]
-    #Eventuel besser irgendwo als Eingabewert übergeben
+    numBins = FLAGS["numBins"]
+    numHistons = FLAGS["numHistons"]
+    
     niter = 50000
     kprob = 1.0
 
@@ -170,12 +126,12 @@ def run_training(datasets, chkptfile=None):
         start_time = time.time()
 
         # build the graph
-        sequences_ph = tf.placeholder(tf.float32, [None, NUM_INPUT])
+        bins = tf.placeholder(tf.float32, [None, numBins, numHistons])
         labels_ph = tf.placeholder(tf.float32, [None, NUM_CLASSES])
         keep_prob = tf.placeholder(tf.float32)
         global_step = tf.Variable(0, name="global_step", trainable=False)
 
-        logits = inference_singh(sequences_ph, keep_prob)
+        logits = inference_singh(bins)
 
         los = loss(logits, labels_ph)
 
@@ -183,11 +139,9 @@ def run_training(datasets, chkptfile=None):
 
         eval_correct = evaluation(logits, labels_ph)
 
-
         # initilize summaries
         summary = tf.summary.merge_all()
-
-        
+      
         init = tf.global_variables_initializer()
 
         saver = tf.train.Saver()
@@ -195,12 +149,6 @@ def run_training(datasets, chkptfile=None):
         sess = tf.Session()
 
         mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob)
-
-        #print(mod_dir)
-        #start_new =False
-        #if not os.path.exists(os.path.join(FLAGS["logdir"], mod_dir)):
-        #    start_new = True
-        #    os.makedirs(os.path.join(FLAGS["logdir"], mod_dir))
 
         mod_dir = os.path.join(FLAGS["logdir"], mod_dir)
         summary_writer = tf.summary.FileWriter(mod_dir, sess.graph)
@@ -221,7 +169,7 @@ def run_training(datasets, chkptfile=None):
 
             #assign data to placeholders
             # and keep prob for dropout
-            feed_dict = {sequences_ph : wins, labels_ph : labs, keep_prob : kprob}
+            feed_dict = {bins : wins, labels_ph : labs, keep_prob : kprob}
 
             #not interested in the ouput of the optimizer
             _ , loss_value = sess.run([train_op, los], feed_dict=feed_dict)
@@ -242,61 +190,19 @@ def run_training(datasets, chkptfile=None):
                 checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
                 saver.save(sess, checkpoint_file, global_step=global_step)
                 print("Evaluation: ")
-                tmp_feed_dict = {sequences_ph : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
+                tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
                 print(eval_correct.eval(session=sess, feed_dict=tmp_feed_dict))
 
 
         # final evaluation on test set
         print("PERFORMANCE ON TESTSET:")
         print(datasets["test"].getFlatWindow().shape)
-        tmp_feed_dict = {sequences_ph: datasets["test"].getFlatWindow(), labels_ph: datasets["test"].labels, keep_prob : 1.0}
+        tmp_feed_dict = {bins: datasets["test"].getFlatWindow(), labels_ph: datasets["test"].labels, keep_prob : 1.0}
 
         print(eval_correct.eval(session=sess, feed_dict=tmp_feed_dict))
 
 
-
-#def getWindowPWM(prot, start):
-#    return prot.getWindow(at=start)
-#
-#def extractWindows(proteins, half_win):
-#    n_winds = 0
-#    for p in proteins:
-#        n_winds += len(p.residues)
-#
-#    complete = np.ndarray([n_winds, 15,20])
-#    structs = np.ndarray([n_winds, NUM_CLASSES])
-#
-#    c = 0
-#    for p in proteins:
-#        for i in range(p.length):
-#            complete[c] = p.getPWMWindow(i,half_win)
-#            structs[c] = p.residues[i].ss
-#            c += 1
-#            # complete.append(p.getPWMWindow(i,half_win))
-#            # structs.append(p.residues[i].ss)
-#
-#    return (complete, structs)
-
-#Wahrscheinlich uninteressant für uns
-#def getStateDistribution(prots):
-#    x = ["H", "B", "C"]
-#    y = [0,0,0]
-#    for p  in prots:
-#        for r in p.residues:
-#            if r.getSSLetter() == "H":
-#                y[0] = y[0] + 1
-#            elif r.getSSLetter() == "B":
-#                y[1] = y[1] + 1
-#            elif r.getSSLetter() == "C":
-#                y[2] = y[2] + 1
-#
-#    plt.bar(np.arange(len(x)), y, align='center', alpha=0.5)
-#    plt.xticks(np.arange(len(x)), x)
-#    plt.ylabel('occurences')
-#    plt.title('Secondary Structure state distribution')
-#
-#    plt.show()
-
+#Split a data set random into two parts in a specific ratio
 def splitRandom(ratio, windows, labels):
     n1 = int(ratio * float(len(windows)))
     set1 = np.ndarray(shape=(n1,)+windows.shape[1:])
@@ -306,23 +212,23 @@ def splitRandom(ratio, windows, labels):
 
     perm = np.random.permutation(labels.shape[0])
 
-    #Verstaendlich, eventuell eleganter programmieren ...
     c1 = 0
+    for i in perm[0:n1]:
+        set1[c1] = windows[i]
+        l1[c1] = labels[i]
+        c1 += 1
+        
     c2 = 0
-    for i in perm:
-        if c1 < n1:
-            set1[c1] = windows[i]
-            l1[c1] = labels[i]
-            c1 += 1
-        else:
-            set2[c2] = windows[i]
-            l2[c2] = labels[i]
-            c2 += 1
+    for i in perm[n1:]:
+        set2[c2] = windows[i]
+        l2[c2] = labels[i]
+        c2 += 1
+        
     return set1, l1, set2, l2
 
 
 
-
+#Dataset class saving all training, validation or respectively test data
 class Dataset(object):
     def __init__(self,windows, labels):
         self.windows = windows
@@ -330,38 +236,38 @@ class Dataset(object):
         self.counter = 0
         self.order = np.random.permutation(len(windows))
 
+    #Gibt den ganzen
     def getFlatWindow(self):
-        res = np.ndarray([len(self.windows), NUM_INPUT])
+        res = np.ndarray([len(self.windows), FLAGS["numBins"], FLAGS["numHistons"]])
         for i in range(len(self.windows)):
-            res[i] = self.windows[i].flatten()
+            #res[i] = self.windows[i].flatten()
+            res[i] = self.windows[i]
         return res
 
+    #Returns a feature batch and the corresponding label batch of size n
     def get_batch(self, n):
-#        res = np.ndarray((n,)+self.windows.shape[1:])
-        res = np.ndarray((n,)+(NUM_INPUT,))
+        res = np.ndarray([n, FLAGS["numBins"], FLAGS["numHistons"]])
         labs = np.ndarray((n,)+self.labels.shape[1:])
         lower = self.counter + n
         upper = lower + n
         self.counter += n
 
         c = 0
-        #Verstaendlich, eventuell eleganter programmieren ...
+        #If the end of the data set is reached
         if upper > len(self.windows):
-            upper = 0
-            while(lower < len(self.windows)):
-                res[c] = self.windows[self.order[lower]].flatten()
-                labs[c] = self.labels[self.order[lower]]
+            for i in range(lower,len(self.windows)):
+                res[c] = self.windows[self.order[i]]
+                labs[c] = self.labels[self.order[i]]
                 c += 1
-                upper += 1
-                lower += 1
+                
             lower = 0
-            upper = n - upper
+            upper = n - c
+            #Permute data again
             self.order = np.random.permutation(len(self.windows))
-            print("reset coutner")
             self.counter = upper
-
+            
         for i in range(lower, upper):
-            res[c] = self.windows[self.order[i]].flatten()
+            res[c] = self.windows[self.order[i]]
             labs[c] = self.labels[self.order[i]]
             c += 1
         return res,labs
@@ -370,40 +276,39 @@ class Dataset(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("")
-    #Help text hinzufügen?
-    parser.add_argument("--logdir", default="./logs")
-    parser.add_argument("-i", dest= "data")
-    parser.add_argument("-l", dest="label")
-    parser.add_argument("--plot", default=False)
-    parser.add_argument("--nclasses", default=2)
-    parser.add_argument("--ninput", default=800) #5 istone modifications * 160 bins
+    parser.add_argument("--logdir", help = "log directory to save results of a run (used for tensorboard)",default="./logs")
+    parser.add_argument("-i", help="Feature input data (bins)", dest= "data")
+    parser.add_argument("-l", help="Label data", dest="label")
+    parser.add_argument("-k", type = int,help="Size of the convolution filter",dest="conv", default=10)
+    parser.add_argument("--Nout", type = int,help="Number of output channels after the convolution",default=50)
+    parser.add_argument("-m", type = int, help="Pool size for the maxpooling step",dest="mpool",default=5)
+    parser.add_argument("--hiddenDims",help="Hidden dimensions, comma separated e.g. \"1000,100\"",default="1000")
     parser.add_argument("--learnrate", default=0.005)
     parser.add_argument("--momentum", default=0.9)
     parser.add_argument("--batchsize", default=200)
-    parser.add_argument("--npasses", default=5)
-#    parser.add_argument("--fastdata", default=True)
 
 
     args = parser.parse_args()
-
-    if args.nclasses is not None:
-        FLAGS["nclasses"] = int(args.nclasses)
-
-    if args.ninput is not None:
-        FLAGS["ninput"] = int(args.ninput)
 
     FLAGS["logdir"] = args.logdir
     FLAGS["learnrate"] = args.learnrate
     FLAGS["momentum"] = args.momentum
     FLAGS["batchsize"] = args.batchsize
-    FLAGS["npasses"] = args.npasses
-
-    #Einlesen von unseren Input files und anschlißend split in training und test
+    
+    FLAGS["conv"]=args.conv
+    FLAGS["Nout"]=args.Nout
+    FLAGS["mpool"]=args.mpool
+    
+    #Get hidden dimensions
+    dimensions=args.hiddenDims.split(",")
+    dimensions=list(map(int,dimensions))
+    
+    FLAGS["dims"]=dimensions
+    
+    #Einlesen von unseren Input files und anschließend split in training und test
     labelFilename = args.label
     trainingData = args.data
 
-
-    #Einlesen von unseren Input files und anschlißend split in training und test
     labelFile = open(labelFilename)
     labelDict = {}
     for line in labelFile.readlines():
@@ -436,7 +341,7 @@ if __name__ == "__main__":
                 valueList=line.split(",")
                 valueList=list(map(float,valueList))
                 trainset[geneID].append(valueList)
-
+    
     #Sort labels according to the feature list
     #Maybe for some genes no GENCODE entry could be found, these are only in the features list
     y=[]
@@ -445,7 +350,14 @@ if __name__ == "__main__":
     for geneID in trainset:
         y.append(labelDict[geneID])
         valueMatrix=trainset[geneID]
+        
+        #Transpose matrix (first number Bins, then histone modifications)
+        valueMatrix=list(map(list, zip(*valueMatrix)))
         X.append(valueMatrix)
+    
+    #Get number of histone modifications and number of bins from the dataset
+    FLAGS["numHistons"]=len(valueMatrix[0])
+    FLAGS["numBins"]=len(valueMatrix)
     
     #Konvertieren in ein numpy array
     X=np.array(X)
@@ -453,10 +365,10 @@ if __name__ == "__main__":
     
     print("finished reading in data!")
     
-    ratio=1/3
+    ratio=0.1
     #split the dataset random in two parts and the labels with them
     test, testL, train, trainL = splitRandom(ratio,X,y)
-    ratio=0.5
+    ratio=0.9
     train, trainL, valid, validL = splitRandom(ratio,train,trainL)
     datasets = {}
     datasets["train"]= Dataset(train,trainL)
