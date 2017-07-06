@@ -20,6 +20,7 @@ parser.add_option("-i",dest="input", help="This gives the path to the file with 
 parser.add_option("-n",dest="name", help="Give the name of the cell line for better naming", default="")
 parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 #save the given options
+(options, args) = parser.parse_args()
 features=options.input
 name = options.name
 labels=options.labels
