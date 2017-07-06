@@ -8,6 +8,7 @@ import numpy as np
 import argparse
 import tensorflow as tf
 import time
+import matplotlib.pyplot as plt
 
 
 #default for PSIPRED
@@ -23,43 +24,65 @@ def inference_singh(bins):
     #######################################
     #Parameter
     #Convolution
-    k=FLAGS["conv"]
-    Nout=FLAGS["Nout"]
+    #k=FLAGS["conv"]
+    #Nout=FLAGS["Nout"]
 
     #Maxpooling
-    m=FLAGS["mpool"]
+    #m=FLAGS["mpool"]
+    
+    k=[10,10]
+    Nout=[20,50]
+    m=[2,2]
+    num_convolution=len(k)
     
     #Hidden layers
     dims=FLAGS["dims"]
     num_hidden=len(dims)
+    
     ############################################
     
     #Get number of bins and histone modifications
     numberHists=FLAGS["numHistons"]
-    numberBins=FLAGS["numBins"]
+    #numberBins=FLAGS["numBins"]
     
-    #Mein versuch convolution networks zu verwenden
-    with tf.name_scope("convolution"):
-        weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
-        biases_con = tf.constant(0.1, shape=[Nout], name="bias")
-        #bin_image = tf.reshape(bins, [-1,numberBins,numberHists])
-        #conv1=tf.nn.relu(tf.nn.conv1d(bin_image, weights_con, stride=1,padding='SAME')+biases_con)
-        conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, stride=1,padding='SAME')+biases_con)
-    
-    #2) max pooling
-    with tf.name_scope("maxPooling"):
-        maxPool=tf.nn.pool(conv1,window_shape=[m],pooling_type="MAX",strides=[m],padding='SAME')
+#    #Old convolution (only one layer)
+#    with tf.name_scope("convolution"+str(i)):
+#        weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
+#        biases_con = tf.constant(0.1, shape=[Nout], name="bias")
+#        conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, stride=1,padding='SAME')+biases_con)
+#        
+#    #2) max pooling
+#    with tf.name_scope("maxPooling"+str(i)):
+#        maxPool=tf.nn.pool(conv1,window_shape=[m],pooling_type="MAX",strides=[m],padding='SAME')
             
+    #Multiple stacked layers of convolution and maxpooling
+    convDims=[numberHists]+Nout
+    convolutionLayer=[bins]
+    for i in range(num_convolution):
+        #1) Convolution layer
+        with tf.name_scope("convolution"+str(i)):
+            weights_con = tf.Variable(tf.truncated_normal(shape=[k[i],convDims[i], convDims[i+1]], stddev=0.1), name="weights")
+            biases_con = tf.constant(0.1, shape=[convDims[i+1]], name="bias")
+            conv1=tf.nn.relu(tf.nn.conv1d(convolutionLayer[i], weights_con, stride=1,padding='SAME')+biases_con)
+            
+        
+        #2) max pooling
+        with tf.name_scope("maxPooling"+str(i)):
+            maxPool=tf.nn.pool(conv1,window_shape=[m[i]],pooling_type="MAX",strides=[m[i]],padding='SAME')
+            convolutionLayer.append(maxPool)
+    
     #3) drop out
     keep_prob = 0.5
     with tf.name_scope("dropOut"):
         dropOut=tf.nn.dropout(maxPool, keep_prob)
-        
+
         #Reshape drop-out layer before starting the multilayer perceptron
-        dropOut_flat = tf.reshape(dropOut, [-1, int(numberBins/m)*Nout])
-    
+        #dropOut_flat = tf.reshape(dropOut, [-1, int(convDims[i+1]/maxPoolReduction[i+1])*Nout])
+        dropOutShapes=dropOut.get_shape()[1]
+        dropOut_flat = tf.reshape(dropOut, [-1, dropOutShapes.value*Nout[-1]])
+        
     #4) multilayer perceptron
-    dims = [int(numberBins/m)*Nout] + dims + [NUM_CLASSES]
+    dims = [dropOutShapes.value*Nout[-1]] + dims + [NUM_CLASSES]
     hiddens = [dropOut_flat]
     for i in range(num_hidden):            
         with tf.name_scope("hiddenLayer"+str(i)):
@@ -272,7 +295,28 @@ class Dataset(object):
             c += 1
         return res,labs
 
+#Plot distribution in training, validation and testset
+def plotStateDistribution(trainL, validL, testL):
+    x =["Train 0", "Train 1", "Valid 0", "Valid 1", "Test 0", "Test 1"]
+#    y= [sum(trainL[:,0]), sum(trainL[:,1]), sum(validL[:,0]), sum(validL[:,1]), 
+#        sum(testL[:,0]), sum(testL[:,1])]
 
+    #Calculate numbers for each label and normalize through size of the data set
+    lenTrain=len(trainL)
+    lenValid=len(validL)
+    lenTest=len(testL)
+    y= [sum(trainL[:,0])/lenTrain, sum(trainL[:,1])/lenTrain, 
+        sum(validL[:,0])/lenValid, sum(validL[:,1])/lenValid, 
+        sum(testL[:,0])/lenTest, sum(testL[:,1])/lenTest]
+
+    #Show bar plots with the results
+    plt.bar(np.arange(len(x)), y, align='center', alpha=0.5)
+    plt.xticks(np.arange(len(x)), x)
+    plt.ylabel('frequency')
+    plt.xlabel('data set - label')
+    plt.title('Label distribution')
+
+    plt.show()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("")
@@ -281,15 +325,22 @@ if __name__ == "__main__":
     parser.add_argument("-l", help="Label data", dest="label")
     parser.add_argument("-k", type = int,help="Size of the convolution filter",dest="conv", default=10)
     parser.add_argument("--Nout", type = int,help="Number of output channels after the convolution",default=50)
-    parser.add_argument("-m", type = int, help="Pool size for the maxpooling step",dest="mpool",default=5)
-    parser.add_argument("--hiddenDims",help="Hidden dimensions, comma separated e.g. \"1000,100\"",default="1000")
-    parser.add_argument("--learnrate", default=0.005)
-    parser.add_argument("--momentum", default=0.9)
+    parser.add_argument("-m", type = int, help="Pool size for the maxpooling step",dest="mpool",default=2)
+    parser.add_argument("--hiddenDims",help="Hidden dimensions, comma separated e.g. \"1000,100\"",default="200")
+    parser.add_argument("--learnrate", type=float, default=0.005)
+    parser.add_argument("--momentum", default=None)
     parser.add_argument("--batchsize", default=200)
-
+    parser.add_argument("--fastdatadir", help="Directory to load preprocessed data in a fast way", default="")
+    parser.add_argument("--saveFastdatadir", help="Directory to save parsed data, which is splitted into training, validation and test, for fast loading the next time (the directory need to exists already).",default="")
+    parser.add_argument("--plot", help="Plot the distribution of the 0/1 labels in the training, validation and test set", action='store_true')
 
     args = parser.parse_args()
 
+    #Directories to load and save the training and test data in numpy format
+    #Empty string, if no fast data should be loaded / saved
+    fastdatadir = args.fastdatadir
+    saveFastdatadir = args.saveFastdatadir
+    
     FLAGS["logdir"] = args.logdir
     FLAGS["learnrate"] = args.learnrate
     FLAGS["momentum"] = args.momentum
@@ -305,77 +356,107 @@ if __name__ == "__main__":
     
     FLAGS["dims"]=dimensions
     
-    #Einlesen von unseren Input files und anschließend split in training und test
-    labelFilename = args.label
-    trainingData = args.data
+    #Read preparsed data from a directory
+    if(len(fastdatadir)>0):
+        #Read directory
+        train = np.load(os.path.join(fastdatadir, "train1_win.npz.npy"))
+        trainL = np.load(os.path.join(fastdatadir, "train1_lab.npz.npy"))
+        valid = np.load(os.path.join(fastdatadir, "valid1_win.npz.npy"))
+        validL = np.load(os.path.join(fastdatadir, "valid1_lab.npz.npy"))
+        test = np.load(os.path.join(fastdatadir, "test1_win.npz.npy"))
+        testL = np.load(os.path.join(fastdatadir, "test1_lab.npz.npy"))
 
-    labelFile = open(labelFilename)
-    labelDict = {}
-    for line in labelFile.readlines():
-        lineSplit=line.split()
-        #Convert each label to a binary vector
-        if(int(lineSplit[2])==0):
-            labelDict[lineSplit[0]]=[1,0]
-        elif(int(lineSplit[2])==1):
-            labelDict[lineSplit[0]]=[0,1]
-        else:
-            print("Fehler beim Parsen des Input-Files.")
+        FLAGS["numHistons"]=len(train[0][0])
+        FLAGS["numBins"]=len(train[0])
         
-
-    trainset={}
-    with open(trainingData) as featureFile:
-        #Name of the data set (from the header)
-        dataset=featureFile.readline().rstrip()[2:]
-        #All modifications
-        modifications=featureFile.readline().rstrip()[2:].split(" ")
-
-        for line in featureFile.readlines():
-            line=line.rstrip()
-            if(line.startswith('#')):
-                lineSplit=line.split(" ")
-                geneID=lineSplit[0]
-                #Remove the hashtag at the beginning of the line
-                geneID=geneID[1:]
-                trainset[geneID]=[]
+        print("finished reading in data!")
+        
+    else:
+        #Einlesen von unseren Input files und anschließend split in training und test
+        labelFilename = args.label
+        trainingData = args.data
+    
+        labelFile = open(labelFilename)
+        labelDict = {}
+        for line in labelFile.readlines():
+            lineSplit=line.split()
+            #Convert each label to a binary vector
+            if(int(lineSplit[2])==0):
+                labelDict[lineSplit[0]]=[1,0]
+            elif(int(lineSplit[2])==1):
+                labelDict[lineSplit[0]]=[0,1]
             else:
-                valueList=line.split(",")
-                valueList=list(map(float,valueList))
-                trainset[geneID].append(valueList)
+                print("Fehler beim Parsen des Input-Files.")
+            
     
-    #Sort labels according to the feature list
-    #Maybe for some genes no GENCODE entry could be found, these are only in the features list
-    y=[]
-    X=[]
-    #If not all bins should be used
-    for geneID in trainset:
-        y.append(labelDict[geneID])
-        valueMatrix=trainset[geneID]
+        trainset={}
+        with open(trainingData) as featureFile:
+            #Name of the data set (from the header)
+            dataset=featureFile.readline().rstrip()[2:]
+            #All modifications
+            modifications=featureFile.readline().rstrip()[2:].split(" ")
+    
+            for line in featureFile.readlines():
+                line=line.rstrip()
+                if(line.startswith('#')):
+                    lineSplit=line.split(" ")
+                    geneID=lineSplit[0]
+                    #Remove the hashtag at the beginning of the line
+                    geneID=geneID[1:]
+                    trainset[geneID]=[]
+                else:
+                    valueList=line.split(",")
+                    valueList=list(map(float,valueList))
+                    trainset[geneID].append(valueList)
         
-        #Transpose matrix (first number Bins, then histone modifications)
-        valueMatrix=list(map(list, zip(*valueMatrix)))
-        X.append(valueMatrix)
+        #Sort labels according to the feature list
+        #Maybe for some genes no GENCODE entry could be found, these are only in the features list
+        y=[]
+        X=[]
+        #If not all bins should be used
+        for geneID in trainset:
+            y.append(labelDict[geneID])
+            valueMatrix=trainset[geneID]
+            
+            #Transpose matrix (first number Bins, then histone modifications)
+            valueMatrix=list(map(list, zip(*valueMatrix)))
+            X.append(valueMatrix)
+        
+        #Get number of histone modifications and number of bins from the dataset
+        FLAGS["numHistons"]=len(valueMatrix[0])
+        FLAGS["numBins"]=len(valueMatrix)
+        
+        #Konvertieren in ein numpy array
+        X=np.array(X)
+        y=np.array(y)
+        
+        print("finished reading in data!")
+        
+        ratio=0.1
+        #split the dataset random in two parts and the labels with them
+        test, testL, train, trainL = splitRandom(ratio,X,y)
+        ratio=0.9
+        train, trainL, valid, validL = splitRandom(ratio,train,trainL)
+        
+        #Saved parsed data in a numpy file
+        if(len(saveFastdatadir)>0):
+            np.save(os.path.join(saveFastdatadir, "train1_win.npz.npy"), train)
+            np.save(os.path.join(saveFastdatadir, "train1_lab.npz.npy"),trainL)
+            np.save(os.path.join(saveFastdatadir, "valid1_win.npz.npy"),valid)
+            np.save(os.path.join(saveFastdatadir, "valid1_lab.npz.npy"),validL)
+            np.save(os.path.join(saveFastdatadir, "test1_win.npz.npy"),test)
+            np.save(os.path.join(saveFastdatadir, "test1_lab.npz.npy"),testL)
+            print("saving parsed data to the directory")
     
-    #Get number of histone modifications and number of bins from the dataset
-    FLAGS["numHistons"]=len(valueMatrix[0])
-    FLAGS["numBins"]=len(valueMatrix)
-    
-    #Konvertieren in ein numpy array
-    X=np.array(X)
-    y=np.array(y)
-    
-    print("finished reading in data!")
-    
-    ratio=0.1
-    #split the dataset random in two parts and the labels with them
-    test, testL, train, trainL = splitRandom(ratio,X,y)
-    ratio=0.9
-    train, trainL, valid, validL = splitRandom(ratio,train,trainL)
     datasets = {}
     datasets["train"]= Dataset(train,trainL)
     datasets["validate"] = Dataset(valid,validL)
     datasets["test"] = Dataset(test,testL)
 
-
+    #Plot distribution of the labels in the three sets
+    if(args.plot):
+        print("Plotting the label distribution")
+        plotStateDistribution(trainL, validL, testL)
     run_training(datasets)
 
 
