@@ -12,12 +12,24 @@ import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from optparse import OptionParser
+
+#this is necessary to get the parameters from the comand line
+parser = OptionParser()
+parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
+parser.add_option("-n",dest="name", help="Give the name of the cell line for better naming", default="")
+parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
+#save the given options
+(options, args) = parser.parse_args()
+features=options.input
+name = options.name
+labels=options.labels
 
 #Normalize inputfile
-os.system("python preprocessing/normalizations.py -i ~/Desktop/input_mRNA.txt -o ~/Desktop/input_mRNA_scaled.txt -m Scale -n")  
-os.system("python preprocessing/normalizations.py -i ~/Desktop/input_mRNA.txt -o ~/Desktop/input_mRNA_normalized.txt -m Norm -n")  
+os.system("python preprocessing/normalizations.py -i "+features+ " -o "+name+"_scaled.txt -m Scale -n")  
+os.system("python preprocessing/normalizations.py -i "+features+ " -o "+name+"_normalized.txt -m Norm -n")  
 
-createdInputFiles=['~/Desktop/input_mRNA.txt','~/Desktop/input_mRNA_scaled.txt', '~/Desktop/input_mRNA_normalized.txt']
+createdInputFiles=[options.input, name+'_scaled.txt', name+'_normalized.txt']
 
 #####################################################################################
 # For classification
@@ -26,11 +38,11 @@ for cM in classificationMethods:
     print(cM)
     for file in createdInputFiles:
         print(file)
-        os.system("python methods/classification.py -i "+ file +" -l ~/Desktop/labels_mRNA.txt "+ 
-                  "-c 10 -a -o ~/Desktop/classification_normalization.txt -n -m "+cM)
+        os.system("python methods/classification.py -i "+ file +" -l "+labels+" "+ 
+                  "-c 10 -a -o classification_"+name+"_normalization.txt -n -m "+cM)
 
 #Plotting the classification results
-fileName="/home/sch/schmidka/Desktop/classification_normalization.txt"
+fileName="classification_"+name+"_normalization.txt"
 
 resultFile=open(fileName)
 score=[]
@@ -48,7 +60,7 @@ plt.xlabel("Method (Normalization)")
 plt.ylabel("AUC score")
 plt.title('AUC Scores of RF and SVM with different normalizations')
 plt.tight_layout()
-plt.savefig('/home/sch/schmidka/Desktop/Vergleich_Klassifikation.png')
+plt.savefig('Vergleich_Klassifikation.png')
 
 #####################################################################################
 # For regression
@@ -58,10 +70,10 @@ for rM in regressionMethods:
     for file in createdInputFiles:
         print(file)
         os.system("python methods/regression.py -i "+ file +
-                  " -c 10 -a -o ~/Desktop/regression_normalization.txt -n -m "+rM)
+                  " -c 10 -a -o regression_"+name+"_normalization.txt -n -m "+rM)
         
 #Plotting the regression results
-fileName="/home/sch/schmidka/Desktop/regression_normalization.txt"
+fileName="regression_"+name+"_normalization.txt"
 
 resultFile=open(fileName)
 score=[]
@@ -79,4 +91,4 @@ plt.xlabel("Method (Normalization)")
 plt.ylabel("R2 score")
 plt.title('R2 Scores of LR, RF and SVM with different normalizations')
 plt.tight_layout()
-plt.savefig('/home/sch/schmidka/Desktop/Vergleich_Regression.png')
+plt.savefig('Vergleich_Regression.png')

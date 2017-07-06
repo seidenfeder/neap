@@ -16,25 +16,31 @@ from optparse import OptionParser
 #this is necessary to get the parameters from the comand line
 parser = OptionParser()
 parser.add_option("-m", type="string", dest="method", help = "the method you want to use Support Vector Machine - Classification (SVC) or Regression (SVR) or Random Forest - Classification (RFC) or Regression (RFR) or Linear Regression (LR) default= RFC", default="RFC")
+parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
+parser.add_option("-n",dest="name", help="Give the name of the cell line for better naming", default="")
+parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 (options, args) = parser.parse_args()
 method=options.method
+features=options.input
+name = options.name
+labels=options.labels
 
 #run the method once for each bin
 for i in range(0,160):
 	if(method == "RFC"):
-		os.system("python classification.py -i input_mRNA.txt -l labels_mRNA.tsv -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
+		os.system("python methods/classification.py -i "+features+" -l "+labels+" -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
 		score="AUC"
 	elif(method == "SVC"):
-		os.system("python classification.py -i input_mRNA.txt -l labels_mRNA.tsv -n -c 5 -o "+method+"Bins.txt -m SVM -b"+ str(i))
+		os.system("python methods/classification.py -i "+features+" -l "+labels+" -n -c 5 -o "+method+"Bins.txt -m SVM -b"+ str(i))
 		score="AUC"
 	elif(method == "RFR"):
-		os.system("python regression.py -i input_mRNA.txt -m RF -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -m RF -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
 		score="r2"
 	elif(method == "SVR"):
-		os.system("python regression.py -i input_mRNA.txt -m SVM -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -m SVM -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
 		score="r2"
 	elif(method == "LR"):
-		os.system("python regression.py -i input_mRNA.txt -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -n -c 5 -o "+method+"Bins.txt -b"+ str(i))
 		score="r2"
 
 #get the calculated score values from the file
