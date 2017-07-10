@@ -17,12 +17,10 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-m", type="string", dest="method", help = "the method you want to use Support Vector Machine - Classification (SVC) or Regression (SVR) or Random Forest - Classification (RFC) or Regression (RFR) or Linear Regression (LR) default= RFC", default="RFC")
 parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
-parser.add_option("-n",dest="name", help="Give the name of the cell line for better naming", default="")
 parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 (options, args) = parser.parse_args()
 method=options.method
 features=options.input
-name = options.name
 labels=options.labels
 
 #run the method once for each bin
@@ -36,16 +34,16 @@ for i in range(0,160):
 		score="AUC"
 		methodCoR="Classification"
 	elif(method == "RFR"):
-		os.system("python methods/regression.py -i "+features+" -m RF -n --name "+name+" -c 5 -o RegressionBins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -m RF -n -c 5 -o RegressionBins.txt -b"+ str(i))
 		methodCoR="Regression"
-		os.system("python methods/regression.py -i "+features+" -m RF -n --name "+name+" -c 5 -o RegressionBins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -m RF -n -c 5 -o RegressionBins.txt -b"+ str(i))
 		score="r2"
 	elif(method == "SVR"):
-		os.system("python methods/regression.py -i "+features+" -m SVM -n --name "+name+" -c 5 -o RegressionBins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -m SVM -n -c 5 -o RegressionBins.txt -b"+ str(i))
 		score="r2"
 		methodCoR="Regression"
 	elif(method == "LR"):
-		os.system("python methods/regression.py -i "+features+" -n --name "+name+" -c 5 -o RegressionBins.txt -b"+ str(i))
+		os.system("python methods/regression.py -i "+features+" -n -c 5 -o RegressionBins.txt -b"+ str(i))
 		score="r2"
 		methodCoR="Regression"
 

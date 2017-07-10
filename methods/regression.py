@@ -30,11 +30,9 @@ parser.add_option("-p", dest="plot", action="store_true", help = "True it makes 
 parser.add_option("-o",dest="output", help="The name of the outputfile", default="regression.txt")
 parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
 parser.add_option("-z", action="store_true", dest="zeros", help="Tells if you want to include the expression values 0.0 (default=false)", default=False)
-parser.add_option("--name",dest="name", help="Name of the cell line")
 
 (options, args) = parser.parse_args()
 method=options.method
-name=options.name
 featureFilename=options.input
 
 #Read values and features
@@ -132,7 +130,7 @@ if options.plot:
 #write the output into a file but don't delete the previous text
 fileHandle = open ( options.output, 'a')
 if(not options.allBins):
-    fileHandle.write(name+"\t"+method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
 else:
-    fileHandle.write(name+"\t"+method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
 fileHandle.close()
