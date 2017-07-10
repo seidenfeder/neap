@@ -35,8 +35,6 @@ featureFilename=options.featureFilename
 outputFilename=options.outputFilename
 normalizationMethod=options.normalizationMethod
 
-numberHistons=5
-numberBins=160
 
 #Read features
 featureFile=open(featureFilename)
@@ -65,6 +63,9 @@ for line in featureFile.readlines():
         valueList=list(map(float,valueList))
         genesModis[geneID].append(valueList)
 
+#get the number of histone modifications and the number of bins from the feature file
+numberHistons=len(genesModis[geneID])
+numberBins=len(genesModis[geneID][0])
 
     
 #Different normalization methods
