@@ -23,9 +23,10 @@ shinyUI(
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           checkboxGroupInput("datasets", label="Data sets", 
-                                             choices = c("K562" = 1, 
-                                                         "..." = 2),
-                                             selected = 1)
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "..."=3),
+                                             selected = "K562")
                         ),
                         mainPanel(
                           plotlyOutput("labelPlot"),
@@ -47,9 +48,10 @@ shinyUI(
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           checkboxGroupInput("datasets", label="Data sets", 
-                                             choices = c("K562" = 1, 
-                                                         "..." = 2),
-                                             selected = 1)
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "..."=3),
+                                             selected = "K562")
                         ),
                         mainPanel(
                           plotOutput("plot")
