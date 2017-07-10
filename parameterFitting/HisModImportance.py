@@ -141,9 +141,9 @@ for mod in modifications:
 	#this is necessary that we can compare different data sets or binnings or methods
 	fileHandle = open ( options.output, 'a' )
 	if(not options.allBins):
-	    fileHandle.write(method+"\t"+str(binNumber)+"\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
+	    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
 	else:
-	    fileHandle.write(method+"\tall\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
+	    fileHandle.write(dataset+"\t"+method+"\tall\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
 	fileHandle.close()
 	i+=1
 
