@@ -97,7 +97,7 @@ scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
 #this is necessary that we can compare different data sets or binnings or methods
 fileHandle = open ( options.output, 'a' )
 if(not options.allBins):
-    fileHandle.write(method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
 else:
-    fileHandle.write(method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
 fileHandle.close()

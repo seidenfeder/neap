@@ -24,7 +24,7 @@ shinyServer(
                                  choices = c("Linear Regression" = "LR",
                                              "RF Regression" = "RF", 
                                              "SVM Regression" = "SVM"),
-                                 selected = 1)
+                                 selected = "RF")
       }
     })
     
@@ -43,7 +43,7 @@ shinyServer(
                                  choices = c("Linear Regression" = "LR",
                                              "RF Regression" = "RF", 
                                              "SVM Regression" = "SVM"),
-                                 selected = 1)
+                                 selected = "RF")
       }
     })
     
@@ -53,7 +53,7 @@ shinyServer(
     #Create the plot of the label evaluation
     output$labelPlot<-renderPlotly({
       #Display the plot only for the classification task and if at least one method is selected
-      if(input$type=="c" & ! is.null(input$method)){
+      if(input$type=="c" & ! is.null(input$method)&!is.null(input$datasets)){
         #Read input data
         data<-read.csv("PlotInput/evalLabels_normalized.txt",sep="\t",header=F)
         
@@ -101,22 +101,29 @@ shinyServer(
     #Create the plot of plot for the bins
     output$binsPlot<-renderPlotly({
       #Display the plot only for the classification task and if at least one method is selected
-      if(input$type=="c" & ! is.null(input$method)){
+      if(input$type=="c" & ! is.null(input$method)&!is.null(input$datasets)){
         #Read input data
         dataBinsC<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
         
         #Filter data according to the selected methods
-        matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V1)
+        matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V2)
         plottedData<-dataBinsC[matchesBins,]
         
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        #Get different labels and colors for differnt datasets and methods
+        NeededColors <- paste(plottedDataCell$V1,plottedDataCell$V2,sep=" - ")
+        
         #Set levels of plotted Data new to get a right scaling of the axis
-        plottedData<-droplevels(plottedData)
+        plottedDataCell<-droplevels(plottedDataCell)
         
         #Create interactive line plots
         color1<-c("blue","red")
-        plot_ly(y = rowMeans(plottedData[,3:ncol(plottedData)]),
-                x = plottedData$V2, type="scatter", 
-                color=plottedData$V1,
+        plot_ly(y = rowMeans(plottedDataCell[,4:ncol(plottedDataCell)]),
+                x = plottedDataCell$V3, type="scatter", 
+                color=NeededColors,
                 colors = color1,
                 
                 mode="lines")%>%
@@ -128,22 +135,29 @@ shinyServer(
                  )
           )
       }
-      else if(! is.null(input$method)){
+      else if(! is.null(input$method)&!is.null(input$datasets)){
         #Read input data
         dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
         
         #Filter data according to the selected methods
-        matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V1)
+        matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V2)
         plottedData<-dataBinsC[matchesBins,]
         
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        #Get different labels and colors for differnt datasets and methods
+        NeededColors <- paste(plottedDataCell$V1,plottedDataCell$V2,sep=" - ")
+        
         #Set levels of plotted Data new to get a right scaling of the axis
-        plottedData<-droplevels(plottedData)
+        plottedDataCell<-droplevels(plottedDataCell)
         
         #Create interactive line plots
         color1<-c("blue","red")
-        plot_ly(y = rowMeans(plottedData[,3:ncol(plottedData)]),
-                x = plottedData$V2, type="scatter", 
-                color=plottedData$V1,
+        plot_ly(y = rowMeans(plottedDataCell[,4:ncol(plottedDataCell)]),
+                x = plottedDataCell$V3, type="scatter", 
+                color=NeededColors,
                 colors = color1,
                 
                 mode="lines")%>%

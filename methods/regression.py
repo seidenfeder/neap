@@ -33,7 +33,6 @@ parser.add_option("-z", action="store_true", dest="zeros", help="Tells if you wa
 
 (options, args) = parser.parse_args()
 method=options.method
-
 featureFilename=options.input
 
 #Read values and features
@@ -131,7 +130,7 @@ if options.plot:
 #write the output into a file but don't delete the previous text
 fileHandle = open ( options.output, 'a')
 if(not options.allBins):
-    fileHandle.write(method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
 else:
-    fileHandle.write(method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\tall\t"+'\t'.join(map(str,scores))+"\n")
 fileHandle.close()

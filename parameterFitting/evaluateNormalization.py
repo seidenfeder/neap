@@ -39,7 +39,7 @@ for cM in classificationMethods:
     for file in createdInputFiles:
         print(file)
         os.system("python methods/classification.py -i "+ file +" -l "+labels+" "+ 
-                  "-c 10 -a -o classification_"+name+"_normalization.txt -n -m "+cM)
+                  "-c 10 -a -o classification_normalization.txt -n -m "+cM)
 
 #Plotting the classification results
 fileName="classification_"+name+"_normalization.txt"
@@ -70,7 +70,7 @@ for rM in regressionMethods:
     for file in createdInputFiles:
         print(file)
         os.system("python methods/regression.py -i "+ file +
-                  " -c 10 -a -o regression_"+name+"_normalization.txt -n -m "+rM)
+                  " -c 10 -a -o regression_normalization.txt -n -m "+rM)
         
 #Plotting the regression results
 fileName="regression_"+name+"_normalization.txt"
