@@ -37,7 +37,7 @@ classificationMethods=["RF","SVM"]
 for m in methods:
     print(m)
     os.system("python preprocessing/labelGenes.py -a "+fileRep1+
-              "-b "+fileRep2+" -m "+ m + " -o "+labelFileName+ 
+              " -b "+fileRep2+" -m "+ m + " -o "+labelFileName+ 
               " --protCod -g "+genecode)
     
     for cM in classificationMethods:

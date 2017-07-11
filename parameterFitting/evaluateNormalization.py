@@ -50,7 +50,7 @@ for line in resultFile:
     line=line.rstrip()
     if not line.startswith('#'):
         results=line.split('\t')
-        score.append(list(map(float,results[2:])))
+        score.append(list(map(float,results[4:])))
 
 scaling=['RF','RF (Scaled)','RF (Normalized)','SVM','SVM (Scaled)','SVM (Normalized)']
 
@@ -77,13 +77,15 @@ fileName="regression_"+name+"_normalization.txt"
 
 resultFile=open(fileName)
 score=[]
+scaling=[]
 for line in resultFile:
     line=line.rstrip()
     if not line.startswith('#'):
         results=line.split('\t')
-        score.append(list(map(float,results[2:])))
+        score.append(list(map(float,results[4:])))
+        scaling.append(results[1]+" ("+results[2]+")")
 
-scaling=['LR','LR (Scaled)','LR (Normalized)','RF','RF (Scaled)','RF (Normalized)','SVM','SVM (Scaled)','SVM (Normalized)']
+#scaling=['LR','LR (Scaled)','LR (Normalized)','RF','RF (Scaled)','RF (Normalized)','SVM','SVM (Scaled)','SVM (Normalized)']
 
 plt.boxplot(score)
 plt.xticks(range(1,len(scaling)+1),scaling, rotation='vertical')

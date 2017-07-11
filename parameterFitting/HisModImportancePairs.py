@@ -108,7 +108,7 @@ fileHandle.close()
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
 i=0 
 for mod in modifications:
-	for j in range(i+1,len(modifications))
+	for j in range(i+1,len(modifications)):
 		#Sort labels according to the feature list
 		#Maybe for some genes no GENCODE entry could be found, these are only in the features list
 		y=[]
