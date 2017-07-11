@@ -24,16 +24,12 @@ def inference_singh(bins):
     #######################################
     #Parameter
     #Convolution
-    #k=FLAGS["conv"]
-    #Nout=FLAGS["Nout"]
-
-    #Maxpooling
-    #m=FLAGS["mpool"]
-    
-    k=[10,10]
-    Nout=[20,50]
-    m=[2,2]
+    k=FLAGS["conv"]
+    Nout=FLAGS["Nout"]
     num_convolution=len(k)
+    
+    #Maxpooling
+    m=FLAGS["mpool"]
     
     #Hidden layers
     dims=FLAGS["dims"]
@@ -144,6 +140,11 @@ def run_training(datasets, chkptfile=None):
     niter = 50000
     kprob = 1.0
 
+    #For naming the mode file
+#    k_toSTr = ",".join(map(str,FLAGS["conv"]))
+#    Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
+#    m_toStr = ",".join(map(str,FLAGS["mpool"]))
+    
     print("starting to train")
     with tf.Graph().as_default():
         start_time = time.time()
@@ -171,6 +172,7 @@ def run_training(datasets, chkptfile=None):
 
         sess = tf.Session()
 
+        
         mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob)
 
         mod_dir = os.path.join(FLAGS["logdir"], mod_dir)
@@ -309,6 +311,8 @@ def plotStateDistribution(trainL, validL, testL):
         sum(validL[:,0])/lenValid, sum(validL[:,1])/lenValid, 
         sum(testL[:,0])/lenTest, sum(testL[:,1])/lenTest]
 
+    print(y)
+    
     #Show bar plots with the results
     plt.bar(np.arange(len(x)), y, align='center', alpha=0.5)
     plt.xticks(np.arange(len(x)), x)
@@ -318,14 +322,15 @@ def plotStateDistribution(trainL, validL, testL):
 
     plt.show()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("")
     parser.add_argument("--logdir", help = "log directory to save results of a run (used for tensorboard)",default="./logs")
     parser.add_argument("-i", help="Feature input data (bins)", dest= "data")
     parser.add_argument("-l", help="Label data", dest="label")
-    parser.add_argument("-k", type = int,help="Size of the convolution filter",dest="conv", default=10)
-    parser.add_argument("--Nout", type = int,help="Number of output channels after the convolution",default=50)
-    parser.add_argument("-m", type = int, help="Pool size for the maxpooling step",dest="mpool",default=2)
+    parser.add_argument("-k", help="Sizes of all convolution filters, comma separated e.g. \"10,10\"",dest="conv", default="10,10")
+    parser.add_argument("--Nout", help="Numbers of output channels after each convolution convolution step, comma separated e.g. \"20,50\"",default="20,50")
+    parser.add_argument("-m", help="Pool size for each the maxpooling step, comma separated e.g. \"2,2\"",dest="mpool",default="2,2")
     parser.add_argument("--hiddenDims",help="Hidden dimensions, comma separated e.g. \"1000,100\"",default="200")
     parser.add_argument("--learnrate", type=float, default=0.005)
     parser.add_argument("--momentum", default=None)
@@ -346,10 +351,34 @@ if __name__ == "__main__":
     FLAGS["momentum"] = args.momentum
     FLAGS["batchsize"] = args.batchsize
     
-    FLAGS["conv"]=args.conv
-    FLAGS["Nout"]=args.Nout
+    
+    
     FLAGS["mpool"]=args.mpool
     
+    #Get convolution dimensions
+    convDims = args.conv.split(",")
+    convDims = list(map(int,convDims))
+    FLAGS["conv"] = convDims
+    
+    #Get number of output channels after each convolution step
+    noutDims = args.Nout.split(",")
+    noutDims = list(map(int,noutDims))
+    FLAGS["Nout"] = noutDims
+    
+    #Get number of pool for each maxpooling step
+    mpoolsDims = args.mpool.split(",")
+    mpoolsDims = list(map(int,mpoolsDims))
+    FLAGS["mpool"] = mpoolsDims
+    
+    #Check if all three have the same length (otherwise print an error)
+    if(len(convDims) != len(noutDims)):
+        print("Anzahl der Convolution Filter und der Convolution Output Channel Zahlen stimmt nicht überein!")
+        exit()
+    
+    if(len(convDims) != len(mpoolsDims)):
+        print("Anzahl der Convolution Filter und der Maxpool Filter stimmt nicht überein!")
+        exit()
+        
     #Get hidden dimensions
     dimensions=args.hiddenDims.split(",")
     dimensions=list(map(int,dimensions))
