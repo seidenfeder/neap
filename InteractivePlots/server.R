@@ -2,6 +2,7 @@ library(shiny)
 library(plotly)
 #Fuer Melt
 library(reshape2)
+library(ggplot2)
 
 options(warn =-1)
 
@@ -46,6 +47,8 @@ shinyServer(
       }
     })
     
+    ####################################################################################
+    # Plots for the model development tab
     
     #Create the plot of the label evaluation
     output$labelPlot<-renderPlotly({
@@ -76,6 +79,19 @@ shinyServer(
                    title = "AUC Score"
                  )
           )
+      }
+      else{
+        return(NULL)
+      }
+    })
+    
+    #Display an explanation text with the label plot
+    output$labelText<-renderText({
+      if(input$type=="c" & ! is.null(input$method)){
+        return(paste("We tested three different labeling methods to separate the gene set in two classes.",
+                     "We splitted either at the median gene expression value, the mean gene expression value",
+                     "or at a expression value of zero. The method \"median\", which splits the genes in two equal sets",
+                     "seems to work best."))
       }
       else{
         return(NULL)
@@ -144,19 +160,96 @@ shinyServer(
       }
     })
     
-    #Display an explanation text with the label plot
-    output$labelText<-renderText({
-      if(input$type=="c" & ! is.null(input$method)){
-        return(paste("We tested three different labeling methods to separate the gene set in two classes.",
-                     "We splitted either at the median gene expression value, the mean gene expression value",
-                     "or at a expression value of zero. The method \"median\", which splits the genes in two equal sets",
-                     "seems to work best."))
-      }
-      else{
-        return(NULL)
+    ####################################################################################
+    # Plots for the dataset comparison tab
+    
+    #Create plot for the different data sets
+    output$cvData<-renderPlotly({
+      if(! is.null(input$method_2)){
+        
+        #Read different files for classification and for regression
+        #TODO: add right data files (after creating them ;) )
+        if(input$type=="c"){
+          filename = "PlotInput/performanceDatasets.txt"
+          titleString = "AUC Score"
+        }
+        else{
+          filename = "PlotInput/performanceDatasets.txt"
+          titleString = "R2 Score"
+        }
+        #Read input data
+        data<-read.csv(filename,sep="\t",header=F)
+        
+        #Reformat data for the box plots
+        reshapedData<-melt(data, id=c("V1","V2", "V3"))
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method_2,collapse="|"), reshapedData$V2)
+        plottedData<-reshapedData[matches,]
+        
+        #Filter data acoording to the selected data sets
+        matches <- grepl(paste(input$datasets_2,collapse="|"), plottedData$V1)
+        plottedData<-plottedData[matches,]
+        
+        #Set levels of plotted Data new to get a right scaling of the axis
+        plottedData<-droplevels(plottedData)
+        
+        #Create interactive box plots
+        plot_ly(y = plottedData$value, 
+                x = paste(plottedData$V1, " - ", plottedData$V2), 
+                type="box")%>%
+          layout(title = paste('Cross evaluation of different data sets using different methods'),
+                 xaxis = list(
+                   title = "Data set - method"),
+                 yaxis = list(
+                   title = titleString
+                 )
+          )
       }
     })
     
-    
+    #Comparison matrix of the different data sets
+    output$dataMatrix<-renderPlotly({
+      if(! is.null(input$method_2)){
+        
+        #Read different files for classification and for regression
+        #TODO: add right data files (after creating them ;) )
+        if(input$type=="c"){
+          filename = "PlotInput/dataMatrix.txt"
+          titleString = "AUC Score"
+        }
+        else{
+          filename = "PlotInput/dataMatrix.txt"
+          titleString = "R2 Score"
+        }
+        #Read input data
+        data<-read.csv(filename,sep="\t",header=F)
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method_2,collapse="|"), data$V1)
+        plottedData<-data[matches,]
+        
+        #Filter data according to the selected data sets
+        matches <- grepl(paste(input$datasets_2,collapse="|"), plottedData$V2)
+        plottedData<-plottedData[matches,]
+        
+        matches <- grepl(paste(input$datasets_2,collapse="|"), plottedData$V3)
+        plottedData<-plottedData[matches,]
+        
+        #If more than one method is selected, calculate the mean of all methods
+        
+        #Rename variables
+        colnames(plottedData)<-c("Method","Dataset1","Dataset2","Score")
+        #Create heatmap
+        p<-ggplot(data = plottedData, aes(x = Dataset1, y = Dataset2)) +
+          geom_tile(aes(fill = Score))+
+          scale_fill_gradient(low = "white", high = "red")+
+          ggtitle("Training on set 1, prediction set 2")+
+          labs(x="Data set 1",y="Data set 2")
+        
+        ggplotly(p)
+        
+      }
+    })
     
   })

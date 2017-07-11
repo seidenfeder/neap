@@ -40,21 +40,32 @@ shinyUI(
                       sidebarLayout(
                         sidebarPanel(
                           radioButtons("type_2", label="Machine learning task",
-                                       c("Classification"="c", "Regression"="r")
-                          ),
-                          checkboxGroupInput("method_2", label="Methods", 
-                                             choices = c("Random Forest" = "RF", 
+                                       c("Classification"="c", "Regression"="r")),
+                          checkboxGroupInput("method_2", label="Methods",
+                                             choices = c("Random Forest" = "RF",
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
-                          checkboxGroupInput("datasets", label="Data sets", 
-                                             choices = c("K562" = 1, 
-                                                         "..." = 2),
-                                             selected = 1)
+                          checkboxGroupInput("datasets_2", label="Data sets",
+                                             choices = c("dataset1" = 1,
+                                                         "dataset2" = 2,
+                                                         "dataset3" = 3),
+                                             selected = c(1,2,3))
                         ),
                         mainPanel(
-                          plotOutput("plot")
-                        )
-                      )),
+                          plotlyOutput("cvData"),
+                          br(),
+                          p(paste0("Choosing the optimal parameters, which were detected during the model development, ",
+                                   "different data sets were tested using all possible classification and regression ",
+                                   "methods in a 10-fold cross validation. The best determined parameters were thereby ",
+                                   "a normalized data set, usisng all bins and all histone modifications, which were ",
+                                   "in common for all data sets, and for classification the labeling method median/zero(?).")
+                          ),
+                          plotlyOutput("dataMatrix"),
+                          br(),
+                          p("Test ...")
+                      )
+              ),
              tabPanel("Run prediction")
+      )
   )
 )
