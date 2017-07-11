@@ -52,7 +52,7 @@ aucs=[]
 fileRF = open(methodCoR+"Bins.txt")
 for line in fileRF.readlines():
 	lineSplit=line.split()
-	aucs.append(list(map(float,lineSplit[2:])))
+	aucs.append(list(map(float,lineSplit[3:])))
 
 #calculate the mean for each bin
 aucMean = np.mean(aucs, axis=1)

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-## TESTVERSION FOR SINGLE HISTONE MODIFICATIONS
-
 #####################################################################################
 #
 # This script tests the relative Importance of all tested Histone Modifications
@@ -38,8 +36,9 @@ featureFilename=options.input
 labelFile = open(labelFilename)
 labelDict = dict()
 for line in labelFile.readlines():
-    lineSplit=line.split()
-    labelDict[lineSplit[0]]=int(lineSplit[2])
+    if not line.startswith("##"):
+        lineSplit=line.split()
+        labelDict[lineSplit[0]]=int(lineSplit[2])
 
 
 #Read features
@@ -50,6 +49,7 @@ genesModis=dict()
 if options.newFormat :
     #Name of the data set (from the header)
     dataset=featureFile.readline().rstrip()[2:]
+    dataset=dataset.split(" ")[0]
     #All modifications
     modifications=featureFile.readline().rstrip()[2:].split(" ")
 
@@ -100,13 +100,13 @@ scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
 #this is necessary that we can compare different data sets or binnings or methods
 fileHandle = open ( options.output, 'a' )
 if(not options.allBins):
-    fileHandle.write(method+"\t"+str(binNumber)+"\tNone\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\tNone\t"+'\t'.join(map(str,scores))+"\n")
 else:
-    fileHandle.write(method+"\tall\tNone\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\tall\tNone\t"+'\t'.join(map(str,scores))+"\n")
 fileHandle.close()
 
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
-i=0  
+i=0
 for mod in modifications:
 		
 	#Sort labels according to the feature list
@@ -120,14 +120,14 @@ for mod in modifications:
 		for geneID in genesModis:
 		    y.append(labelDict[geneID])
 		    valueMatrix=np.array(genesModis[geneID])
-		    valueMatrix=np.delete(valueMatrix,i,0)
+		    valueMatrix=valueMatrix[i]
 		    X.append(valueMatrix[:,binNumber])
 	#if you want the classification with all bins
 	else:
 		for geneID in genesModis:
 		    y.append(labelDict[geneID])
 		    valueMatrix=np.array(genesModis[geneID])
-		    valueMatrix=np.delete(valueMatrix,i,0)
+		    valueMatrix=valueMatrix[i]
 		    X.append(valueMatrix.flatten())
 
 	#Support Vector Machines
@@ -162,10 +162,11 @@ for mod in modifications:
 
 #plot how the performance changes when we miss a histone modification
 plt.boxplot(aucs)
-plt.xlabel("Missing Histone Modification")
+plt.xlabel("Used Histone Modification")
 plt.ylabel("AUC score")
-plt.title("Performance change with a missing histone modification")
-plt.xticks(list(range(0,len(modis))),modis)
+plt.title("Performance change by using one histone modification")
+plt.xticks(list(range(0,len(modis))),modis,rotation=20)
+plt.tight_layout()
 plt.savefig('HistImportance.png')
 #plt.show()
 
@@ -179,11 +180,12 @@ modis.remove("")
 
 # plot the mean as barplot
 plt.bar(range(0,len(aucMean)),aucMean,width=0.6, align="center")
-plt.xlabel("Missing Histone Modification")
+plt.xlabel("Used Histone Modification")
 plt.ylabel("Mean of AUC score")
-plt.title("Performance change with a missing histone modification")
-plt.xticks(list(range(0,len(modis))),modis)
+plt.title("Performance change by using one histone modification")
+plt.xticks(list(range(0,len(modis))),modis,rotation=20)
 #plt.ylim(0.84,0.9)
+plt.tight_layout()
 plt.savefig('HistImportanceBars.png')
 #plt.show()
 

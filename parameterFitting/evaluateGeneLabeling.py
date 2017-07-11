@@ -28,7 +28,7 @@ parser.add_option("-i",dest="input", help="This gives the path to the file with 
 fileRep1=options.fileRep1
 fileRep2=options.fileRep2
 labelFileName=options.labelFileName
-gencode=options.fileGenecode
+genecode=options.fileGencode
 inputFile=options.input
 
 #For each label method run the label script and the classification ones
@@ -43,7 +43,7 @@ for m in methods:
     for cM in classificationMethods:
         print(cM)
         os.system("python methods/classification.py -i "+inputFile+" -l "+labelFileName+ 
-                  "-c 10 -a -o evalLabels_normalized.txt -n -m "+cM)
+                  " -c 10 -a -o evalLabels_normalized.txt -n -m "+cM)
 
 #Get the scores from the result file
 #get the calculated score values from the file
