@@ -166,7 +166,7 @@ def run_training(datasets, chkptfile=None):
         # initilize summaries
         summary = tf.summary.merge_all()
       
-        init = tf.global_variables_initializer()
+        
 
         saver = tf.train.Saver()
 
@@ -176,7 +176,12 @@ def run_training(datasets, chkptfile=None):
         mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob)
 
         mod_dir = os.path.join(FLAGS["logdir"], mod_dir)
-        summary_writer = tf.summary.FileWriter(mod_dir, sess.graph)
+        #summary_writer = tf.summary.FileWriter(mod_dir, sess.graph)
+        train_writer = tf.summary.FileWriter(mod_dir + '/train',
+                                      sess.graph)
+        test_writer = tf.summary.FileWriter(mod_dir + '/test')
+
+        init = tf.global_variables_initializer()
 
         sess.run(init)
 
@@ -197,26 +202,33 @@ def run_training(datasets, chkptfile=None):
             feed_dict = {bins : wins, labels_ph : labs, keep_prob : kprob}
 
             #not interested in the ouput of the optimizer
-            _ , loss_value = sess.run([train_op, los], feed_dict=feed_dict)
+            summary_str, loss_value = sess.run([summary, train_op], feed_dict=feed_dict)
 
 
-            duration = time.time() - start_time
+            #duration = time.time() - start_time
 
             #print current loss value
             if i%100 == 0:
-                print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
-                feed_dict[keep_prob] = 1.0
-                summary_str = sess.run(summary, feed_dict=feed_dict)
-                summary_writer.add_summary(summary_str, i)
-                summary_writer.flush()
+                #print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
+                
+                #Update the events file
+                train_writer.add_summary(summary_str, i)
+                train_writer.flush()
 
             #check performance based on validation set
             if (i + 1) % 1000 == 0 or (i + 1) == niter:
                 checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
                 saver.save(sess, checkpoint_file, global_step=global_step)
-                print("Evaluation: ")
+                
                 tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
-                print(eval_correct.eval(session=sess, feed_dict=tmp_feed_dict))
+                summary_str, acc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
+                
+                print('Accuracy at step %s: %s' % (i, acc))
+
+                test_writer.add_summary(summary_str, i)
+                test_writer.flush()
+
+                #print(sess.run(eval_correct, feed_dict=tmp_feed_dict))
 
 
         # final evaluation on test set
@@ -226,6 +238,8 @@ def run_training(datasets, chkptfile=None):
 
         print(eval_correct.eval(session=sess, feed_dict=tmp_feed_dict))
 
+        test_writer.close()
+        train_writer.close()
 
 #Split a data set random into two parts in a specific ratio
 def splitRandom(ratio, windows, labels):
