@@ -108,7 +108,7 @@ fileHandle.close()
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
 i=0 
 for mod in modifications:
-	for j in range(i+1,len(modifications)):
+	for j in range(0,len(modifications)):
 		#Sort labels according to the feature list
 		#Maybe for some genes no GENCODE entry could be found, these are only in the features list
 		y=[]
@@ -128,7 +128,7 @@ for mod in modifications:
 			    y.append(labelDict[geneID])
 			    valueMatrix=np.array(genesModis[geneID])
 			    modis=valueMatrix[i]
-			    modis.append(valueMatrix[j])
+			    np.append(modis,valueMatrix[j])
 			    X.append(modis.flatten())
 
 		#Support Vector Machines
@@ -144,9 +144,9 @@ for mod in modifications:
 		#this is necessary that we can compare different data sets or binnings or methods
 		fileHandle = open ( options.output, 'a' )
 		if(not options.allBins):
-		    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
+		    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+mod+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
 		else:
-		    fileHandle.write(dataset+"\t"+method+"\tall\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
+		    fileHandle.write(dataset+"\t"+method+"\tall\t"+mod+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
 		fileHandle.close()
 	i+=1
 
