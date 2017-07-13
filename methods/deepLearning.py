@@ -93,7 +93,7 @@ def inference_singh(bins):
         bias = tf.constant(0.1, shape=[2], name="bias")
         logits=tf.matmul(hiddens[-1], weights) + bias
         
-    return logits
+    return logits, hiddens[-1]
 
 
 #define the loss function
@@ -122,9 +122,11 @@ def evaluation(logits, labels):
 
     correct_prediction = tf.equal(tf.argmax(logits,1), tf.argmax(labels,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    #auc = tf.metrics.auc(labels, logits) #Maybe it's possible to calculate the auc score like here
 
     #add accuracy for summary plots
     tf.summary.scalar("accuracy", accuracy)
+    #tf.summary.scalar("auc",auc)
     return accuracy
 
 
@@ -155,7 +157,7 @@ def run_training(datasets, chkptfile=None):
         keep_prob = tf.placeholder(tf.float32)
         global_step = tf.Variable(0, name="global_step", trainable=False)
 
-        logits = inference_singh(bins)
+        logits, valuesBeforeSoftmax = inference_singh(bins) #valuesBeforeSoftmax eventuell wieder rauslöschen auc braucht allerdings float werte
 
         los = loss(logits, labels_ph)
 
@@ -175,7 +177,9 @@ def run_training(datasets, chkptfile=None):
         
         mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob)
 
-        mod_dir = os.path.join(FLAGS["logdir"], mod_dir)
+        #write the summary to the folder logdir
+        mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
+
         #summary_writer = tf.summary.FileWriter(mod_dir, sess.graph)
         train_writer = tf.summary.FileWriter(mod_dir + '/train',
                                       sess.graph)
@@ -422,14 +426,15 @@ if __name__ == "__main__":
         labelFile = open(labelFilename)
         labelDict = {}
         for line in labelFile.readlines():
-            lineSplit=line.split()
-            #Convert each label to a binary vector
-            if(int(lineSplit[2])==0):
-                labelDict[lineSplit[0]]=[1,0]
-            elif(int(lineSplit[2])==1):
-                labelDict[lineSplit[0]]=[0,1]
-            else:
-                print("Fehler beim Parsen des Input-Files.")
+            if not line.startswith("##"):
+                lineSplit=line.split()
+                #Convert each label to a binary vector
+                if(int(lineSplit[2])==0):
+                    labelDict[lineSplit[0]]=[1,0]
+                elif(int(lineSplit[2])==1):
+                    labelDict[lineSplit[0]]=[0,1]
+                else:
+                    print("Fehler beim Parsen des Input-Files.")
             
     
         trainset={}
