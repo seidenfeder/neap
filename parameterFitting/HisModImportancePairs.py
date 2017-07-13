@@ -14,7 +14,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from optparse import OptionParser
 import matplotlib.pyplot as plt
-import re
 
 #this is necessary to get the parameters from the comand line
 parser = OptionParser()
@@ -106,9 +105,8 @@ else:
 fileHandle.close()
 
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
-i=0 
-for mod in modifications:
-	for j in range(0,len(modifications)):
+for i in range(0,len(modifications)):
+	for j in range(i+1,len(modifications)):
 		#Sort labels according to the feature list
 		#Maybe for some genes no GENCODE entry could be found, these are only in the features list
 		y=[]
@@ -128,7 +126,7 @@ for mod in modifications:
 			    y.append(labelDict[geneID])
 			    valueMatrix=np.array(genesModis[geneID])
 			    modis=valueMatrix[i]
-			    np.append(modis,valueMatrix[j])
+			    modis=np.append(modis,valueMatrix[j])
 			    X.append(modis.flatten())
 
 		#Support Vector Machines
@@ -144,29 +142,29 @@ for mod in modifications:
 		#this is necessary that we can compare different data sets or binnings or methods
 		fileHandle = open ( options.output, 'a' )
 		if(not options.allBins):
-		    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+mod+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
+		    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+modifications[i]+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
 		else:
-		    fileHandle.write(dataset+"\t"+method+"\tall\t"+mod+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
+		    fileHandle.write(dataset+"\t"+method+"\tall\t"+modifications[i]+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
 		fileHandle.close()
-	i+=1
 
 aucs=[]
+modis=[""]
 fileRF = open(options.output)
 for line in fileRF.readlines():
 	lineSplit=line.split()
 	aucs.append(list(map(float,lineSplit[4:])))
+	modis.append(lineSplit[3])
 
-modis = ["","None"]
-for mod in modifications:
-	name=re.split('-', mod) #we only need the name not the species
-	modis.append(name[0])
+#Remove all human notations in the string
+modis=list(map(lambda x: x.replace("-human",""), modis))
+modis=list(map(lambda x: x.replace("None","All histones"), modis))
 
 #plot how the performance changes when we miss a histone modification
 plt.boxplot(aucs)
 plt.xlabel("Used Histone Modification")
 plt.ylabel("AUC score")
-plt.title("Performance change by using one histone modification")
-plt.xticks(list(range(0,len(modis))),modis,rotation=20)
+plt.title("Performance of each possible pairwise histone combination")
+plt.xticks(list(range(0,len(modis))),modis,fontsize=7,rotation=90)
 plt.tight_layout()
 plt.savefig('HistImportance.png')
 #plt.show()
@@ -179,12 +177,17 @@ aucMean= aucMean.tolist()
 #remove one label because it's not needed for the barplot
 modis.remove("")
 
+#Sort the aucs (and corresponding the labels after size)
+modis_sorted=[x for (y,x) in sorted(zip(aucMean,modis), reverse=True)]
+aucMean_sorted=sorted(aucMean,reverse=True)
+
 # plot the mean as barplot
-plt.bar(range(0,len(aucMean)),aucMean,width=0.6, align="center")
+plt.figure(0)
+plt.bar(range(0,len(aucMean_sorted)),aucMean_sorted,width=0.6, align="center")
 plt.xlabel("Used Histone Modification")
 plt.ylabel("Mean of AUC score")
-plt.title("Performance change by using one histone modification")
-plt.xticks(list(range(0,len(modis))),modis,rotation=20)
+plt.title("Performance of each possible pairwise histone combination")
+plt.xticks(list(range(0,len(modis_sorted))),modis_sorted,fontsize=7,rotation=90)
 #plt.ylim(0.84,0.9)
 plt.tight_layout()
 plt.savefig('HistImportanceBars.png')
