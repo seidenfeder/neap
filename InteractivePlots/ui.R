@@ -25,7 +25,7 @@ shinyUI(
                           checkboxGroupInput("datasets", label="Data sets", 
                                              choices = c("K562" = "K562", 
                                                          "Endothelial cell of umbilical vein" = "Endo",
-                                                         "..."=3),
+                                                         "Keratinocyte"="keratinocyte"),
                                              selected = "K562")
                         ),
                         mainPanel(
