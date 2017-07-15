@@ -33,7 +33,9 @@ shinyUI(
                           br(),
                           textOutput("labelText"),
                           br(),
-                          plotlyOutput("binsPlot")
+                          plotlyOutput("binsPlot"),
+                          br(),
+                          plotlyOutput("normPlot")
                         )
                       )
              ),
@@ -47,11 +49,11 @@ shinyUI(
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           checkboxGroupInput("datasets_2", label="Data sets",
-                                             choices = c("dataset1" = 1,
-                                                         "dataset2" = 2,
-                                                         "dataset3" = 3),
-                                             selected = c(1,2,3))
-
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "Keratinocyte"="keratinocyte"),
+                                             selected = c("K562","Endo"))
+                          
                         ),
                         mainPanel(
                           plotlyOutput("cvData"),
@@ -65,9 +67,9 @@ shinyUI(
                           plotlyOutput("dataMatrix"),
                           br(),
                           p("Test ...")
-                      )
-              ),
-             tabPanel("Run prediction")
-      )
+                        )
+                      ),
+                      tabPanel("Run prediction")
+             )
   )
 )

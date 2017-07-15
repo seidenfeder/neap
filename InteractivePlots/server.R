@@ -56,7 +56,7 @@ shinyServer(
       if(input$type=="c" & ! is.null(input$method)&!is.null(input$datasets)){
         #Read input data
         data<-read.csv("PlotInput/evalLabels_normalized.txt",sep="\t",header=F)
-         #produce the right labels
+        #produce the right labels
         data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
         
         #Reformat data for the box plots
@@ -86,8 +86,21 @@ shinyServer(
                  )
           )
       }
-      else{
-        return(NULL)
+      else if(! is.null(input$method)&input$datasets=="K562"){
+        #Read input data
+        data<-read.csv("PlotInput/regressionK562.txt",sep="\t",header=F)
+        #produce the right labels
+        data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
+        plot_ly(y = plottedDataCell$value, 
+                x = plottedDataCell$names, 
+                type="box")%>%
+          layout(title = paste('Evaluation of different labeling methods'),
+                 xaxis = list(
+                   title = "Labeling method"),
+                 yaxis = list(
+                   title = "AUC Score"
+                 )
+          )
       }
     })
     
@@ -179,6 +192,82 @@ shinyServer(
         return(NULL)
       }
     })
+    
+    #Create the plot of the label evaluation
+    output$normPlot<-renderPlotly({
+      #Display the plot only for the classification task and if at least one method is selected
+      if(input$type=="c" & ! is.null(input$method)&!is.null(input$datasets)){
+        #Read input data
+        data<-read.csv("PlotInput/evalNormalisation.txt",sep="\t",header=F)
+        #produce the right labels
+        data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
+        
+        #Reformat data for the box plots
+        reshapedData<-melt(data, id=c("V1","V2","V3","V4","names"))
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), reshapedData$V2)
+        plottedData<-reshapedData[matches,]
+        
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        
+        #Set levels of plotted Data new to get a right scaling of the axis
+        plottedDataCell<-droplevels(plottedDataCell)
+        
+        #Create interactive box plots
+        plot_ly(y = plottedDataCell$value, 
+                x = plottedDataCell$names, 
+                type="box")%>%
+          layout(title = paste('Evaluation of different normalization methods'),
+                 xaxis = list(
+                   title = "Normalization method"),
+                 yaxis = list(
+                   title = "AUC Score"
+                 )
+          )
+      }
+      else if(! is.null(input$method)&!is.null(input$datasets)){
+        #Read input data
+        data<-read.csv("PlotInput/evalNormalisationReg.txt",sep="\t",header=F)
+        #produce the right labels
+        data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
+        
+        #Reformat data for the box plots
+        reshapedData<-melt(data, id=c("V1","V2","V3","V4","names"))
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), reshapedData$V2)
+        plottedData<-reshapedData[matches,]
+        
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        
+        #Set levels of plotted Data new to get a right scaling of the axis
+        plottedDataCell<-droplevels(plottedDataCell)
+        
+        #Create interactive box plots
+        plot_ly(y = plottedDataCell$value, 
+                x = plottedDataCell$names, 
+                type="box")%>%
+          layout(title = paste('Evaluation of different normalization methods'),
+                 xaxis = list(
+                   title = "Normalization method"),
+                 yaxis = list(
+                   title = "R2 Score"
+                 )
+          )
+      }  
+      else{
+        return(NULL)
+      }
+    })
+    
+  
     
     ####################################################################################
     # Plots for the dataset comparison tab
