@@ -90,15 +90,20 @@ shinyServer(
         #Read input data
         data<-read.csv("PlotInput/regressionK562.txt",sep="\t",header=F)
         #produce the right labels
-        data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
-        plot_ly(y = plottedDataCell$value, 
-                x = plottedDataCell$names, 
-                type="box")%>%
-          layout(title = paste('Evaluation of different labeling methods'),
+        #data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
+        ## Use densCols() output to get density at each point
+        x <- densCols(data$V1,data$V2, colramp=colorRampPalette(c("black", "white")))
+        data$dens <- col2rgb(x)[1,] + 1L
+        
+        plot_ly(y = data$V1, 
+                x = data$V2,
+                color=~data$dens
+                )%>%
+          layout(title = paste('Regression'),
                  xaxis = list(
-                   title = "Labeling method"),
+                   title = "Measured"),
                  yaxis = list(
-                   title = "AUC Score"
+                   title = "Predicted"
                  )
           )
       }
