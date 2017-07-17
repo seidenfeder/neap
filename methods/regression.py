@@ -118,7 +118,8 @@ if options.plot:
     xy = np.vstack([y,pred])
     z = gaussian_kde(xy)(xy)
     fileReg=open("Regression_"+dataset+".txt",'a')
-    
+    for i in range(0,len(y)):
+        fileReg.write(dataset+"\t"+method+"\t"+str(y[i])+"\t"+str(pred[i])+"\n")
     fig, ax = plt.subplots()
     ax.scatter(y, pred,c=z,s=100,edgecolor='')
     ax.set_xlabel('Measured')
@@ -127,7 +128,7 @@ if options.plot:
     ax.plot([min(y), max(y)], [min(y), max(y)], 'k', lw=2)
     plt.title("Regression calculated with "+ method+"\nR2 score: "+"{0:.2f}".format(corrCoef))
     plt.savefig(method+ "Regression.png") 
-    plt.show()
+#    plt.show()
 
 #write the output into a file but don't delete the previous text
 fileHandle = open ( options.output, 'a')
