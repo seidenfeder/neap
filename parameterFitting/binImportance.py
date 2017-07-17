@@ -36,7 +36,6 @@ for i in range(0,160):
 	elif(method == "RFR"):
 		os.system("python methods/regression.py -i "+features+" -m RF -n -c 5 -o RegressionBins.txt -b"+ str(i))
 		methodCoR="Regression"
-		os.system("python methods/regression.py -i "+features+" -m RF -n -c 5 -o RegressionBins.txt -b"+ str(i))
 		score="r2"
 	elif(method == "SVR"):
 		os.system("python methods/regression.py -i "+features+" -m SVM -n -c 5 -o RegressionBins.txt -b"+ str(i))

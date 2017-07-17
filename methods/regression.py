@@ -117,6 +117,8 @@ if options.plot:
     # Calculate the point density
     xy = np.vstack([y,pred])
     z = gaussian_kde(xy)(xy)
+    fileReg=open("Regression_"+dataset+".txt",'a')
+    
     fig, ax = plt.subplots()
     ax.scatter(y, pred,c=z,s=100,edgecolor='')
     ax.set_xlabel('Measured')

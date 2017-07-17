@@ -19,7 +19,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 
 #DNN according to Shingh et al
-def inference_singh(bins):
+def inference_singh(bins, keep_prob):
         
     #######################################
     #Parameter
@@ -68,7 +68,6 @@ def inference_singh(bins):
             convolutionLayer.append(maxPool)
     
     #3) drop out
-    keep_prob = 0.5
     with tf.name_scope("dropOut"):
         dropOut=tf.nn.dropout(maxPool, keep_prob)
 
@@ -140,12 +139,12 @@ def run_training(datasets, chkptfile=None):
     numHistons = FLAGS["numHistons"]
     
     niter = 50000
-    kprob = 1.0
+    kprob = 0.5
 
     #For naming the mode file
-#    k_toSTr = ",".join(map(str,FLAGS["conv"]))
-#    Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
-#    m_toStr = ",".join(map(str,FLAGS["mpool"]))
+    k_toSTr = ",".join(map(str,FLAGS["conv"]))
+    Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
+    m_toStr = ",".join(map(str,FLAGS["mpool"]))
     
     print("starting to train")
     with tf.Graph().as_default():
@@ -157,7 +156,7 @@ def run_training(datasets, chkptfile=None):
         keep_prob = tf.placeholder(tf.float32)
         global_step = tf.Variable(0, name="global_step", trainable=False)
 
-        logits, valuesBeforeSoftmax = inference_singh(bins) #valuesBeforeSoftmax eventuell wieder rauslöschen auc braucht allerdings float werte
+        logits, valuesBeforeSoftmax = inference_singh(bins, keep_prob) #valuesBeforeSoftmax eventuell wieder rauslöschen auc braucht allerdings float werte
 
         los = loss(logits, labels_ph)
 
@@ -175,7 +174,7 @@ def run_training(datasets, chkptfile=None):
         sess = tf.Session()
 
         
-        mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob)
+        mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob) + "_c"+k_toSTr + "_Nout"+Nout_toStr + "_m" + m_toStr
 
         #write the summary to the folder logdir
         mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
@@ -206,15 +205,22 @@ def run_training(datasets, chkptfile=None):
             feed_dict = {bins : wins, labels_ph : labs, keep_prob : kprob}
 
             #not interested in the ouput of the optimizer
-            summary_str, loss_value = sess.run([summary, train_op], feed_dict=feed_dict)
+            #summary_str, loss_value = sess.run([summary, train_op], feed_dict=feed_dict)
+            _ , loss_value = sess.run([train_op, los], feed_dict=feed_dict)
 
+
+            duration = time.time() - start_time
 
             #duration = time.time() - start_time
 
             #print current loss value
             if i%100 == 0:
-                #print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
+                print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
+                feed_dict[keep_prob] = 1.0
                 
+                summary_str = sess.run(summary, feed_dict=feed_dict)
+#                summary_writer.add_summary(summary_str, i)
+#                summary_writer.flush()
                 #Update the events file
                 train_writer.add_summary(summary_str, i)
                 train_writer.flush()
@@ -228,7 +234,6 @@ def run_training(datasets, chkptfile=None):
                 summary_str, acc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
                 
                 print('Accuracy at step %s: %s' % (i, acc))
-
                 test_writer.add_summary(summary_str, i)
                 test_writer.flush()
 

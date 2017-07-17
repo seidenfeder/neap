@@ -43,7 +43,7 @@ for m in methods:
     for cM in classificationMethods:
         print(cM)
         os.system("python methods/classification.py -i "+inputFile+" -l "+labelFileName+ 
-                  " -c 10 -a -o evalLabels_normalized.txt -n -m "+cM)
+                  " -c 10 -a -o evalLabels_normalized.txt -n --add "+m+" -m "+cM)
 
 #Get the scores from the result file
 #get the calculated score values from the file
