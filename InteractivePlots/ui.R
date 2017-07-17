@@ -49,10 +49,10 @@ shinyUI(
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           checkboxGroupInput("datasets_2", label="Data sets",
-                                             choices = c("K562" = "K562", 
-                                                         "Endothelial cell of umbilical vein" = "Endo",
-                                                         "Keratinocyte"="keratinocyte"),
-                                             selected = c("K562","Endo"))
+                                             choices = c("dataset1" = "dataset1", 
+                                                         "dataset2" = "dataset2",
+                                                         "dataset3" = "dataset3"),
+                                             selected = c("dataset1"))
                           
                         ),
                         mainPanel(
@@ -68,8 +68,38 @@ shinyUI(
                           br(),
                           p("Test ...")
                         )
-                      ),
-                      tabPanel("Run prediction")
-             )
+                      )
+                      
+             ),
+             tabPanel("Run prediction",
+                      sidebarLayout(
+                        sidebarPanel(
+                          radioButtons("type_3", label="Machine learning task",
+                                       c("Classification"="c", "Regression"="r")),
+                          checkboxGroupInput("method_3", label="Methods",
+                                             choices = c("Random Forest" = "RF",
+                                                         "Support Vector Machine" = "SVM"),
+                                             selected = "RF"),
+                          radioButtons("datasetTrain", label="Training set",
+                                             choices = c("dataset1" = "dataset1", 
+                                                         "dataset2" = "dataset2",
+                                                         "dataset3"="dataset3")),
+                          fileInput("binningFile", label = "Feature file with bins"),
+                          fileInput("labelFile", label = "Label file"),
+                          actionButton("action", label = "Run prediction"),
+                          checkboxGroupInput("datasets_3", label="Data sets to compare to",
+                                             choices = c("dataset1" = "dataset1", 
+                                                         "dataset2" = "dataset2",
+                                                         "dataset3"="dataset3"),
+                                             selected = c("dataset1"))                          
+                          
+                        ),
+                        mainPanel(
+                          p("In this tab you are able to run your own predictions. Just insert the data in the corresponding format. ... "),
+                          plotlyOutput("comparePredicton")
+
+                        )
+                      )
+            )
   )
 )
