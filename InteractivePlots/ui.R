@@ -51,7 +51,7 @@ shinyUI(
                           checkboxGroupInput("datasets_2", label="Data sets",
                                              choices = c("dataset1" = "dataset1", 
                                                          "dataset2" = "dataset2",
-                                                         "dataset3"="dataset3"),
+                                                         "dataset3" = "dataset3"),
                                              selected = c("dataset1"))
                           
                         ),
@@ -80,15 +80,24 @@ shinyUI(
                                              choices = c("Random Forest" = "RF",
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
-                          checkboxGroupInput("datasets_3", label="Training set",
+                          radioButtons("datasetTrain", label="Training set",
+                                             choices = c("dataset1" = "dataset1", 
+                                                         "dataset2" = "dataset2",
+                                                         "dataset3"="dataset3")),
+                          fileInput("binningFile", label = "Feature file with bins"),
+                          fileInput("labelFile", label = "Label file"),
+                          actionButton("action", label = "Run prediction"),
+                          checkboxGroupInput("datasets_3", label="Data sets to compare to",
                                              choices = c("dataset1" = "dataset1", 
                                                          "dataset2" = "dataset2",
                                                          "dataset3"="dataset3"),
-                                             selected = c("dataset1"))
+                                             selected = c("dataset1"))                          
                           
                         ),
                         mainPanel(
-                          p("In this tab you are able to run your own predictions. Just insert the data in the corresponding format. ... ")
+                          p("In this tab you are able to run your own predictions. Just insert the data in the corresponding format. ... "),
+                          plotlyOutput("comparePredicton")
+
                         )
                       )
             )

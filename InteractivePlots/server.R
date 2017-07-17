@@ -366,4 +366,26 @@ shinyServer(
       }
     })
     
+    ####################################################################################
+    # Plots for the run prediction tab
+    
+    output$comparePredicton<-renderPlotly({
+      
+      dummyData=data.frame(dataset=c("dataset1","dataset2","dataset3"),scores=c(0.8,0.7,0.9))
+      plot_ly(
+        x = dummyData$dataset,
+        y = dummyData$scores,
+        name = "Boxplot",
+        type = "bar")%>%
+        layout(title='Comparison of the current prediction with prediction on other datasets',
+               xaxis = list(
+                 title = "Data set"),
+               yaxis = list(
+                 title = "AUC score"
+               )
+        )
+    })
+    
+#     score<-system("/home/sch/schmidka/anaconda3/bin/python  ~/Dokumente/GeneExpressionPrediction/neap/methods/classification_withStoredModel -i 
+#            ~/Desktop/InputFiles/input_mRNA_normalized.txt -l ~/Desktop/InputFiles/testLabels_median.txt -m ~/Desktop/model.pkl -a -n")
   })
