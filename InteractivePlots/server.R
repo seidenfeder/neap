@@ -86,9 +86,10 @@ shinyServer(
                  )
           )
       }
-      else if(! is.null(input$method)&input$datasets=="K562"){
+      else if(! is.null(input$method)&!is.null(input$datasets){
         #Read input data
-        data<-read.csv("PlotInput/regressionK562.txt",sep="\t",header=F)
+        filename=paste("PlotInput/Regression_",input$dataset,".txt")
+        data<-read.csv(filename,sep="\t",header=F)
         #produce the right labels
         #data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
         ## Use densCols() output to get density at each point
