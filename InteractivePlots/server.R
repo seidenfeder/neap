@@ -11,9 +11,7 @@ shinyServer(
     
     #Dynamically change avaliable methods (in the second panel Model development)
     observe({
-      x <- input$type
-      
-      if(x == "c"){
+      if(input$type == "c"){
         updateCheckboxGroupInput(session, "method", label="Methods", 
                                  choices = c("Random Forest" = "RF", 
                                              "Support Vector Machine" = "SVM"),
@@ -30,9 +28,7 @@ shinyServer(
     
     #Dynamically change avaliable methods (in the third panel Dataset comparison)
     observe({
-      x <- input$type_2
-      
-      if(x == "c"){
+      if(input$type_2 == "c"){
         updateCheckboxGroupInput(session, "method_2", label="Methods", 
                                  choices = c("Random Forest" = "RF", 
                                              "Support Vector Machine" = "SVM"),
@@ -47,6 +43,39 @@ shinyServer(
       }
     })
     
+    output$dynamic <- renderUI({
+      
+      if (input$type == "c") { 
+        tabsetPanel(
+          tabPanel("Gene labels",
+                   br(),
+                   plotlyOutput("labelPlot"),
+                   br(),
+                   textOutput("labelText")
+          ),
+          tabPanel("Bin importance per bin",
+                   br(),
+                   plotlyOutput("binsPlot")
+          ),
+          tabPanel("Normalization",
+                   br(),
+                   plotlyOutput("normPlot")
+          )
+        )
+      } else {
+        tabsetPanel(
+          tabPanel("Bin importance per bin",
+                   br(),
+                   plotlyOutput("binsPlot")
+          ),
+          tabPanel("Normalization",
+                   br(),
+                   plotlyOutput("normPlot")
+          )
+        )
+      }
+      })
+      
     ####################################################################################
     # Plots for the model development tab
     
@@ -86,98 +115,8 @@ shinyServer(
                  )
           )
       }
-      else if(! is.null(input$method)&input$datasets=="K562"){
-        #Read input data
-        filename=paste("PlotInput/Regression_K562.txt", sep="")
-        data<-read.csv(filename,sep="\t",header=F)
-        #produce the right labels
-        #data$names<-paste(data$V1,data$V2,sep=" - ")
-        ## Use densCols() output to get density at each point
-        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
-        data$dens <- col2rgb(x)[1,] + 1L
-        
-        #Filter data according to the selected methods
-        matches <- grepl(paste(input$method,collapse="|"), data$V2)
-        plottedData<-data[matches,]
-        
-        #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
-        plottedDataCell<-plottedData[matchesBinsCell,]
-        
-        
-        plot_ly(y = plottedDataCell$V4, 
-                x = plottedDataCell$V3,
-                color=~plottedDataCell$dens
-                )%>%
-          layout(title = paste('Regression with',input$method,sep=" "),
-                 xaxis = list(
-                   title = "Measured"),
-                 yaxis = list(
-                   title = "Predicted"
-                 )
-          )
-      }
-      else if(! is.null(input$method)&input$datasets=="Endo"){
-        #Read input data
-        filename=paste("PlotInput/Regression_Endo.txt", sep="")
-        data<-read.csv(filename,sep="\t",header=F)
-        #produce the right labels
-        #data$names<-paste(data$V1,data$V2,sep=" - ")
-        ## Use densCols() output to get density at each point
-        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
-        data$dens <- col2rgb(x)[1,] + 1L
-        
-        #Filter data according to the selected methods
-        matches <- grepl(paste(input$method,collapse="|"), data$V2)
-        plottedData<-data[matches,]
-        
-        #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
-        plottedDataCell<-plottedData[matchesBinsCell,]
-        
-        
-        plot_ly(y = plottedDataCell$V4, 
-                x = plottedDataCell$V3,
-                color=~plottedDataCell$dens
-        )%>%
-          layout(title = paste('Regression with',input$method,sep=" "),
-                 xaxis = list(
-                   title = "Measured"),
-                 yaxis = list(
-                   title = "Predicted"
-                 )
-          )
-      }
-      else if(! is.null(input$method)&input$datasets=="keratinocyte"){
-        #Read input data
-        filename=paste("PlotInput/Regression_keratinocyte.txt", sep="")
-        data<-read.csv(filename,sep="\t",header=F)
-        #produce the right labels
-        #data$names<-paste(data$V1,data$V2,sep=" - ")
-        ## Use densCols() output to get density at each point
-        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
-        data$dens <- col2rgb(x)[1,] + 1L
-        
-        #Filter data according to the selected methods
-        matches <- grepl(paste(input$method,collapse="|"), data$V2)
-        plottedData<-data[matches,]
-        
-        #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
-        plottedDataCell<-plottedData[matchesBinsCell,]
-        
-        
-        plot_ly(y = plottedDataCell$V4, 
-                x = plottedDataCell$V3,
-                color=~plottedDataCell$dens
-        )%>%
-          layout(title = paste('Regression with',input$method,sep=" "),
-                 xaxis = list(
-                   title = "Measured"),
-                 yaxis = list(
-                   title = "Predicted"
-                 )
-          )
+      else{
+        return(NULL)
       }
     })
     
@@ -190,16 +129,23 @@ shinyServer(
                      "seems to work best."))
       }
       else{
-        return(paste("If you want to look at the regression plot please select olny one method and one dataset"))
+        return(NULL)
       }
     })
     
     #Create the plot of plot for the bins
     output$binsPlot<-renderPlotly({
       #Display the plot only for the classification task and if at least one method is selected
-      if(input$type=="c" & ! is.null(input$method)&!is.null(input$datasets)){
+      if(!is.null(input$method)&!is.null(input$datasets)){
         #Read input data
-        dataBinsC<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+        if(input$type=="c"){
+          dataBinsC<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+          yAxisTitle<-"AUC Score"
+        }
+        else{
+          dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
+          yAxisTitle<-"R2 Score"
+        }
         
         #Filter data according to the selected methods
         matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V2)
@@ -223,45 +169,11 @@ shinyServer(
                 colors = color1,
                 
                 mode="lines")%>%
-          layout(title = paste('AUC score for each bin'),
+          layout(title = paste('Performance for each bin'),
                  xaxis = list(
                    title = "Bin"),
                  yaxis = list(
-                   title = "AUC Score"
-                 )
-          )
-      }
-      else if(! is.null(input$method)&!is.null(input$datasets)){
-        #Read input data
-        dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
-        
-        #Filter data according to the selected methods
-        matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V2)
-        plottedData<-dataBinsC[matchesBins,]
-        
-        #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,"$",collapse="|",sep=""), plottedData$V1)
-        plottedDataCell<-plottedData[matchesBinsCell,]
-        
-        #Get different labels and colors for differnt datasets and methods
-        NeededColors <- paste(plottedDataCell$V1,plottedDataCell$V2,sep=" - ")
-        
-        #Set levels of plotted Data new to get a right scaling of the axis
-        plottedDataCell<-droplevels(plottedDataCell)
-        
-        #Create interactive line plots
-        color1<-c("blue","red")
-        plot_ly(y = rowMeans(plottedDataCell[,4:ncol(plottedDataCell)]),
-                x = plottedDataCell$V3, type="scatter", 
-                color=NeededColors,
-                colors = color1,
-                
-                mode="lines")%>%
-          layout(title = paste('R2 score for each bin'),
-                 xaxis = list(
-                   title = "Bin"),
-                 yaxis = list(
-                   title = "R2 Score"
+                   title = yAxisTitle
                  )
           )
       }
@@ -270,81 +182,84 @@ shinyServer(
       }
     })
     
-    #Create the plot of the label evaluation
+    #Create the plot of the normalization evaluation
     output$normPlot<-renderPlotly({
       #Display the plot only for the classification task and if at least one method is selected
-      if(input$type=="c" & ! is.null(input$method)&!is.null(input$datasets)){
+      if(! is.null(input$method)&!is.null(input$datasets)){
         #Read input data
-        data<-read.csv("PlotInput/evalNormalisation.txt",sep="\t",header=F)
+        if(input$type=="c"){
+          data<-read.csv("PlotInput/evalNormalisation.txt",sep="\t",header=F)
+          yaxisTitle<-"AUC Score"
+        }
+        else{
+          data<-read.csv("PlotInput/evalNormalisationReg.txt",sep="\t",header=F)
+          yaxisTitle<-"R2 Score"
+        }
         #produce the right labels
         data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
+        
+        #Filter data according to the selected datasets
+        data<-data[data$V1 %in% input$datasets,]
         
         #Reformat data for the box plots
         reshapedData<-melt(data, id=c("V1","V2","V3","V4","names"))
         
-        #Filter data according to the selected methods
+        #Filter data according to the selected method
         matches <- grepl(paste(input$method,collapse="|"), reshapedData$V2)
         plottedData<-reshapedData[matches,]
-        
-        #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
-        plottedDataCell<-plottedData[matchesBinsCell,]
-        
-        
+                
         #Set levels of plotted Data new to get a right scaling of the axis
-        plottedDataCell<-droplevels(plottedDataCell)
+        plottedData<-droplevels(plottedData)
         
         #Create interactive box plots
-        plot_ly(y = plottedDataCell$value, 
-                x = plottedDataCell$names, 
+        plot_ly(y = plottedData$value, 
+                x = plottedData$names, 
                 type="box")%>%
           layout(title = paste('Evaluation of different normalization methods'),
                  xaxis = list(
                    title = "Normalization method"),
                  yaxis = list(
-                   title = "AUC Score"
+                   title = yaxisTitle
                  )
           )
       }
-      else if(! is.null(input$method)&!is.null(input$datasets)){
-        #Read input data
-        data<-read.csv("PlotInput/evalNormalisationReg.txt",sep="\t",header=F)
-        #produce the right labels
-        data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
-        
-        #Reformat data for the box plots
-        reshapedData<-melt(data, id=c("V1","V2","V3","V4","names"))
-        
-        #Filter data according to the selected methods
-        matches <- grepl(paste(input$method,collapse="|"), reshapedData$V2)
-        plottedData<-reshapedData[matches,]
-        
-        #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
-        plottedDataCell<-plottedData[matchesBinsCell,]
-        
-        
-        #Set levels of plotted Data new to get a right scaling of the axis
-        plottedDataCell<-droplevels(plottedDataCell)
-        
-        #Create interactive box plots
-        plot_ly(y = plottedDataCell$value, 
-                x = plottedDataCell$names, 
-                type="box")%>%
-          layout(title = paste('Evaluation of different normalization methods'),
-                 xaxis = list(
-                   title = "Normalization method"),
-                 yaxis = list(
-                   title = "R2 Score"
-                 )
-          )
-      }  
       else{
         return(NULL)
       }
     })
     
   
+    ####################################################################################
+    # Plots for the regression plot tab
+    
+    output$regressionScatterplot<-renderPlotly({
+      if(! is.null(input$method_reg)){
+        #Read input data
+        filename=paste("PlotInput/Regression_",input$datasets_reg,".txt", sep="")
+        data<-read.csv(filename,sep="\t",header=F)
+        #produce the right labels
+        #data$names<-paste(data$V1,data$V2,sep=" - ")
+        ## Use densCols() output to get density at each point
+        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
+        data$dens <- col2rgb(x)[1,] + 1L
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), data$V2)
+        plottedData<-data[matches,]        
+        
+        plot_ly(y = plottedData$V4, 
+                x = plottedData$V3,
+                color=~plottedData$dens
+        )%>%
+          layout(title = paste('Regression with',input$method,sep=" "),
+                 xaxis = list(
+                   title = "Measured"),
+                 yaxis = list(
+                   title = "Predicted"
+                 )
+          )
+      }
+    })
     
     ####################################################################################
     # Plots for the dataset comparison tab
