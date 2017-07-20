@@ -23,7 +23,8 @@ shinyUI(
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           checkboxGroupInput("datasets", label="Data sets", 
-                                             choices = c("K562" = "K562", 
+                                             choices = c("K562_short"="K562_short",
+                                                         "K562" = "K562", 
                                                          "Endothelial cell of umbilical vein" = "Endo",
                                                          "Keratinocyte"="keratinocyte"),
                                              selected = "K562")

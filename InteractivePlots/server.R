@@ -67,7 +67,7 @@ shinyServer(
         plottedData<-reshapedData[matches,]
         
         #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        matchesBinsCell<- grepl(paste(input$datasets,"$",collapse="|",sep=""), plottedData$V1)
         plottedDataCell<-plottedData[matchesBinsCell,]
         
         
@@ -204,9 +204,10 @@ shinyServer(
         #Filter data according to the selected methods
         matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V2)
         plottedData<-dataBinsC[matchesBins,]
+        print(input$datasets)
         
         #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        matchesBinsCell<- grepl(paste(input$datasets,"$",collapse="|",sep=""), plottedData$V1)
         plottedDataCell<-plottedData[matchesBinsCell,]
         
         #Get different labels and colors for differnt datasets and methods
@@ -240,7 +241,7 @@ shinyServer(
         plottedData<-dataBinsC[matchesBins,]
         
         #Filter data according to the selected cell lines
-        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        matchesBinsCell<- grepl(paste(input$datasets,"$",collapse="|",sep=""), plottedData$V1)
         plottedDataCell<-plottedData[matchesBinsCell,]
         
         #Get different labels and colors for differnt datasets and methods
