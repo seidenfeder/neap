@@ -88,18 +88,90 @@ shinyServer(
       }
       else if(! is.null(input$method)&input$datasets=="K562"){
         #Read input data
-        data<-read.csv("PlotInput/regressionK562.txt",sep="\t",header=F)
+        filename=paste("PlotInput/Regression_K562.txt", sep="")
+        data<-read.csv(filename,sep="\t",header=F)
         #produce the right labels
-        #data$names<-paste(data$V1,data$V2,data$V3,sep=" - ")
+        #data$names<-paste(data$V1,data$V2,sep=" - ")
         ## Use densCols() output to get density at each point
-        x <- densCols(data$V1,data$V2, colramp=colorRampPalette(c("black", "white")))
+        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
         data$dens <- col2rgb(x)[1,] + 1L
         
-        plot_ly(y = data$V1, 
-                x = data$V2,
-                color=~data$dens
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), data$V2)
+        plottedData<-data[matches,]
+        
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        
+        plot_ly(y = plottedDataCell$V4, 
+                x = plottedDataCell$V3,
+                color=~plottedDataCell$dens
                 )%>%
-          layout(title = paste('Regression'),
+          layout(title = paste('Regression with',input$method,sep=" "),
+                 xaxis = list(
+                   title = "Measured"),
+                 yaxis = list(
+                   title = "Predicted"
+                 )
+          )
+      }
+      else if(! is.null(input$method)&input$datasets=="Endo"){
+        #Read input data
+        filename=paste("PlotInput/Regression_Endo.txt", sep="")
+        data<-read.csv(filename,sep="\t",header=F)
+        #produce the right labels
+        #data$names<-paste(data$V1,data$V2,sep=" - ")
+        ## Use densCols() output to get density at each point
+        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
+        data$dens <- col2rgb(x)[1,] + 1L
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), data$V2)
+        plottedData<-data[matches,]
+        
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        
+        plot_ly(y = plottedDataCell$V4, 
+                x = plottedDataCell$V3,
+                color=~plottedDataCell$dens
+        )%>%
+          layout(title = paste('Regression with',input$method,sep=" "),
+                 xaxis = list(
+                   title = "Measured"),
+                 yaxis = list(
+                   title = "Predicted"
+                 )
+          )
+      }
+      else if(! is.null(input$method)&input$datasets=="keratinocyte"){
+        #Read input data
+        filename=paste("PlotInput/Regression_keratinocyte.txt", sep="")
+        data<-read.csv(filename,sep="\t",header=F)
+        #produce the right labels
+        #data$names<-paste(data$V1,data$V2,sep=" - ")
+        ## Use densCols() output to get density at each point
+        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
+        data$dens <- col2rgb(x)[1,] + 1L
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), data$V2)
+        plottedData<-data[matches,]
+        
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,collapse="|"), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        
+        plot_ly(y = plottedDataCell$V4, 
+                x = plottedDataCell$V3,
+                color=~plottedDataCell$dens
+        )%>%
+          layout(title = paste('Regression with',input$method,sep=" "),
                  xaxis = list(
                    title = "Measured"),
                  yaxis = list(
@@ -118,7 +190,7 @@ shinyServer(
                      "seems to work best."))
       }
       else{
-        return(NULL)
+        return(paste("If you want to look at the regression plot please select olny one method and one dataset"))
       }
     })
     

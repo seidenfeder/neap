@@ -351,6 +351,8 @@ if __name__ == "__main__":
     parser.add_argument("--logdir", help = "log directory to save results of a run (used for tensorboard)",default="./logs")
     parser.add_argument("-i", help="Feature input data (bins)", dest= "data")
     parser.add_argument("-l", help="Label data", dest="label")
+    parser.add_argument("-t", help="Additional test set iff you want a seperate test set", dest="test",default="")
+    parser.add_argument("--labelsTest", help="Additional label file for the test set iff you want a seperate test set", dest="labelsTest",default="")
     parser.add_argument("-k", help="Sizes of all convolution filters, comma separated e.g. \"10,10\"",dest="conv", default="10,10")
     parser.add_argument("--Nout", help="Numbers of output channels after each convolution convolution step, comma separated e.g. \"20,50\"",default="20,50")
     parser.add_argument("-m", help="Pool size for each the maxpooling step, comma separated e.g. \"2,2\"",dest="mpool",default="2,2")
@@ -368,6 +370,8 @@ if __name__ == "__main__":
     #Empty string, if no fast data should be loaded / saved
     fastdatadir = args.fastdatadir
     saveFastdatadir = args.saveFastdatadir
+    testfile = args.test
+    labelsTest = args.labelsTest
     
     FLAGS["logdir"] = args.logdir
     FLAGS["learnrate"] = args.learnrate
@@ -483,13 +487,69 @@ if __name__ == "__main__":
         X=np.array(X)
         y=np.array(y)
         
-        print("finished reading in data!")
+        if(testfile=="" or labelsTest==""):
+            ratio=0.1
+            #split the dataset random in two parts and the labels with them
+            test, testL, train, trainL = splitRandom(ratio,X,y)
+            ratio=0.9
+            train, trainL, valid, validL = splitRandom(ratio,train,trainL)
+        else:
+            testset={}
+            #Einlesen von unseren Input files und anschließend split in training und test
+            labelFilename = args.label
+            trainingData = args.data
+            
+            labelFile = open(labelFilename)
+            labelDict2 = {}
+            for line in labelFile.readlines():
+                if not line.startswith("##"):
+                    lineSplit=line.split()
+                    #Convert each label to a binary vector
+                    if(int(lineSplit[2])==0):
+                        labelDict2[lineSplit[0]]=[1,0]
+                    elif(int(lineSplit[2])==1):
+                        labelDict2[lineSplit[0]]=[0,1]
+                    else:
+                        print("Fehler beim Parsen des Input-Files.")
+            with open(testfile) as test:
+                #Name of the data set (from the header)
+                datasetTest=test.readline().rstrip()[2:]
+                #All modifications
+                modificationsTest=test.readline().rstrip()[2:].split(" ")
         
-        ratio=0.1
-        #split the dataset random in two parts and the labels with them
-        test, testL, train, trainL = splitRandom(ratio,X,y)
-        ratio=0.9
-        train, trainL, valid, validL = splitRandom(ratio,train,trainL)
+                for line in test.readlines():
+                    line=line.rstrip()
+                    if(line.startswith('#')):
+                        lineSplit=line.split(" ")
+                        geneID=lineSplit[0]
+                        #Remove the hashtag at the beginning of the line
+                        geneID=geneID[1:]
+                        testset[geneID]=[]
+                    else:
+                        valueList=line.split(",")
+                        valueList=list(map(float,valueList))
+                        testset[geneID].append(valueList)
+            
+            #Sort labels according to the feature list
+            #Maybe for some genes no GENCODE entry could be found, these are only in the features list
+            testL=[]
+            test=[]
+            #If not all bins should be used
+            for geneID in testset:
+                testL.append(labelDict2[geneID])
+                valueMatrix=testset[geneID]
+                
+                #Transpose matrix (first number Bins, then histone modifications)
+                valueMatrix=list(map(list, zip(*valueMatrix)))
+                test.append(valueMatrix)
+            
+            #Konvertieren in ein numpy array
+            test=np.array(test)
+            testL=np.array(testL)
+            ratio=0.9
+            train, trainL, valid, validL = splitRandom(ratio,X,y)
+            
+        print("finished reading in data!")
         
         #Saved parsed data in a numpy file
         if(len(saveFastdatadir)>0):
