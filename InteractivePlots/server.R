@@ -262,6 +262,35 @@ shinyServer(
     })
     
     ####################################################################################
+    # Plots for the histone importance tab
+    singleHistons <- reactive({
+      data<-read.csv("PlotInput/histoneImportance_Single.txt",sep="\t",header=F)
+      
+      #Calculate the mean over the values of the cross-validation
+      dataNew<-data.frame(dataset=data$V1,
+                          method=data$V2,
+                          histone=unlist(strsplit(as.character(data$V4),"-human")),
+                          performanceMean=rowMeans(data[5:dim(data)[2]]),
+                          type="Single")
+    })
+
+    pairsHistons <- reactive({
+      data<-read.csv("PlotInput/histoneImportance_Pairs.txt",sep="\t",header=F)
+      
+      #Calculate the mean over the values of the cross-validation
+      dataNew<-data.frame(dataset=data$V1,
+                          method=data$V2,
+                          #TODO: funktioniert so nicht -> besser was anderes einfallen lassen (auch oben?)
+                          histone=unlist(strsplit(as.character(data$V4),"-human")),
+                          performanceMean=rowMeans(data[5:dim(data)[2]]),
+                          type="Pair")
+    })
+    
+    output$histonePlot<-renderPlotly({
+      
+    })
+    
+    ####################################################################################
     # Plots for the dataset comparison tab
     
     #Create plot for the different data sets
