@@ -52,7 +52,9 @@ shinyUI(
                           
                         ),
                         mainPanel(
-                          plotlyOutput("regressionScatterplot")
+                          plotlyOutput("regressionScatterplot"),
+                          br(),
+                          plotlyOutput("regressionScatterplotZeros")
                         )
                       )
              ),

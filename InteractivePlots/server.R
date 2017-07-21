@@ -261,6 +261,35 @@ shinyServer(
       }
     })
     
+    output$regressionScatterplotZeros<-renderPlotly({
+      if(! is.null(input$method_reg)){
+        #Read input data
+        filename=paste("PlotInput/Regression_",input$datasets_reg,"_zeros.txt", sep="")
+        data<-read.csv(filename,sep="\t",header=F)
+        #produce the right labels
+        #data$names<-paste(data$V1,data$V2,sep=" - ")
+        ## Use densCols() output to get density at each point
+        x <- densCols(data$V3,data$V4, colramp=colorRampPalette(c("black", "white")))
+        data$dens <- col2rgb(x)[1,] + 1L
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method,collapse="|"), data$V2)
+        plottedData<-data[matches,]        
+        
+        plot_ly(y = plottedData$V4, 
+                x = plottedData$V3,
+                color=~plottedData$dens
+        )%>%
+          layout(title = paste('Regression with',input$method,sep=" "),
+                 xaxis = list(
+                   title = "Measured"),
+                 yaxis = list(
+                   title = "Predicted"
+                 )
+          )
+      }
+    })
+    
     ####################################################################################
     # Plots for the histone importance tab
     singleHistons <- reactive({
