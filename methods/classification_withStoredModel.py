@@ -76,7 +76,7 @@ else:
 
 ####### Test the model #########
 clf = joblib.load(modelFile) 
-pred = clf.predict(Z)
+pred = clf.predict_proba(Z)
 score = roc_auc_score(w,pred)
 
 #write the output into a file but don't delete the previous text

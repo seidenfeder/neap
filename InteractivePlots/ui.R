@@ -1,10 +1,11 @@
 library(shiny)
+library(shinythemes)
 library(plotly)
 
 
 # Define UI for the application
 shinyUI(
-  navbarPage("Gene expression predidiction",
+  navbarPage("Gene expression predidiction",theme = shinytheme("sandstone"),
              tabPanel("Project description",
                       fluidPage(
                         h1("NEAP Group 1 - Gene expression prediction using histone modifications"),
@@ -30,13 +31,61 @@ shinyUI(
                                              selected = "K562")
                         ),
                         mainPanel(
-                          plotlyOutput("labelPlot"),
-                          br(),
-                          textOutput("labelText"),
-                          br(),
-                          plotlyOutput("binsPlot"),
-                          br(),
-                          plotlyOutput("normPlot")
+                          uiOutput("dynamic")
+                        )
+                      )
+             ),
+             tabPanel("Regression plots",
+                      sidebarLayout(
+                        sidebarPanel(
+                          radioButtons("method_reg", label="Methods", 
+                                             choices = c("Linear Regression" = "LR",
+                                                         "RF Regression" = "RF", 
+                                                         "SVM Regression" = "SVM"),
+                                             selected = "RF"),
+                          radioButtons("datasets_reg", label="Data sets",
+                                       choices = c("K562_short"="K562_short",
+                                                   "K562" = "K562", 
+                                                   "Endothelial cell of umbilical vein" = "Endo",
+                                                   "Keratinocyte"="keratinocyte"),
+                                       selected = "K562")
+                          
+                        ),
+                        mainPanel(
+                          plotlyOutput("regressionScatterplot")
+                        )
+                      )
+             ),
+             tabPanel("Spatial information"
+             ),
+             tabPanel("Histone modifications",
+                      sidebarLayout(
+                        sidebarPanel(
+                          radioButtons("type_spatial", label="Machine learning task",
+                                       c("Classification"="c", "Regression"="r")
+                          ),
+                          radioButtons("method_spatial", label="Methods", 
+                                       choices = c("Linear Regression" = "LR",
+                                                   "RF Regression" = "RF", 
+                                                   "SVM Regression" = "SVM"),
+                                       selected = "RF"),
+                          radioButtons("datasets_spatial", label="Data sets",
+                                       choices = c("K562_short"="K562_short",
+                                                   "K562" = "K562", 
+                                                   "Endothelial cell of umbilical vein" = "Endo",
+                                                   "Keratinocyte"="keratinocyte"),
+                                       selected = "K562"),
+                          checkboxGroupInput("datasets_comp_spatial", label="Data sets for comparison",
+                                             choices = c("K562_short"="K562_short",
+                                                         "K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "Keratinocyte"="keratinocyte"),
+                                             selected = "K562"),
+                          sliderInput("perc_spat", label="Percentage of best histone modifications to compare", 
+                                      0, 100, 10)
+                        ),
+                        mainPanel(
+                          #plotlyOutput("regressionScatterplot")
                         )
                       )
              ),

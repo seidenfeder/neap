@@ -20,6 +20,8 @@ parser.add_option("-s", type="string", dest="signalPlot", help = "Signal plot",
                   default='signalPattern.png')
 parser.add_option("-c", type="string", dest="corrPlot", help = "Correlation plot", 
                   default='corrPattern.png')
+parser.add_option("--outputFile", action="store_true", dest="outputFile", help="Save the data matrices also in a text file.",default=False)
+parser.add_option("--outfileName",dest="outFile", help="Name if the output file if there should be one created")
 
 (options, args) = parser.parse_args()
 
@@ -92,6 +94,9 @@ for histonM in histonModis:
     normalized=[(x-mean)/std for x in average]
     normalizedSignal.append(normalized)
     
+#If interested, save results
+#for histonM in histonModis:
+    #...
     
 #Plot heatmap with normalized signal pattern
 heatmap=np.array(normalizedSignal)
