@@ -103,7 +103,10 @@ shinyUI(
                           checkboxGroupInput("datasets_2", label="Data sets",
                                              choices = c("dataset1" = "dataset1", 
                                                          "dataset2" = "dataset2",
-                                                         "dataset3" = "dataset3"),
+                                                         "dataset3" = "dataset3",
+                                                         "Gastrocnemius medialis"="gastrocnemius medialis",
+                                                         "SK-N-SH"="SK-N-SH",
+                                                         "Thyroid gland"="thyroid gland"),
                                              selected = c("dataset1"))
                           
                         ),

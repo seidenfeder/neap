@@ -333,7 +333,7 @@ shinyServer(
           titleString = "AUC Score"
         }
         else{
-          filename = "PlotInput/performanceDatasets.txt"
+          filename = "PlotInput/performanceDatasetsRegression.txt"
           titleString = "R2 Score"
         }
         #Read input data
