@@ -328,7 +328,7 @@ shinyServer(
         
         #Read different files for classification and for regression
         #TODO: add right data files (after creating them ;) )
-        if(input$type=="c"){
+        if(input$type_2=="c"){
           filename = "PlotInput/performanceDatasets.txt"
           titleString = "AUC Score"
         }
