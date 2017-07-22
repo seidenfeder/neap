@@ -298,9 +298,14 @@ shinyServer(
       #Calculate the mean over the values of the cross-validation
       dataNew<-data.frame(dataset=data$V1,
                           method=data$V2,
-                          histone=unlist(strsplit(as.character(data$V4),"-human")),
+                          histone=gsub("-human","",data$V4),
                           performanceMean=rowMeans(data[5:dim(data)[2]]),
                           type="Single")
+      
+      dataNew$type <- factor(dataNew$type, levels=c(levels(dataNew$type), 'All'))
+      dataNew$type[dataNew$histone=='All']<-'All'
+      
+      return(dataNew)
     })
 
     pairsHistons <- reactive({
@@ -309,14 +314,43 @@ shinyServer(
       #Calculate the mean over the values of the cross-validation
       dataNew<-data.frame(dataset=data$V1,
                           method=data$V2,
-                          #TODO: funktioniert so nicht -> besser was anderes einfallen lassen (auch oben?)
-                          histone=unlist(strsplit(as.character(data$V4),"-human")),
+                          histone=gsub("-human","",data$V4),
                           performanceMean=rowMeans(data[5:dim(data)[2]]),
                           type="Pair")
+      return(dataNew)
     })
     
     output$histonePlot<-renderPlotly({
       
+      dataSingle<-singleHistons()
+      dataPairs<-pairsHistons()
+      
+      dataAll<-rbind(dataSingle, dataPairs)
+      
+      print(input$dataset_histone)
+      
+      #Filter data according to the selected datasets
+      dataAll<-dataAll[dataAll$dataset==input$dataset_histone,]
+      print(dataAll)
+      
+      #Sort according to the size
+      dataAll<-dataAll[order(dataAll$performanceMean, decreasing=TRUE),]
+      dataAll$histone <- factor(dataAll$histone, levels = dataAll$histone[order(dataAll$performanceMean, decreasing=TRUE)])
+      
+      
+      plot_ly(y = dataAll$performanceMean, 
+              x = dataAll$histone,
+              color=dataAll$type,
+              type="bar")%>%
+        layout(title = paste('Performance of single or pairs of histone modifications'),
+               xaxis = list(
+                 title = "Histone modification(s)"),
+               yaxis = list(
+                 title = "AUC Score",
+                 tickangle = 90
+               ),
+               margin=list(b=230)
+        )
     })
     
     ####################################################################################

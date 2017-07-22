@@ -63,31 +63,32 @@ shinyUI(
              tabPanel("Histone modifications",
                       sidebarLayout(
                         sidebarPanel(
-                          radioButtons("type_spatial", label="Machine learning task",
+                          radioButtons("type_histone", label="Machine learning task",
                                        c("Classification"="c", "Regression"="r")
                           ),
-                          radioButtons("method_spatial", label="Methods", 
+                          radioButtons("method_histone", label="Methods", 
                                        choices = c("Linear Regression" = "LR",
                                                    "RF Regression" = "RF", 
                                                    "SVM Regression" = "SVM"),
                                        selected = "RF"),
-                          radioButtons("datasets_spatial", label="Data sets",
+                          radioButtons("dataset_histone", label="Data sets",
                                        choices = c("K562_short"="K562_short",
                                                    "K562" = "K562", 
-                                                   "Endothelial cell of umbilical vein" = "Endo",
+                                                   "Endothelial cell of umbilical vein" = "endo",
                                                    "Keratinocyte"="keratinocyte"),
                                        selected = "K562"),
-                          checkboxGroupInput("datasets_comp_spatial", label="Data sets for comparison",
+                          checkboxGroupInput("datasets_comp_histone", label="Data sets for comparison",
                                              choices = c("K562_short"="K562_short",
                                                          "K562" = "K562", 
                                                          "Endothelial cell of umbilical vein" = "Endo",
                                                          "Keratinocyte"="keratinocyte"),
                                              selected = "K562"),
-                          sliderInput("perc_spat", label="Percentage of best histone modifications to compare", 
+                          sliderInput("perc_histone", label="Percentage of best histone modifications to compare", 
                                       0, 100, 10)
                         ),
                         mainPanel(
-                          #plotlyOutput("regressionScatterplot")
+                          plotlyOutput("histonePlot"),
+                          tableOutput('histoneComparison')
                         )
                       )
              ),
