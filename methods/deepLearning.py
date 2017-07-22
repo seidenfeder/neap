@@ -39,17 +39,6 @@ def inference_singh(bins, keep_prob):
     
     #Get number of bins and histone modifications
     numberHists=FLAGS["numHistons"]
-    #numberBins=FLAGS["numBins"]
-    
-#    #Old convolution (only one layer)
-#    with tf.name_scope("convolution"+str(i)):
-#        weights_con = tf.Variable(tf.truncated_normal(shape=[k,numberHists, Nout], stddev=0.1), name="weights")
-#        biases_con = tf.constant(0.1, shape=[Nout], name="bias")
-#        conv1=tf.nn.relu(tf.nn.conv1d(bins, weights_con, stride=1,padding='SAME')+biases_con)
-#        
-#    #2) max pooling
-#    with tf.name_scope("maxPooling"+str(i)):
-#        maxPool=tf.nn.pool(conv1,window_shape=[m],pooling_type="MAX",strides=[m],padding='SAME')
             
     #Multiple stacked layers of convolution and maxpooling
     convDims=[numberHists]+Nout
@@ -67,18 +56,33 @@ def inference_singh(bins, keep_prob):
             maxPool=tf.nn.pool(conv1,window_shape=[m[i]],pooling_type="MAX",strides=[m[i]],padding='SAME')
             convolutionLayer.append(maxPool)
     
-    #3) drop out
-    with tf.name_scope("dropOut"):
-        dropOut=tf.nn.dropout(maxPool, keep_prob)
-
-        #Reshape drop-out layer before starting the multilayer perceptron
-        #dropOut_flat = tf.reshape(dropOut, [-1, int(convDims[i+1]/maxPoolReduction[i+1])*Nout])
-        dropOutShapes=dropOut.get_shape()[1]
-        dropOut_flat = tf.reshape(dropOut, [-1, dropOutShapes.value*Nout[-1]])
+    if(FLAGS["batchnorm"]):
+        #3) batch normalization
+        with tf.name_scope("batch_normalization"):
+            batch_mean, batch_var = tf.nn.moments(maxPool,[0])
+            scale = tf.Variable(tf.ones([maxPool.get_shape()[1],maxPool.get_shape()[2]]))
+            beta = tf.Variable(tf.zeros([maxPool.get_shape()[1],maxPool.get_shape()[2]]))
+            batchNorm = tf.nn.batch_normalization(maxPool,batch_mean,batch_var, scale, beta, 0.000000001)
+            batchNormShapes=batchNorm.get_shape()[1]
+            batchNorm_flat = tf.reshape(batchNorm, [-1, batchNormShapes.value*Nout[-1]])
         
-    #4) multilayer perceptron
-    dims = [dropOutShapes.value*Nout[-1]] + dims + [NUM_CLASSES]
-    hiddens = [dropOut_flat]
+        #4) multilayer perceptron
+        dims = [batchNormShapes.value*Nout[-1]] + dims + [NUM_CLASSES]
+        hiddens = [batchNorm_flat]
+        
+    else:    
+        #3) drop out
+        with tf.name_scope("dropOut"):
+            dropOut=tf.nn.dropout(maxPool, keep_prob)
+    
+            #Reshape drop-out layer before starting the multilayer perceptron
+            dropOutShapes=dropOut.get_shape()[1]
+            dropOut_flat = tf.reshape(dropOut, [-1, dropOutShapes.value*Nout[-1]])
+        
+        #4) multilayer perceptron
+        dims = [dropOutShapes.value*Nout[-1]] + dims + [NUM_CLASSES]
+        hiddens = [dropOut_flat]
+        
     for i in range(num_hidden):            
         with tf.name_scope("hiddenLayer"+str(i)):
             weights = tf.Variable(tf.truncated_normal(shape=[dims[i], dims[i+1]], stddev=0.1, name="weights"))
@@ -90,9 +94,9 @@ def inference_singh(bins, keep_prob):
     with tf.name_scope("softmax"):
         weights = tf.Variable(tf.truncated_normal(shape=[dims[-2], dims[-1]], stddev=0.1), name="weights")
         bias = tf.constant(0.1, shape=[2], name="bias")
-        logits=tf.matmul(hiddens[-1], weights) + bias
-        
-    return logits, hiddens[-1]
+        logits=tf.matmul(hiddens[-1], weights) + bias  
+    
+    return logits
 
 
 #define the loss function
@@ -116,17 +120,29 @@ def training(loss, learning_rate, momentum=None, global_step=None):
     train_op = optimizer.minimize(loss, global_step=global_step)
     return train_op
 
+
 #evalueate given predictions and labels
 def evaluation(logits, labels):
 
+    #Accuracy
     correct_prediction = tf.equal(tf.argmax(logits,1), tf.argmax(labels,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    #auc = tf.metrics.auc(labels, logits) #Maybe it's possible to calculate the auc score like here
-
-    #add accuracy for summary plots
     tf.summary.scalar("accuracy", accuracy)
-    #tf.summary.scalar("auc",auc)
-    return accuracy
+    
+    #AUC score
+    a = tf.argmax(logits, 1)
+    b = tf.argmax(labels,1)
+#    if(dataset=='train'):
+#        auc =tf.metrics.auc(a,b,name="auc_train")
+#        
+#    elif(dataset=='test'):
+#       auc =tf.metrics.auc(a,b,name="auc_test")
+
+    auc =tf.metrics.auc(a,b)
+    
+    tf.summary.scalar("auc",auc[1])      
+    
+    return auc
 
 
 #run training on a given train and test data set
@@ -138,7 +154,7 @@ def run_training(datasets, chkptfile=None):
     numBins = FLAGS["numBins"]
     numHistons = FLAGS["numHistons"]
     
-    niter = 50000
+    niter = 30000
     kprob = 0.5
 
     #For naming the mode file
@@ -156,7 +172,7 @@ def run_training(datasets, chkptfile=None):
         keep_prob = tf.placeholder(tf.float32)
         global_step = tf.Variable(0, name="global_step", trainable=False)
 
-        logits, valuesBeforeSoftmax = inference_singh(bins, keep_prob) #valuesBeforeSoftmax eventuell wieder rauslöschen auc braucht allerdings float werte
+        logits = inference_singh(bins, keep_prob)
 
         los = loss(logits, labels_ph)
 
@@ -166,8 +182,6 @@ def run_training(datasets, chkptfile=None):
 
         # initilize summaries
         summary = tf.summary.merge_all()
-      
-        
 
         saver = tf.train.Saver()
 
@@ -175,18 +189,21 @@ def run_training(datasets, chkptfile=None):
 
         
         mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob) + "_c"+k_toSTr + "_Nout"+Nout_toStr + "_m" + m_toStr
-
+        if(FLAGS["batchnorm"]):
+            mod_dir = mod_dir + "_batchnorm"
+            
         #write the summary to the folder logdir
         mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
 
-        #summary_writer = tf.summary.FileWriter(mod_dir, sess.graph)
         train_writer = tf.summary.FileWriter(mod_dir + '/train',
                                       sess.graph)
         test_writer = tf.summary.FileWriter(mod_dir + '/test')
 
         init = tf.global_variables_initializer()
-
+        initLocal = tf.local_variables_initializer()
         sess.run(init)
+        sess.run(initLocal)
+       
 
         #restore trained data if chkptfile is given
         startv = 0
@@ -197,6 +214,7 @@ def run_training(datasets, chkptfile=None):
 
     
         for i in range(startv, startv+niter):
+             
             #get data and corresponding labels for trainstep
             wins, labs = datasets["train"].get_batch(batchsize)
 
@@ -205,39 +223,35 @@ def run_training(datasets, chkptfile=None):
             feed_dict = {bins : wins, labels_ph : labs, keep_prob : kprob}
 
             #not interested in the ouput of the optimizer
-            #summary_str, loss_value = sess.run([summary, train_op], feed_dict=feed_dict)
             _ , loss_value = sess.run([train_op, los], feed_dict=feed_dict)
 
 
             duration = time.time() - start_time
-
-            #duration = time.time() - start_time
 
             #print current loss value
             if i%100 == 0:
                 print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
                 feed_dict[keep_prob] = 1.0
                 
+                sess.run(initLocal)
                 summary_str = sess.run(summary, feed_dict=feed_dict)
-#                summary_writer.add_summary(summary_str, i)
-#                summary_writer.flush()
                 #Update the events file
                 train_writer.add_summary(summary_str, i)
                 train_writer.flush()
 
             #check performance based on validation set
-            if (i + 1) % 1000 == 0 or (i + 1) == niter:
+            #if (i + 1) % 1000 == 0 or (i + 1) == niter:
                 checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
                 saver.save(sess, checkpoint_file, global_step=global_step)
                 
                 tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
+                sess.run(initLocal)
                 summary_str, acc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
                 
-                print('Accuracy at step %s: %s' % (i, acc))
+                print('AUC score at step %s: %s' % (i, acc[1]))
                 test_writer.add_summary(summary_str, i)
                 test_writer.flush()
 
-                #print(sess.run(eval_correct, feed_dict=tmp_feed_dict))
 
 
         # final evaluation on test set
@@ -363,7 +377,8 @@ if __name__ == "__main__":
     parser.add_argument("--fastdatadir", help="Directory to load preprocessed data in a fast way", default="")
     parser.add_argument("--saveFastdatadir", help="Directory to save parsed data, which is splitted into training, validation and test, for fast loading the next time (the directory need to exists already).",default="")
     parser.add_argument("--plot", help="Plot the distribution of the 0/1 labels in the training, validation and test set", action='store_true')
-
+    parser.add_argument("--batchnorm", help="If set performs batch normalization instead of drop-out", action='store_true')
+    
     args = parser.parse_args()
 
     #Directories to load and save the training and test data in numpy format
@@ -377,6 +392,7 @@ if __name__ == "__main__":
     FLAGS["learnrate"] = args.learnrate
     FLAGS["momentum"] = args.momentum
     FLAGS["batchsize"] = args.batchsize
+    FLAGS["batchnorm"] = args.batchnorm
     
     
     
