@@ -20,14 +20,17 @@ parser.add_option("-s", type="string", dest="signalPlot", help = "Signal plot",
                   default='signalPattern.png')
 parser.add_option("-c", type="string", dest="corrPlot", help = "Correlation plot", 
                   default='corrPattern.png')
-parser.add_option("--outputFile", action="store_true", dest="outputFile", help="Save the data matrices also in a text file.",default=False)
-parser.add_option("--outfileName",dest="outFile", help="Name if the output file if there should be one created")
+parser.add_option("-S",dest="outFile", help="File to save the signal values", default ="")
+parser.add_option("-C",dest="outFile2", help="File to save the correlation values", default ="")
 
 (options, args) = parser.parse_args()
 
 #Path to save the signal and the correlation plot
 corrPlot=options.corrPlot
 signalPlot=options.signalPlot
+outFile =options.outFile
+outFile2 =options.outFile2
+
 
 #Read input file
 filename=options.filename
@@ -93,7 +96,8 @@ for histonM in histonModis:
     std=np.std(average)
     normalized=[(x-mean)/std for x in average]
     normalizedSignal.append(normalized)
-    
+
+  
 #If interested, save results
 #for histonM in histonModis:
     #...
@@ -149,6 +153,19 @@ for histonM in histonModis:
         #Spearman correlation
         corrBin.append(spearmanr(normalizedValues,expressionValues)[0])
     corrMatrix.append(corrBin)
+
+##Write now the signals and the correlation into the outputfile
+signals=open(outFile,'w')
+for i in range(0,len(normalizedSignal)):
+    for j in range(0,len(normalizedSignal[0])):
+        signals.write(str(normalizedSignal[i][j])+"\t")
+    signals.write("\n")
+
+corre=open(outFile2,'w')
+for i in range(0,len(corrMatrix)):
+    for j in range(0,len(corrMatrix[0])):
+        corre.write(str(corrMatrix[i][j])+"\t")
+    corre.write("\n")
 
 #Plot heatmap with correlation matrix    
 heatmap=np.array(corrMatrix)
