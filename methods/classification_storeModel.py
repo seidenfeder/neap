@@ -85,7 +85,7 @@ else:
 
 #Support Vector Machines
 if(method=="SVM"):
-    clf=svm.SVC(kernel='rbf')
+    clf=svm.SVC(kernel='rbf', probability=True)
 #Random Forest
 elif(method=="RF"):
     clf=RandomForestClassifier(n_estimators=12)
