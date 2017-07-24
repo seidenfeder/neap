@@ -64,12 +64,23 @@ shinyUI(
                           radioButtons("dataset_spatial", label="Data sets",
                                        choices = c("K562_short"="K562_short",
                                                    "K562" = "K562", 
-                                                   "Endothelial cell of umbilical vein" = "endo",
+                                                   "Endothelial cell of umbilical vein" = "Endo",
                                                    "Keratinocyte"="keratinocyte"),
                                        selected = "K562")
                           ),
                           mainPanel(
-                            p("...")
+                            tabsetPanel(
+                              tabPanel("Signal Pattern",
+                                       br()
+                                       plotlyOutput("signalPattern"),
+                                       br()),
+                              tabPanel("Correlation Pattern",
+                                       br(),
+                                       plotlyOutput("corrPattern")
+                              )
+                            )
+                              
+                            
                           )
                         )
              ),

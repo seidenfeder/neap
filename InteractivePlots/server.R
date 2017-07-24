@@ -308,6 +308,50 @@ shinyServer(
     })
     
     ####################################################################################
+    #Spatial Information Tab
+    
+    output$signalPattern<-renderPlotly({
+      
+      #Read input data
+      filename=paste("PlotInput/signal",input$dataset_spatial,".txt", sep="")
+      data<-read.csv(filename,sep="\t",header=F)
+      data$V162<-NULL
+      colnames(data)<-c("names",1:160)
+      reshapedData<-melt(data, id=c("names"))
+      p_Value<-reshapedData$value
+      
+      p<-ggplot(data = reshapedData, aes(x = reshapedData$variable, y = reshapedData$names)) +
+        geom_tile(aes(fill = p_Value))+
+        scale_fill_gradient2(low = "white", high = "steelblue")+
+        ggtitle("Signal Pattern")+
+        labs(x="Bins",y="Histone")
+      
+      ggplotly(p)
+        
+    })
+    
+    output$corrPattern<-renderPlotly({
+      
+      #Read input data
+      filename=paste("PlotInput/corr",input$dataset_spatial,".txt", sep="")
+      data<-read.csv(filename,sep="\t",header=F)
+      data$V162<-NULL
+      colnames(data)<-c("names",1:160)
+      reshapedData<-melt(data, id=c("names"))
+      Spearman<-reshapedData$value
+      
+      p<-ggplot(data = reshapedData, aes(x = reshapedData$variable, y = reshapedData$names)) +
+        geom_tile(aes(fill = Spearman))+
+        scale_fill_gradient2(low = "white",mid="yellow", high = "red")+
+        ggtitle("Correlation Pattern")+
+        labs(x="Bins",y="Histone")
+      
+      ggplotly(p)
+        
+      
+    })
+    
+    ####################################################################################
     # Plots for the histone importance tab
     singleHistons <- reactive({
       data<-read.csv("PlotInput/histoneImportance_Single.txt",sep="\t",header=F)
