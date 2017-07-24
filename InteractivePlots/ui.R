@@ -61,6 +61,13 @@ shinyUI(
              tabPanel("Spatial information",
                       sidebarLayout(
                         sidebarPanel(
+                          radioButtons("type_spa", label="Machine learning task",
+                                       c("Classification"="c", "Regression"="r")
+                          ),
+                          checkboxGroupInput("method_spa", label="Methods", 
+                                             choices = c("Random Forest" = "RF", 
+                                                         "Support Vector Machine" = "SVM"),
+                                             selected = "RF"),
                           radioButtons("dataset_spatial", label="Data sets",
                                        choices = c("K562_short"="K562_short",
                                                    "K562" = "K562", 
@@ -71,12 +78,15 @@ shinyUI(
                           mainPanel(
                             tabsetPanel(
                               tabPanel("Signal Pattern",
-                                       br()
+                                       br(),
                                        plotlyOutput("signalPattern"),
-                                       br()),
+                                       br(),
+                                       plotlyOutput("binsPlot2")),
                               tabPanel("Correlation Pattern",
                                        br(),
-                                       plotlyOutput("corrPattern")
+                                       plotlyOutput("corrPattern"),
+                                       br(),
+                                       plotlyOutput("binsPlot2")
                               )
                             )
                               

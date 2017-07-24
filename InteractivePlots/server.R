@@ -25,7 +25,22 @@ shinyServer(
                                  selected = "RF")
       }
     })
-    
+    #Dynamical change for spatial information tap
+    observe({
+      if(input$type_spa == "c"){
+        updateCheckboxGroupInput(session, "method_spa", label="Methods", 
+                                 choices = c("Random Forest" = "RF", 
+                                             "Support Vector Machine" = "SVM"),
+                                 selected = "RF")
+      }
+      else{
+        updateCheckboxGroupInput(session, "method_spa", label="Methods", 
+                                 choices = c("Linear Regression" = "LR",
+                                             "RF Regression" = "RF", 
+                                             "SVM Regression" = "SVM"),
+                                 selected = "RF")
+      }
+    })
     #Dynamically change avaliable methods (in the third panel Dataset comparison)
     observe({
       if(input$type_2 == "c"){
@@ -318,10 +333,10 @@ shinyServer(
       data$V162<-NULL
       colnames(data)<-c("names",1:160)
       reshapedData<-melt(data, id=c("names"))
-      p_Value<-reshapedData$value
+      normalized_p_Value<-reshapedData$value
       
       p<-ggplot(data = reshapedData, aes(x = reshapedData$variable, y = reshapedData$names)) +
-        geom_tile(aes(fill = p_Value))+
+        geom_tile(aes(fill = normalized_p_Value))+
         scale_fill_gradient2(low = "white", high = "steelblue")+
         ggtitle("Signal Pattern")+
         labs(x="Bins",y="Histone")
@@ -349,6 +364,54 @@ shinyServer(
       ggplotly(p)
         
       
+    })
+    
+    output$binsPlot2<-renderPlotly({
+      #Display the plot only for the classification task and if at least one method is selected
+      if(!is.null(input$method_spa)&!is.null(input$dataset_spatial)){
+        #Read input data
+        if(input$type_spa=="c"){
+          dataBinsC<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+          yAxisTitle<-"AUC Score"
+        }
+        else{
+          dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
+          yAxisTitle<-"R2 Score"
+        }
+        
+        #Filter data according to the selected methods
+        matchesBins<- grepl(paste(input$method,collapse="|"), dataBinsC$V2)
+        plottedData<-dataBinsC[matchesBins,]
+        
+        #Filter data according to the selected cell lines
+        matchesBinsCell<- grepl(paste(input$datasets,"$",collapse="|",sep=""), plottedData$V1)
+        plottedDataCell<-plottedData[matchesBinsCell,]
+        
+        #Get different labels and colors for differnt datasets and methods
+        NeededColors <- paste(plottedDataCell$V1,plottedDataCell$V2,sep=" - ")
+        
+        #Set levels of plotted Data new to get a right scaling of the axis
+        plottedDataCell<-droplevels(plottedDataCell)
+        
+        #Create interactive line plots
+        color1<-c("blue","red")
+        plot_ly(y = rowMeans(plottedDataCell[,4:ncol(plottedDataCell)]),
+                x = plottedDataCell$V3, type="scatter", 
+                color=NeededColors,
+                colors = color1,
+                
+                mode="lines")%>%
+          layout(title = paste('Performance for each bin'),
+                 xaxis = list(
+                   title = "Bin"),
+                 yaxis = list(
+                   title = yAxisTitle
+                 )
+          )
+      }
+      else{
+        return(NULL)
+      }
     })
     
     ####################################################################################
