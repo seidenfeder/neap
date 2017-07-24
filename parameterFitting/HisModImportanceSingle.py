@@ -89,14 +89,23 @@ else:
 	    valueMatrix=np.array(genesModis[geneID])
 	    X.append(valueMatrix.flatten())
 
-#Support Vector Machines
-if(method=="SVM"):
-    clf=svm.SVC(kernel="rbf")
-#Random Forest
-elif(method=="RF"):
+#Performance classification or regression depending on the method
+if(method == "RFC"):
     clf=RandomForestClassifier(n_estimators=12)
+    scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+elif(method == "SVC"):
+    clf=svm.SVC(kernel="rbf")
+    scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+elif(method == "RFR"):
+    rg=RandomForestRegressor(n_estimators=12)
+    scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
+elif(method == "SVR"):
+    rg=svm.SVR(cache_size=500)
+    scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
+elif(method == "LR"):
+    rg=linear_model.LinearRegression()
+    scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
 
-scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
 
 #write the output into a file but don't delete the previous text
 #this is necessary that we can compare different data sets or binnings or methods
@@ -182,22 +191,22 @@ for mod in modifications:
 #plt.savefig('HistImportance.png')
 #plt.show()
 
-#calculate the mean for bar plots
-aucMean = np.mean(aucs, axis=1)
-aucMean = aucMean.flatten()
-aucMean= aucMean.tolist() 
-
-#remove one label because it's not needed for the barplot
-modis.remove("")
-
-# plot the mean as barplot
-plt.bar(range(0,len(aucMean)),aucMean,width=0.6, align="center")
-plt.xlabel("Used Histone Modification")
-plt.ylabel("Mean of AUC score")
-plt.title("Performance change by using one histone modification")
-plt.xticks(list(range(0,len(modis))),modis,rotation=20)
-#plt.ylim(0.84,0.9)
-plt.tight_layout()
-plt.savefig(plotname)
+##calculate the mean for bar plots
+#aucMean = np.mean(aucs, axis=1)
+#aucMean = aucMean.flatten()
+#aucMean= aucMean.tolist() 
+#
+##remove one label because it's not needed for the barplot
+#modis.remove("")
+#
+## plot the mean as barplot
+#plt.bar(range(0,len(aucMean)),aucMean,width=0.6, align="center")
+#plt.xlabel("Used Histone Modification")
+#plt.ylabel("Mean of AUC score")
+#plt.title("Performance change by using one histone modification")
+#plt.xticks(list(range(0,len(modis))),modis,rotation=20)
+##plt.ylim(0.84,0.9)
+#plt.tight_layout()
+#plt.savefig(plotname)
 #plt.show()
 

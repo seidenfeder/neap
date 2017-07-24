@@ -58,7 +58,20 @@ shinyUI(
                         )
                       )
              ),
-             tabPanel("Spatial information"
+             tabPanel("Spatial information",
+                      sidebarLayout(
+                        sidebarPanel(
+                          radioButtons("dataset_spatial", label="Data sets",
+                                       choices = c("K562_short"="K562_short",
+                                                   "K562" = "K562", 
+                                                   "Endothelial cell of umbilical vein" = "endo",
+                                                   "Keratinocyte"="keratinocyte"),
+                                       selected = "K562")
+                          ),
+                          mainPanel(
+                            p("...")
+                          )
+                        )
              ),
              tabPanel("Histone modifications",
                       sidebarLayout(
@@ -67,24 +80,29 @@ shinyUI(
                                        c("Classification"="c", "Regression"="r")
                           ),
                           radioButtons("method_histone", label="Methods", 
-                                       choices = c("Linear Regression" = "LR",
-                                                   "RF Regression" = "RF", 
-                                                   "SVM Regression" = "SVM"),
-                                       selected = "RF"),
+                                       choices = c("Random Forest" = "RFC", 
+                                                   "Support Vector Machine" = "SVC"),
+                                       selected = "RFC"),
                           radioButtons("dataset_histone", label="Data sets",
-                                       choices = c("K562_short"="K562_short",
-                                                   "K562" = "K562", 
+                                       choices = c("K562" = "K562", 
                                                    "Endothelial cell of umbilical vein" = "endo",
                                                    "Keratinocyte"="keratinocyte"),
                                        selected = "K562"),
+                          sliderInput("perc_histone", label="Percentage of best histone modifications to compare", 
+                                      0, 100, 10),
                           checkboxGroupInput("datasets_comp_histone", label="Data sets for comparison",
-                                             choices = c("K562_short"="K562_short",
-                                                         "K562" = "K562", 
+                                             choices = c("K562" = "K562", 
                                                          "Endothelial cell of umbilical vein" = "Endo",
                                                          "Keratinocyte"="keratinocyte"),
                                              selected = "K562"),
-                          sliderInput("perc_histone", label="Percentage of best histone modifications to compare", 
-                                      0, 100, 10)
+                          checkboxGroupInput("methods_comp_histone", label="Methods for comparison",
+                                             choices = c("Random Forest" = "RFC", 
+                                                         "Support Vector Machine" = "SVC",
+                                                         "Linear Regression" = "LR",
+                                                         "RF Regression" = "RFR", 
+                                                         "SVM Regression" = "SVR"),
+                                             selected = "K562")
+
                         ),
                         mainPanel(
                           plotlyOutput("histonePlot"),

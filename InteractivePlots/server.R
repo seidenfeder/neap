@@ -43,6 +43,23 @@ shinyServer(
       }
     })
     
+    #Dynamically change avaliable methods (in the panel histone importance)
+    observe({
+      if(input$type_histone == "c"){
+        updateRadioButtons(session, "method_histone", label="Methods", 
+                                 choices = c("Random Forest" = "RFC", 
+                                             "Support Vector Machine" = "SVC"),
+                                 selected = "RFC")
+      }
+      else{
+        updateRadioButtons(session, "method_histone", label="Methods", 
+                                 choices = c("Linear Regression" = "LR",
+                                             "RF Regression" = "RFR", 
+                                             "SVM Regression" = "SVR"),
+                                 selected = "RFR")
+      }
+    })
+    
     output$dynamic <- renderUI({
       
       if (input$type == "c") { 
@@ -327,16 +344,19 @@ shinyServer(
       
       dataAll<-rbind(dataSingle, dataPairs)
       
-      print(input$dataset_histone)
-      
       #Filter data according to the selected datasets
       dataAll<-dataAll[dataAll$dataset==input$dataset_histone,]
-      print(dataAll)
+      
+      #Filter data according to the selected methods
+      dataAll<-dataAll[dataAll$method==input$method_histone,]
       
       #Sort according to the size
       dataAll<-dataAll[order(dataAll$performanceMean, decreasing=TRUE),]
       dataAll$histone <- factor(dataAll$histone, levels = dataAll$histone[order(dataAll$performanceMean, decreasing=TRUE)])
       
+      #Show only the first data columns
+      shownColumns<-round(nrow(dataAll)*input$perc_histone/100)
+      dataAll<-dataAll[1:shownColumns,]
       
       plot_ly(y = dataAll$performanceMean, 
               x = dataAll$histone,
@@ -351,6 +371,55 @@ shinyServer(
                ),
                margin=list(b=230)
         )
+    })
+    
+    output$histoneComparison<-renderTable({
+      x<-data.frame(a=c(1,2,3),b=c(4,5,6))
+      
+      dataSingle<-singleHistons()
+      dataPairs<-pairsHistons()
+      
+      dataAll<-rbind(dataSingle, dataPairs)
+      
+      #Filter data according to the selected methods
+      matches <- grepl(paste(input$methods_comp_histone,collapse="|"), dataAll$method)
+      dataAll<-dataAll[matches,]
+      
+      #Filter data according to the selected datasets
+      matches<- grepl(paste(input$datasets_comp_histone,"$",collapse="|",sep=""), dataAll$dataset)
+      dataAll<-dataAll[matches,]
+      
+      #Fuer jede Histone Modifikation
+      histons <- dataAll$histone[dataAll$type=="Single" & dataAll$histone != "All"]
+      
+      #Loop ueber jede Gruppe (Datensatz und Methode)
+      pairs<-expand.grid(input$datasets_comp_histone,input$methods_comp_histone)
+      pairName<-paste(pairs[,1],pairs[,2],sep="-")
+      
+      print(pairName)
+      results<-data.frame(histons=histons)
+      for(i in 1:length(pairs)){
+        #Filter dataset to the group
+        print(pairs[i,1])
+        print(pairs[i,2])
+        dataShort<-dataAll[dataAll$dataset==pairs[i,1] & dataAll$method==pairs[i,2],]
+        print(dataShort)
+        
+        #Shown histone modifications
+        dataShort<-dataShort[order(dataShort$performanceMean, decreasing=TRUE),]
+        shownColumns<-round(nrow(dataShort)*input$perc_histone/100)
+        dataShort<-dataShort[1:shownColumns,]
+        
+        #Occurence in general
+        occAll<-sapply(histons, function(x) sum(grepl(x,dataShort$histone)))
+        occSingle<-sapply(histons, function(x) sum(grepl(x,dataShort$histone[dataShort$type=="Single"])))
+        occurences<-paste0(occAll," (",occSingle,")")
+        results<-cbind(results,occurences)
+        print(results)
+      }
+      colnames(results)<-c("Histone",pairName)
+      
+      results
     })
     
     ####################################################################################

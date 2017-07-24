@@ -108,46 +108,54 @@ for line in featureFile.readlines():
 
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
 for i in range(0,len(modifications)):
-	for j in range(i+1,len(modifications)):
+    for j in range(i+1,len(modifications)):
 		#Sort labels according to the feature list
 		#Maybe for some genes no GENCODE entry could be found, these are only in the features list
-		y=[]
-		X=[]
+        y=[]
+        X=[]
 		#If not all bins should be used
-		if(not options.allBins):
-			binNumber=options.bin
-			#Create feature matrix of the given bin 
-			for geneID in genesModis:
-			    y.append(labelDict[geneID])
-			    valueMatrix=np.array(genesModis[geneID])
-			    valueMatrix=valueMatrix[i]
-			    X.append(valueMatrix[:,binNumber])
+        if(not options.allBins):
+            binNumber=options.bin
+            #Create feature matrix of the given bin 
+            for geneID in genesModis:
+                y.append(labelDict[geneID])
+                valueMatrix=np.array(genesModis[geneID])
+                valueMatrix=valueMatrix[i]
+                X.append(valueMatrix[:,binNumber])
 		#if you want the classification with all bins
-		else:
-			for geneID in genesModis:
-			    y.append(labelDict[geneID])
-			    valueMatrix=np.array(genesModis[geneID])
-			    modis=valueMatrix[i]
-			    modis=np.append(modis,valueMatrix[j])
-			    X.append(modis.flatten())
+        else:
+            for geneID in genesModis:
+                y.append(labelDict[geneID])
+                valueMatrix=np.array(genesModis[geneID])
+                modis=valueMatrix[i]
+                modis=np.append(modis,valueMatrix[j])
+                X.append(modis.flatten())
 
 		#Support Vector Machines
-		if(method=="SVM"):
-		    clf=svm.SVC(kernel="rbf")
-		#Random Forest
-		elif(method=="RF"):
-		    clf=RandomForestClassifier(n_estimators=12)
-
-		scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+        if(method == "RFC"):
+            clf=RandomForestClassifier(n_estimators=12)
+            scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+        elif(method == "SVC"):
+            clf=svm.SVC(kernel="rbf")
+            scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+        elif(method == "RFR"):
+            rg=RandomForestRegressor(n_estimators=12)
+            scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
+        elif(method == "SVR"):
+            rg=svm.SVR(cache_size=500)
+            scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
+        elif(method == "LR"):
+            rg=linear_model.LinearRegression()
+            scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
 
 		#write the output into a file but don't delete the previous text
 		#this is necessary that we can compare different data sets or binnings or methods
-		fileHandle = open ( options.output, 'a' )
-		if(not options.allBins):
-		    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+modifications[i]+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
-		else:
-		    fileHandle.write(dataset+"\t"+method+"\tall\t"+modifications[i]+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
-		fileHandle.close()
+        fileHandle = open ( options.output, 'a' )
+        if(not options.allBins):
+            fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+modifications[i]+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
+        else:
+            fileHandle.write(dataset+"\t"+method+"\tall\t"+modifications[i]+"-"+modifications[j]+"\t"+'\t'.join(map(str,scores))+"\n")
+        fileHandle.close()
 
 aucs=[]
 modis=[""]
@@ -171,27 +179,27 @@ modis=list(map(lambda x: x.replace("None","All histones"), modis))
 #plt.savefig('HistImportance.png')
 #plt.show()
 
-#calculate the mean for bar plots
-aucMean = np.mean(aucs, axis=1)
-aucMean = aucMean.flatten()
-aucMean= aucMean.tolist() 
-
-#remove one label because it's not needed for the barplot
-modis.remove("")
-
-#Sort the aucs (and corresponding the labels after size)
-modis_sorted=[x for (y,x) in sorted(zip(aucMean,modis), reverse=True)]
-aucMean_sorted=sorted(aucMean,reverse=True)
-
-# plot the mean as barplot
-plt.figure(0)
-plt.bar(range(0,len(aucMean_sorted)),aucMean_sorted,width=0.6, align="center")
-plt.xlabel("Used Histone Modification")
-plt.ylabel("Mean of AUC score")
-plt.title("Performance of each possible pairwise histone combination")
-plt.xticks(list(range(0,len(modis_sorted))),modis_sorted,fontsize=7,rotation=90)
-#plt.ylim(0.84,0.9)
-plt.tight_layout()
-plt.savefig(plotname)
+##calculate the mean for bar plots
+#aucMean = np.mean(aucs, axis=1)
+#aucMean = aucMean.flatten()
+#aucMean= aucMean.tolist() 
+#
+##remove one label because it's not needed for the barplot
+#modis.remove("")
+#
+##Sort the aucs (and corresponding the labels after size)
+#modis_sorted=[x for (y,x) in sorted(zip(aucMean,modis), reverse=True)]
+#aucMean_sorted=sorted(aucMean,reverse=True)
+#
+## plot the mean as barplot
+#plt.figure(0)
+#plt.bar(range(0,len(aucMean_sorted)),aucMean_sorted,width=0.6, align="center")
+#plt.xlabel("Used Histone Modification")
+#plt.ylabel("Mean of AUC score")
+#plt.title("Performance of each possible pairwise histone combination")
+#plt.xticks(list(range(0,len(modis_sorted))),modis_sorted,fontsize=7,rotation=90)
+##plt.ylim(0.84,0.9)
+#plt.tight_layout()
+#plt.savefig(plotname)
 #plt.show()
 
