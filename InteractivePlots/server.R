@@ -519,7 +519,6 @@ shinyServer(
       if(! is.null(input$method_2)){
         
         #Read different files for classification and for regression
-        #TODO: add right data files (after creating them ;) )
         if(input$type=="c"){
           filename = "PlotInput/dataMatrix.txt"
           titleString = "AUC Score"
@@ -556,6 +555,26 @@ shinyServer(
         ggplotly(p)
         
       }
+    })
+
+    ####################################################################################
+    # Plots for the deep learning tab
+    
+    output$dl_learningRates<-renderPlotly({
+      data<-read.csv("PlotInput/deepLearning_learningrates.txt",sep="\t",header=F)
+      
+      plot_ly(y = as.numeric(data$V4),
+              x = as.numeric(data$V3),
+              color = paste(data$V1,data$V2,sep="-"),
+              type="scatter",
+              mode="lines")%>%
+      layout(title = 'Influence of the learning rate',
+               xaxis = list(
+                 title = "Step"),
+               yaxis = list(
+                 title = "Auc score"
+               )
+        )
     })
     
     ####################################################################################
