@@ -77,7 +77,8 @@ shinyUI(
                       sidebarLayout(
                         sidebarPanel(
                           radioButtons("type_histone", label="Machine learning task",
-                                       c("Classification"="c", "Regression"="r")
+                                       c("Classification"="c", "Regression"="r"),
+                                       selected="c"
                           ),
                           radioButtons("method_histone", label="Methods", 
                                        choices = c("Random Forest" = "RFC", 
@@ -101,7 +102,7 @@ shinyUI(
                                                          "Linear Regression" = "LR",
                                                          "RF Regression" = "RFR", 
                                                          "SVM Regression" = "SVR"),
-                                             selected = "K562")
+                                             selected = "RFC")
 
                         ),
                         mainPanel(
@@ -147,6 +148,21 @@ shinyUI(
                         )
                       )
                       
+             ),
+             tabPanel("Deep Learning",
+                      tabsetPanel(
+                        tabPanel("Graph layout",
+                                 br(),
+                                 plotlyOutput("dl_Layout")
+                        ),
+                        tabPanel("Learning rates",
+                                 br(),
+                                 plotlyOutput("dl_learningRates")
+                        ),
+                        tabPanel("Data sets",
+                                 br(),
+                                 plotlyOutput("dl_datasets")
+                        ))
              ),
              tabPanel("Run prediction",
                       sidebarLayout(

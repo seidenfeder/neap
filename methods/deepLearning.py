@@ -154,7 +154,7 @@ def run_training(datasets, chkptfile=None):
     numBins = FLAGS["numBins"]
     numHistons = FLAGS["numHistons"]
     
-    niter = 30000
+    niter = 5000
     kprob = 0.5
 
     #For naming the mode file
@@ -205,6 +205,10 @@ def run_training(datasets, chkptfile=None):
         sess.run(initLocal)
        
 
+        #Create an output file to store the AUC performance results for the website
+        if FLAGS["outputfile"] != "None":
+            outFile = open(FLAGS["outputfile"], 'a')
+        
         #restore trained data if chkptfile is given
         startv = 0
         if chkptfile is not None:
@@ -234,7 +238,11 @@ def run_training(datasets, chkptfile=None):
                 feed_dict[keep_prob] = 1.0
                 
                 sess.run(initLocal)
-                summary_str = sess.run(summary, feed_dict=feed_dict)
+                summary_str, auc = sess.run([summary,eval_correct], feed_dict=feed_dict)
+                
+                if FLAGS["outputfile"] != "None":
+                    outFile.write(FLAGS["outputtag"] + "\ttrain\t"+str(i)+"\t"+str(auc[1])+"\n")
+                    
                 #Update the events file
                 train_writer.add_summary(summary_str, i)
                 train_writer.flush()
@@ -246,9 +254,13 @@ def run_training(datasets, chkptfile=None):
                 
                 tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
                 sess.run(initLocal)
-                summary_str, acc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
+                summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
                 
-                print('AUC score at step %s: %s' % (i, acc[1]))
+                print('AUC score at step %s: %s' % (i, auc[1]))
+                
+                if FLAGS["outputfile"] != "None":
+                    outFile.write(FLAGS["outputtag"] + "\ttest\t"+str(i)+"\t"+str(auc[1])+"\n")
+                    
                 test_writer.add_summary(summary_str, i)
                 test_writer.flush()
 
@@ -259,10 +271,14 @@ def run_training(datasets, chkptfile=None):
         print(datasets["test"].getFlatWindow().shape)
         tmp_feed_dict = {bins: datasets["test"].getFlatWindow(), labels_ph: datasets["test"].labels, keep_prob : 1.0}
 
-        print(eval_correct.eval(session=sess, feed_dict=tmp_feed_dict))
+        summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
+        print('Auc score of %s' % (auc[1]))
 
         test_writer.close()
         train_writer.close()
+        
+        if FLAGS["outputfile"] != "None":
+            outFile.close()
 
 #Split a data set random into two parts in a specific ratio
 def splitRandom(ratio, windows, labels):
@@ -378,7 +394,9 @@ if __name__ == "__main__":
     parser.add_argument("--saveFastdatadir", help="Directory to save parsed data, which is splitted into training, validation and test, for fast loading the next time (the directory need to exists already).",default="")
     parser.add_argument("--plot", help="Plot the distribution of the 0/1 labels in the training, validation and test set", action='store_true')
     parser.add_argument("--batchnorm", help="If set performs batch normalization instead of drop-out", action='store_true')
-    
+    parser.add_argument("--outputfile", help="Save the output AUC scores in a text file (to insert plots into the web browser)",default ="None")
+    parser.add_argument("--outputtag", help="String to identify different runs in the output file.")
+
     args = parser.parse_args()
 
     #Directories to load and save the training and test data in numpy format
@@ -393,8 +411,8 @@ if __name__ == "__main__":
     FLAGS["momentum"] = args.momentum
     FLAGS["batchsize"] = args.batchsize
     FLAGS["batchnorm"] = args.batchnorm
-    
-    
+    FLAGS["outputfile"] = args.outputfile
+    FLAGS["outputtag"] = args.outputtag
     
     FLAGS["mpool"]=args.mpool
     
