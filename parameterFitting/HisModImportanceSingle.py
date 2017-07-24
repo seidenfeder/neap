@@ -9,8 +9,8 @@
 #####################################################################################
 
 import numpy as np
-from sklearn import svm
-from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm, linear_model
+from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from optparse import OptionParser
 import matplotlib.pyplot as plt
@@ -26,11 +26,13 @@ parser.add_option("-c",type = "int",dest="crossVal", help="Number of iterations 
 parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
 parser.add_option("-o",dest="output", help="The name of the outputfile", default="classification.txt")
 parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
+parser.add_option("--plotname",dest="plotname", help="Name of the result plot", default='HistImportanceSingleBars.png')
 (options, args) = parser.parse_args()
 method=options.method
 
 labelFilename=options.labels
 featureFilename=options.input
+plotname=options.plotname
 
 #Read labels
 labelFile = open(labelFilename)
@@ -102,7 +104,7 @@ fileHandle = open ( options.output, 'a' )
 if(not options.allBins):
     fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\tNone\t"+'\t'.join(map(str,scores))+"\n")
 else:
-    fileHandle.write(dataset+"\t"+method+"\tall\tNone\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.write(dataset+"\t"+method+"\tall\tAll\t"+'\t'.join(map(str,scores))+"\n")
 fileHandle.close()
 
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
@@ -111,43 +113,53 @@ for mod in modifications:
 		
 	#Sort labels according to the feature list
 	#Maybe for some genes no GENCODE entry could be found, these are only in the features list
-	y=[]
-	X=[]
+    y=[]
+    X=[]
 	#If not all bins should be used
-	if(not options.allBins):
-		binNumber=options.bin
+    if(not options.allBins):
+        binNumber=options.bin
 		#Create feature matrix of the given bin 
-		for geneID in genesModis:
-		    y.append(labelDict[geneID])
-		    valueMatrix=np.array(genesModis[geneID])
-		    valueMatrix=valueMatrix[i]
-		    X.append(valueMatrix[:,binNumber])
+        for geneID in genesModis:
+            y.append(labelDict[geneID])
+            valueMatrix=np.array(genesModis[geneID])
+            valueMatrix=valueMatrix[i]
+            X.append(valueMatrix[:,binNumber])
 	#if you want the classification with all bins
-	else:
-		for geneID in genesModis:
-		    y.append(labelDict[geneID])
-		    valueMatrix=np.array(genesModis[geneID])
-		    valueMatrix=valueMatrix[i]
-		    X.append(valueMatrix.flatten())
+    else:
+        for geneID in genesModis:
+            y.append(labelDict[geneID])
+            valueMatrix=np.array(genesModis[geneID])
+            valueMatrix=valueMatrix[i]
+            X.append(valueMatrix.flatten())
 
-	#Support Vector Machines
-	if(method=="SVM"):
-	    clf=svm.SVC(kernel="rbf")
-	#Random Forest
-	elif(method=="RF"):
-	    clf=RandomForestClassifier(n_estimators=12)
+	#Performance classification or regression depending on the method
+    if(method == "RFC"):
+        clf=RandomForestClassifier(n_estimators=12)
+        scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+    elif(method == "SVC"):
+        clf=svm.SVC(kernel="rbf")
+        scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+    elif(method == "RFR"):
+        rg=RandomForestRegressor(n_estimators=12)
+        scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
+    elif(method == "SVR"):
+        rg=svm.SVR(cache_size=500)
+        scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
+    elif(method == "LR"):
+        rg=linear_model.LinearRegression()
+        scores = cross_val_score(rg, X, y, cv=options.crossVal, scoring="r2")
 
-	scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+	
 
 	#write the output into a file but don't delete the previous text
 	#this is necessary that we can compare different data sets or binnings or methods
-	fileHandle = open ( options.output, 'a' )
-	if(not options.allBins):
-	    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
-	else:
-	    fileHandle.write(dataset+"\t"+method+"\tall\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
-	fileHandle.close()
-	i+=1
+    fileHandle = open ( options.output, 'a' )
+    if(not options.allBins):
+        fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
+    else:
+        fileHandle.write(dataset+"\t"+method+"\tall\t"+mod+"\t"+'\t'.join(map(str,scores))+"\n")
+    fileHandle.close()
+    i+=1
 
 aucs=[]
 fileRF = open(options.output)
@@ -161,13 +173,13 @@ for mod in modifications:
 	modis.append(name[0])
 
 #plot how the performance changes when we miss a histone modification
-plt.boxplot(aucs)
-plt.xlabel("Used Histone Modification")
-plt.ylabel("AUC score")
-plt.title("Performance change by using one histone modification")
-plt.xticks(list(range(0,len(modis))),modis,rotation=20)
-plt.tight_layout()
-plt.savefig('HistImportance.png')
+#plt.boxplot(aucs)
+#plt.xlabel("Used Histone Modification")
+#plt.ylabel("AUC score")
+#plt.title("Performance change by using one histone modification")
+#plt.xticks(list(range(0,len(modis))),modis,rotation=20)
+#plt.tight_layout()
+#plt.savefig('HistImportance.png')
 #plt.show()
 
 #calculate the mean for bar plots
@@ -186,6 +198,6 @@ plt.title("Performance change by using one histone modification")
 plt.xticks(list(range(0,len(modis))),modis,rotation=20)
 #plt.ylim(0.84,0.9)
 plt.tight_layout()
-plt.savefig('HistImportanceBars.png')
+plt.savefig(plotname)
 #plt.show()
 
