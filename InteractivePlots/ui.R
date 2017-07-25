@@ -10,8 +10,12 @@ shinyUI(
                       fluidPage(
                         h1("NEAP Group 1 - Gene expression prediction using histone modifications"),
                         h4("Nicola Palandt, Katharina Schmid"),
-                        h2("Section"),
-                        p("Text ...")
+                        h2("Introduction"),
+                        p(paste("On this website we present the interactive plots, created during our research project on ",
+                                "'Gene Expression Prediction using Histone Modifications'. For detailed information about the project,",
+                                "read our report. The most important results are presented shortly in the following tabs.")),
+                        h2("Model development"),
+                        h2("Regression ")
                       )),
              tabPanel("Model development",
                       sidebarLayout(
@@ -187,22 +191,31 @@ shinyUI(
                         sidebarPanel(
                           radioButtons("type_3", label="Machine learning task",
                                        c("Classification"="c", "Regression"="r")),
-                          checkboxGroupInput("method_3", label="Methods",
+                          radioButtons("method_3", label="Method",
                                              choices = c("Random Forest" = "RF",
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           radioButtons("datasetTrain", label="Training set",
-                                             choices = c("dataset1" = "dataset1", 
-                                                         "dataset2" = "dataset2",
-                                                         "dataset3"="dataset3")),
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "Keratinocyte"="keratinocyte",
+                                                         "Gastrocnemius medialis"="gastrocnemius medialis",
+                                                         "SK-N-SH"="SK-N-SH",
+                                                         "Thyroid gland"="thyroid gland"),
+                                              selected="K562"),
                           fileInput("binningFile", label = "Feature file with bins"),
                           fileInput("labelFile", label = "Label file"),
+                          textInput("pythonPath", "Python path", "python"),
                           actionButton("action", label = "Run prediction"),
+                          br(),
                           checkboxGroupInput("datasets_3", label="Data sets to compare to",
-                                             choices = c("dataset1" = "dataset1", 
-                                                         "dataset2" = "dataset2",
-                                                         "dataset3"="dataset3"),
-                                             selected = c("dataset1"))                          
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "Keratinocyte"="keratinocyte",
+                                                         "Gastrocnemius medialis"="gastrocnemius medialis",
+                                                         "SK-N-SH"="SK-N-SH",
+                                                         "Thyroid gland"="thyroid gland"),
+                                             selected = c("K562","Endo","keratinocyte"))                          
                           
                         ),
                         mainPanel(

@@ -1,0 +1,6 @@
+RF		endothelial cell of umbilical vein	0.880116456732
+RF		endothelial cell of umbilical vein	0.880116456732
+RF		K562	0.999226537427
+RF		K562	0.999226537427
+RF		K562	0.999226537427
+RF		K562	0.999226537427

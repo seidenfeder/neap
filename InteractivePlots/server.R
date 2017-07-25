@@ -4,7 +4,7 @@ library(plotly)
 library(reshape2)
 library(ggplot2)
 
-options(warn =-1)
+options(warn =-1, shiny.maxRequestSize=1000*1024^2)
 
 shinyServer(
   function(input, output, session) {
@@ -91,6 +91,23 @@ shinyServer(
                            selected = "RF")
       }
     })
+
+    #Dynamically change avaliable methods (in the panel histone importance)
+    observe({
+      if(input$type_3 == "c"){
+        updateRadioButtons(session, "method_3", label="Method",
+                           choices = c("Random Forest" = "RF", 
+                                       "Support Vector Machine" = "SVM"),
+                           selected = "RF")
+      }
+      else{
+        updateRadioButtons(session, "method_3", label="Method",
+                           choices = c("Linear Regression" = "LR",
+                                       "RF Regression" = "RF", 
+                                       "SVM Regression" = "SVM"),
+                           selected = "RF")
+      }
+    })
     
     output$dynamic <- renderUI({
       
@@ -104,22 +121,30 @@ shinyServer(
           ),
           tabPanel("Bin importance per bin",
                    br(),
-                   plotlyOutput("binsPlot")
+                   plotlyOutput("binsPlot"),
+                   br(),
+                   textOutput("binsText")
           ),
           tabPanel("Normalization",
                    br(),
-                   plotlyOutput("normPlot")
+                   plotlyOutput("normPlot"),
+                   br(),
+                   textOutput("normText")
           )
         )
       } else {
         tabsetPanel(
           tabPanel("Bin importance per bin",
                    br(),
-                   plotlyOutput("binsPlot")
+                   plotlyOutput("binsPlot"),
+                   br(),
+                   textOutput("binsText")
           ),
           tabPanel("Normalization",
                    br(),
-                   plotlyOutput("normPlot")
+                   plotlyOutput("normPlot"),
+                   br(),
+                   textOutput("normText")
           )
         )
       }
@@ -176,7 +201,7 @@ shinyServer(
         return(paste("We tested three different labeling methods to separate the gene set in two classes.",
                      "We splitted either at the median gene expression value, the mean gene expression value",
                      "or at a expression value of zero. The method \"median\", which splits the genes in two equal sets",
-                     "seems to work best."))
+                     "seems to work best, independent of the chosen data set and machine learning method."))
       }
       else{
         return(NULL)
@@ -234,6 +259,21 @@ shinyServer(
       }
     })
     
+    #Display an explanation text with the bin plot
+    output$binsText<-renderText({
+      if(! is.null(input$method)&!is.null(input$datasets)){
+        return(paste("Running the method always at only one bin, different performances can be observed.",
+                     "So the histone signal corresponding to the gene expression level is not always the same in the region around the TSS,",
+                     "the gene body and the TTS, but shows always the strongest signal at the region of the TSS.",
+                     "Still, differences between the data sets can be observed. For example, the dataset K562 contains more histone modifications than",
+                     "K562_short and with H4K79me2 also one additional with a strong correlation to the expression in the gene body.",
+                     "So in this dataset the performance of the bins in the gene body are better and there is not so a huge drop after the TSS."))
+      }
+      else{
+        return(NULL)
+      }
+    })
+    
     #Create the plot of the normalization evaluation
     output$normPlot<-renderPlotly({
       #Display the plot only for the classification task and if at least one method is selected
@@ -282,6 +322,16 @@ shinyServer(
     })
     
   
+    output$normText<-renderText({
+      if(! is.null(input$method)&!is.null(input$datasets)){
+        return(paste("Also the normalization influences the performance of the data.",
+                     "..."))
+      }
+      else{
+        return(NULL)
+      }
+    })
+    
     ####################################################################################
     # Plots for the regression plot tab
     
@@ -561,7 +611,6 @@ shinyServer(
       if(! is.null(input$method_2)){
         
         #Read different files for classification and for regression
-        #TODO: add right data files (after creating them ;) )
         if(input$type_2=="c"){
           filename = "PlotInput/performanceDatasets.txt"
           titleString = "AUC Score"
@@ -663,23 +712,87 @@ shinyServer(
     ####################################################################################
     # Plots for the run prediction tab
     
-    output$comparePredicton<-renderPlotly({
+    #Calculate the auc score for the loaded data
+    calculateScore <- eventReactive(input$action, {
+
+      if (is.null(input$binningFile) | is.null(input$labelFile)){
+        showModal(modalDialog(
+          title = "Error!",
+          "Please upload a feature and a lable file!"
+        ))
+        
+        return(NULL)
+      }
       
-      dummyData=data.frame(dataset=c("dataset1","dataset2","dataset3"),scores=c(0.8,0.7,0.9))
-      plot_ly(
-        x = dummyData$dataset,
-        y = dummyData$scores,
-        name = "Boxplot",
-        type = "bar")%>%
-        layout(title='Comparison of the current prediction with prediction on other datasets',
-               xaxis = list(
-                 title = "Data set"),
-               yaxis = list(
-                 title = "AUC score"
-               )
-        )
+      systemCommand<-paste("/home/sch/schmidka/anaconda3/bin/python ~/Dokumente/GeneExpressionPrediction/neap/methods/classification_withStoredModel.py",
+                           "-i",input$binningFile$datapath,"-l", input$labelFile$datapath,"-m ~/Desktop/modelTest.pkl -a -n")
+      score<-system(systemCommand, intern=T)
+      return(as.numeric(score))
+      
     })
     
-#     score<-system("/home/sch/schmidka/anaconda3/bin/python  ~/Dokumente/GeneExpressionPrediction/neap/methods/classification_withStoredModel -i 
-#            ~/Desktop/InputFiles/input_mRNA_normalized.txt -l ~/Desktop/InputFiles/testLabels_median.txt -m ~/Desktop/model.pkl -a -n")
+    output$comparePredicton<-renderPlotly({
+      
+      newScore<-calculateScore()
+
+      if(is.numeric(newScore)){
+        
+        #Read different files for classification and for regression
+        if(input$type_3=="c"){
+          filename = "PlotInput/dataMatrix.txt"
+          titleString = "AUC Score"
+        }
+        else{
+          filename = "PlotInput/dataMatrix.txt"
+          titleString = "R2 Score"
+        }
+        
+        #Read input data
+        data<-read.csv(filename,sep="\t",header=F)
+        
+        #Filter data according to the selected methods
+        matches <- grepl(paste(input$method_3,collapse="|"), data$V1)
+        plottedData<-data[matches,]
+        
+        #Filter data according to the trained data
+        matches <- grepl(paste(input$datasetTrain,collapse="|"), plottedData$V2)
+        plottedData<-plottedData[matches,]
+        
+        #Filter data according to the other data
+        matches <- grepl(paste(input$datasets_3,collapse="|"), plottedData$V3)
+        plottedData<-plottedData[matches,]
+        
+        #Add the new prediction
+        plottedData$V3 <- factor(plottedData$V3 , levels=c(levels(plottedData$V3), 'Your data'))
+        plottedData<-rbind(c(input$method_3, input$datasetTrain, "Your data", newScore),plottedData)
+        
+        #Set levels of plotted Data new to get a right scaling of the axis
+        plottedData<-droplevels(plottedData)
+        
+        #Add colors
+        plottedData$V5<-"oldData"
+        plottedData$V5[plottedData$V3=='Your data']<-"newdata"
+        
+        plot_ly(
+          x = plottedData$V3,
+          y = as.numeric(plottedData$V4),
+          color = plottedData$V5,
+          name = "Boxplot",
+          type = "bar")%>%
+          layout(title='Comparison of the current prediction with prediction on other datasets',
+                 xaxis = list(
+                   title = "Data set"),
+                 yaxis = list(
+                   title = "AUC score"
+                 ),
+                 margin(l=100),
+                 showlegend = FALSE
+          )
+      }
+      else{
+        NULL
+      }
+    })
+    
+
   })
