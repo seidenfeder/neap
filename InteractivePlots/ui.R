@@ -76,21 +76,18 @@ shinyUI(
                                        selected = "K562")
                           ),
                           mainPanel(
-                            tabsetPanel(
-                              tabPanel("Signal Pattern",
-                                       br(),
-                                       plotlyOutput("signalPattern"),
-                                       br(),
-                                       plotlyOutput("binsPlot2")),
-                              tabPanel("Correlation Pattern",
-                                       br(),
-                                       plotlyOutput("corrPattern"),
-                                       br(),
-                                       plotlyOutput("binsPlot2")
+                             tabsetPanel(
+                               tabPanel("Signal Pattern",
+                                        br(),
+                                        plotlyOutput("signalPattern")
+                                        ),
+                               tabPanel("Correlation Pattern",
+                                        br(),
+                                        plotlyOutput("corrPattern")  
                               )
-                            )
-                              
-                            
+                            ),
+                            br(),
+                            plotlyOutput("binsPlot2")
                           )
                         )
              ),
