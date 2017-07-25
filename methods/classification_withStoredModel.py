@@ -14,8 +14,8 @@ from sklearn.metrics import roc_auc_score
 
 #this is necessary to get the parameters from the comand line
 parser = OptionParser()
-parser.add_option("-i", dest="testset",help="This is the path to the test dataset, this is necessary if you used -t, otherwise it will be ignored")
-parser.add_option("-l",dest="labelsTest", help="This gives the path to the file with the labels fot´r the training data")
+parser.add_option("-i", dest="testset",help="This is the path to the test dataset")
+parser.add_option("-l",dest="labelsTest", help="This gives the path to the file with the labels for the training data")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
 parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
 parser.add_option("-m",dest="modelFile", help="Model file where the trained classificator is saved in.")
