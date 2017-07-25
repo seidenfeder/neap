@@ -1,4 +1,3 @@
-RF	dataset1	dataset1	0.89
 RF	Endo	Endo	0.999302849913
 RF	Endo	K562	0.829954283125
 RF	Endo	keratinocyte	0.688041626538

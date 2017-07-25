@@ -75,6 +75,23 @@ shinyServer(
       }
     })
     
+    #Dynamically change avaliable methods (in the panel histone importance)
+    observe({
+      if(input$type_2 == "c"){
+        updateRadioButtons(session, "method_2_comp", label="Method shown in the comparison matrix",
+                           choices = c("Random Forest" = "RF", 
+                                       "Support Vector Machine" = "SVM"),
+                           selected = "RF")
+      }
+      else{
+        updateRadioButtons(session, "method_2_comp", label="Method shown in the comparison matrix",
+                           choices = c("Linear Regression" = "LR",
+                                       "RF Regression" = "RF", 
+                                       "SVM Regression" = "SVM"),
+                           selected = "RF")
+      }
+    })
+    
     output$dynamic <- renderUI({
       
       if (input$type == "c") { 
@@ -144,7 +161,8 @@ shinyServer(
                    title = "Labeling method"),
                  yaxis = list(
                    title = "AUC Score"
-                 )
+                 ),
+                 margin = list(b = 100, r=50)
           )
       }
       else{
@@ -203,7 +221,9 @@ shinyServer(
                 mode="lines")%>%
           layout(title = paste('Performance for each bin'),
                  xaxis = list(
-                   title = "Bin"),
+                   title = "Bin",
+                   tickvals = c(20,40,60,100,120,140),
+                   ticktext = c("-20","TSS","+20","-20","TTS","+20")),
                  yaxis = list(
                    title = yAxisTitle
                  )
@@ -252,7 +272,8 @@ shinyServer(
                    title = "Normalization method"),
                  yaxis = list(
                    title = yaxisTitle
-                 )
+                 ),
+                 margin = list(b = 100, r=50)
           )
       }
       else{
@@ -339,9 +360,12 @@ shinyServer(
         geom_tile(aes(fill = normalized_p_Value))+
         scale_fill_gradient2(low = "white", high = "steelblue")+
         ggtitle("Signal Pattern")+
-        labs(x="Bins",y="Histone")
+        labs(x="Bins",y="Histone")+
+        scale_x_discrete(breaks=c(20,41,60,100,121,140),
+                         labels=c("-20","TSS", "+20","-20","TTS","+20"))
       
-      ggplotly(p)
+      ggplotly(p)%>%
+        layout(margin = list(l = 110))
         
     })
     
@@ -359,10 +383,12 @@ shinyServer(
         geom_tile(aes(fill = Spearman))+
         scale_fill_gradient2(low = "white",mid="yellow", high = "red")+
         ggtitle("Correlation Pattern")+
-        labs(x="Bins",y="Histone")
+        labs(x="Bins",y="Histone")+
+        scale_x_discrete(breaks=c(20,41,60,100,121,140),
+                           labels=c("-20","TSS", "+20","-20","TTS","+20"))
       
-      ggplotly(p)
-        
+      ggplotly(p)%>%
+        layout(margin = list(l = 110))
       
     })
     
@@ -378,8 +404,6 @@ shinyServer(
           dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
           yAxisTitle<-"R2 Score"
         }
-        
-        #print(dataBinsC)
         
         #Filter data according to the selected methods
         matchesBins<- grepl(paste(input$method_spa,collapse="|"), dataBinsC$V2)
@@ -401,11 +425,13 @@ shinyServer(
                 x = plottedDataCell$V3, type="scatter", 
                 color=NeededColors,
                 colors = color1,
-                
                 mode="lines")%>%
           layout(title = paste('Performance for each bin'),
                  xaxis = list(
-                   title = "Bin"),
+                   title = "Bin",
+                   tickvals = c(20,40,60,100,120,140),
+                   ticktext = c("-20","TSS","+20","-20","TTS","+20")
+                   ),
                  yaxis = list(
                    title = yAxisTitle
                  )
@@ -499,20 +525,17 @@ shinyServer(
       dataAll<-dataAll[matches,]
       
       #Fuer jede Histone Modifikation
-      histons <- dataAll$histone[dataAll$type=="Single" & dataAll$histone != "All"]
+      histons <- unique(dataAll$histone[dataAll$type=="Single" & dataAll$histone != "All"])
       
       #Loop ueber jede Gruppe (Datensatz und Methode)
       pairs<-expand.grid(input$datasets_comp_histone,input$methods_comp_histone)
       pairName<-paste(pairs[,1],pairs[,2],sep="-")
       
-      print(pairName)
       results<-data.frame(histons=histons)
-      for(i in 1:length(pairs)){
+      for(i in 1:nrow(pairs)){
         #Filter dataset to the group
-        print(pairs[i,1])
-        print(pairs[i,2])
-        dataShort<-dataAll[dataAll$dataset==pairs[i,1] & dataAll$method==pairs[i,2],]
-        print(dataShort)
+        dataShort<-dataAll[dataAll$dataset==as.character(pairs[i,1]) & dataAll$method==as.character(pairs[i,2]),]
+        
         
         #Shown histone modifications
         dataShort<-dataShort[order(dataShort$performanceMean, decreasing=TRUE),]
@@ -524,7 +547,6 @@ shinyServer(
         occSingle<-sapply(histons, function(x) sum(grepl(x,dataShort$histone[dataShort$type=="Single"])))
         occurences<-paste0(occAll," (",occSingle,")")
         results<-cbind(results,occurences)
-        print(results)
       }
       colnames(results)<-c("Histone",pairName)
       
@@ -581,10 +603,8 @@ shinyServer(
     
     #Comparison matrix of the different data sets
     output$dataMatrix<-renderPlotly({
-      if(! is.null(input$method_2)){
-        
         #Read different files for classification and for regression
-        if(input$type=="c"){
+        if(input$type_2=="c"){
           filename = "PlotInput/dataMatrix.txt"
           titleString = "AUC Score"
         }
@@ -592,11 +612,12 @@ shinyServer(
           filename = "PlotInput/dataMatrix.txt"
           titleString = "R2 Score"
         }
+        
         #Read input data
         data<-read.csv(filename,sep="\t",header=F)
         
         #Filter data according to the selected methods
-        matches <- grepl(paste(input$method_2,collapse="|"), data$V1)
+        matches <- grepl(paste(input$method_2_comp,collapse="|"), data$V1)
         plottedData<-data[matches,]
         
         #Filter data according to the selected data sets
@@ -605,8 +626,6 @@ shinyServer(
         
         matches <- grepl(paste(input$datasets_2,collapse="|"), plottedData$V3)
         plottedData<-plottedData[matches,]
-        
-        #If more than one method is selected, calculate the mean of all methods
         
         #Rename variables
         colnames(plottedData)<-c("Method","Dataset1","Dataset2","Score")
@@ -618,8 +637,7 @@ shinyServer(
           labs(x="Data set 1",y="Data set 2")
         
         ggplotly(p)
-        
-      }
+
     })
 
     ####################################################################################

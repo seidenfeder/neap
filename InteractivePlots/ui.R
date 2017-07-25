@@ -104,7 +104,7 @@ shinyUI(
                                        selected = "RFC"),
                           radioButtons("dataset_histone", label="Data sets",
                                        choices = c("K562" = "K562", 
-                                                   "Endothelial cell of umbilical vein" = "endo",
+                                                   "Endothelial cell of umbilical vein" = "Endo",
                                                    "Keratinocyte"="keratinocyte"),
                                        selected = "K562"),
                           sliderInput("perc_histone", label="Percentage of best histone modifications to compare", 
@@ -139,16 +139,16 @@ shinyUI(
                                                          "Support Vector Machine" = "SVM"),
                                              selected = "RF"),
                           checkboxGroupInput("datasets_2", label="Data sets",
-                                             choices = c("dataset1" = "dataset1", 
-                                                         "dataset2" = "dataset2",
-                                                         "dataset3" = "dataset3",
-                                                         "K562" = "K562", 
+                                             choices = c("K562" = "K562", 
                                                          "Endothelial cell of umbilical vein" = "Endo",
                                                          "Keratinocyte"="keratinocyte",
                                                          "Gastrocnemius medialis"="gastrocnemius medialis",
                                                          "SK-N-SH"="SK-N-SH",
                                                          "Thyroid gland"="thyroid gland"),
-                                             selected = c("dataset1"))
+                                             selected = c("K562","Endo","keratinocyte")),
+                          radioButtons("method_2_comp", label="Method shown in the comparison matrix",
+                                       c("Random Forest" = "RF",
+                                         "Support Vector Machine" = "SVM"))
                           
                         ),
                         mainPanel(
