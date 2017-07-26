@@ -125,6 +125,7 @@ shinyUI(
                               )
                             ),
                             br(),
+                            br(),
                             plotlyOutput("binsPlot2")
                           )
                         )
@@ -200,7 +201,7 @@ shinyUI(
                           ),
                           plotlyOutput("dataMatrix"),
                           br(),
-                          p("Test ...")
+                          p("The matrix above ")
                         )
                       )
                       
@@ -218,7 +219,23 @@ shinyUI(
                         tabPanel("Data sets",
                                  br(),
                                  plotlyOutput("dl_datasets")
-                        ))
+                        ),
+                        tabPanel("Bin Importance",
+                                 sidebarLayout(
+                                   sidebarPanel(
+                                     radioButtons("dataset_deep", label="Dataset",
+                                                  choices = c("K562" = "K562", 
+                                                              "Endothelial cell of umbilical vein" = "Endo",
+                                                              "Keratinocyte"="keratinocyte"),
+                                                  selected = "K562")
+                                     ),
+                                   mainPanel(
+                                     br(),
+                                     plotlyOutput("binImp")
+                                     )
+                                   )
+                                 
+                                 ))
              ),
              tabPanel("Run prediction",
                       sidebarLayout(
