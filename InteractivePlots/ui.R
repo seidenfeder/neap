@@ -215,19 +215,31 @@ shinyUI(
                       
              ),
              tabPanel("Deep Learning",
-                      tabsetPanel(
-                        tabPanel("Graph layout",
-                                 br(),
-                                 plotlyOutput("dl_Layout")
-                        ),
-                        tabPanel("Learning rates",
-                                 br(),
-                                 plotlyOutput("dl_learningRates")
-                        ),
-                        tabPanel("Data sets",
-                                 br(),
-                                 plotlyOutput("dl_datasets")
-                        ))
+                      sidebarLayout(
+                        sidebarPanel(
+                          checkboxGroupInput("datasets_DL", label="Data sets",
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "Keratinocyte"="Kera"),
+                                             selected = c("K562")),
+                          checkboxGroupInput("sets_DL", label="Shown curves",
+                                             choices = c("Training set" = "train", 
+                                                         "Test set" = "test"),
+                                             selected = c("train")),
+                          uiOutput("flexibelCheckDL")
+                          ),
+                          mainPanel(
+                            tabsetPanel(id="DLtab",
+                              tabPanel("Graph layout",
+                                       br(),
+                                       plotlyOutput("dl_Layout")
+                              ),
+                              tabPanel("Learning rates",
+                                       br(),
+                                       plotlyOutput("dl_learningRates")
+                              ))
+                          )
+                      )
              ),
              tabPanel("Run prediction",
                       sidebarLayout(
