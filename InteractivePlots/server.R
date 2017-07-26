@@ -682,8 +682,8 @@ shinyServer(
         p<-ggplot(data = plottedData, aes(x = Dataset1, y = Dataset2)) +
           geom_tile(aes(fill = Score))+
           scale_fill_gradient(low = "white", high = "red")+
-          ggtitle("Training on set 1, prediction set 2")+
-          labs(x="Data set 1",y="Data set 2")
+          ggtitle("Predicting another data set")+
+          labs(x="Training set",y="Prediction set")
         
         ggplotly(p)
 
@@ -724,7 +724,9 @@ shinyServer(
         return(NULL)
       }
       
-      systemCommand<-paste("/home/sch/schmidka/anaconda3/bin/python ~/Dokumente/GeneExpressionPrediction/neap/methods/classification_withStoredModel.py",
+      #Chose the right dataset
+      model<-paste0("PredictionModels/model",input$datasetTrain,".txt")
+      systemCommand<-paste(input$pythonPath,"PredictionModels/classification_withStoredModel.py",
                            "-i",input$binningFile$datapath,"-l", input$labelFile$datapath,"-m ~/Desktop/modelTest.pkl -a -n")
       score<-system(systemCommand, intern=T)
       return(as.numeric(score))
