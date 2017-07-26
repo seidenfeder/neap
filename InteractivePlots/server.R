@@ -149,6 +149,14 @@ shinyServer(
         )
       }
       })
+    
+    output$inputFiles<-renderUI({
+      if (input$type_3 == "c") {
+        fileInput("labelFile", label = "Label file")
+      } else {
+        NULL
+      }
+    })
       
     ####################################################################################
     # Plots for the model development tab
@@ -658,7 +666,7 @@ shinyServer(
           titleString = "AUC Score"
         }
         else{
-          filename = "PlotInput/dataMatrix.txt"
+          filename = "PlotInput/dataMatrixReg.txt"
           titleString = "R2 Score"
         }
         
@@ -725,12 +733,34 @@ shinyServer(
       }
       
       #Chose the right dataset
-      model<-paste0("PredictionModels/model",input$datasetTrain,".txt")
-      systemCommand<-paste(input$pythonPath,"PredictionModels/classification_withStoredModel.py",
-                           "-i",input$binningFile$datapath,"-l", input$labelFile$datapath,"-m ~/Desktop/modelTest.pkl -a -n")
-      score<-system(systemCommand, intern=T)
-      return(as.numeric(score))
+      if(input$datasetTrain == "gastrocnemius medialis"){
+        datasetName<-"gastrocnemius_medialis"
+      }
+      else if(input$datasetTrain == "thyroid gland"){
+        datasetName<-"thyroid_gland"
+      }
+      else{
+        datasetName<-input$datasetTrain
+      }
+      model<-paste0("PredictionModels/model_",input$type_3,input$method_3,"_",datasetName,".pkl")
+
+
+      #Choose the right script - either classification or regression
+      if(input$type_3=="c"){
+        systemCommand<-paste(input$pythonPath,"PredictionModels/classification_Interactive.py",
+                             "-i",input$binningFile$datapath,"-l", input$labelFile$datapath,"-m", model,"-a -n")
+      }
+      else{
+        systemCommand<-paste(input$pythonPath,"PredictionModels/regression_Interactive.py",
+                             "-i",input$binningFile$datapath,"-m", model,"-a -n")
+      }
+
       
+      print(systemCommand)
+      score<-withProgress(message="Prediction",value=0.5,expr={system(systemCommand, intern=T)})
+      
+      print(score)
+      return(as.numeric(score))
     })
     
     output$comparePredicton<-renderPlotly({
@@ -745,7 +775,7 @@ shinyServer(
           titleString = "AUC Score"
         }
         else{
-          filename = "PlotInput/dataMatrix.txt"
+          filename = "PlotInput/dataMatrixReg.txt"
           titleString = "R2 Score"
         }
         
@@ -785,7 +815,7 @@ shinyServer(
                  xaxis = list(
                    title = "Data set"),
                  yaxis = list(
-                   title = "AUC score"
+                   title = titleString
                  ),
                  margin(l=100),
                  showlegend = FALSE

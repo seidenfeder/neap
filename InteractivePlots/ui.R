@@ -247,7 +247,7 @@ shinyUI(
                                                          "Thyroid gland"="thyroid gland"),
                                               selected="K562"),
                           fileInput("binningFile", label = "Feature file with bins"),
-                          fileInput("labelFile", label = "Label file"),
+                          uiOutput("inputFiles"),
                           textInput("pythonPath", "Python path", "python"),
                           actionButton("action", label = "Run prediction"),
                           br(),
