@@ -240,9 +240,7 @@ def run_training(datasets, chkptfile=None):
                 sess.run(initLocal)
                 summary_str, auc = sess.run([summary,eval_correct], feed_dict=feed_dict)
                 
-                if FLAGS["outputfile"] != "None":
-                    outFile.write(FLAGS["outputtag"] + "\ttrain\t"+str(i)+"\t"+str(auc[1])+"\n")
-                    
+                   
                 #Update the events file
                 train_writer.add_summary(summary_str, i)
                 train_writer.flush()
@@ -258,9 +256,7 @@ def run_training(datasets, chkptfile=None):
                 
                 print('AUC score at step %s: %s' % (i, auc[1]))
                 
-                if FLAGS["outputfile"] != "None":
-                    outFile.write(FLAGS["outputtag"] + "\ttest\t"+str(i)+"\t"+str(auc[1])+"\n")
-                    
+                   
                 test_writer.add_summary(summary_str, i)
                 test_writer.flush()
 
@@ -273,7 +269,9 @@ def run_training(datasets, chkptfile=None):
 
         summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
         print('Auc score of %s' % (auc[1]))
-
+        if FLAGS["outputfile"] != "None":
+                    outFile.write(FLAGS["outputtag"] + "\t"+FLAGS["bin"]+"\t"+str(auc[1])+"\n")
+                 
         test_writer.close()
         train_writer.close()
         
@@ -394,8 +392,8 @@ if __name__ == "__main__":
     parser.add_argument("--saveFastdatadir", help="Directory to save parsed data, which is splitted into training, validation and test, for fast loading the next time (the directory need to exists already).",default="")
     parser.add_argument("--plot", help="Plot the distribution of the 0/1 labels in the training, validation and test set", action='store_true')
     parser.add_argument("--batchnorm", help="If set performs batch normalization instead of drop-out", action='store_true')
-    parser.add_argument("--outputfile", help="Save the output AUC scores in a text file (to insert plots into the web browser)",default ="None")
-
+    parser.add_argument("--outputfile", help="Save the last auc score in this file",default ="None")
+    parser.add_argument("-b", help="give a bin for the case you want to train only on one bin", dest="bin",default=-1)
     parser.add_argument("--outputtag", help="String to identify different runs in the output file.")
 
     args = parser.parse_args()
@@ -406,6 +404,8 @@ if __name__ == "__main__":
     saveFastdatadir = args.saveFastdatadir
     testfile = args.test
     labelsTest = args.labelsTest
+    FLAGS["bin"]=args.bin
+    oneBin = FLAGS["bin"]
     
     FLAGS["logdir"] = args.logdir
     FLAGS["learnrate"] = args.learnrate
@@ -595,7 +595,11 @@ if __name__ == "__main__":
             np.save(os.path.join(saveFastdatadir, "test1_win.npz.npy"),test)
             np.save(os.path.join(saveFastdatadir, "test1_lab.npz.npy"),testL)
             print("saving parsed data to the directory")
-
+    # For the case you want only one bin extract that one bin
+    if(int(oneBin)>-1):
+        test= test[:,oneBin]
+        train= train[:,oneBin]
+        valid= valid[:,oneBin]
     datasets = {}
     datasets["train"]= Dataset(train,trainL)
     datasets["validate"] = Dataset(valid,validL)

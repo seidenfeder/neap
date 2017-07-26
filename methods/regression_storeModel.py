@@ -98,7 +98,7 @@ else:
 
 #Support Vector Machines
 if(method=="SVM"):
-    rg=svm.SVR(kernel='rbf', probability=True)
+    rg=svm.SVR(kernel='rbf')
 #Random Forest
 elif(method=="RF"):
     rg=RandomForestRegressor(n_estimators=12)
