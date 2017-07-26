@@ -134,6 +134,7 @@ shinyUI(
                               )
                             ),
                             br(),
+                            br(),
                             plotlyOutput("binsPlot2")
                           )
                         )
@@ -209,7 +210,7 @@ shinyUI(
                           ),
                           plotlyOutput("dataMatrix"),
                           br(),
-                          p("Test ...")
+                          p("The matrix above ")
                         )
                       )
                       
@@ -237,9 +238,14 @@ shinyUI(
                               tabPanel("Learning rates",
                                        br(),
                                        plotlyOutput("dl_learningRates")
-                              ))
+                              ),
+                              tabPanel("Bin Importance",
+                                       br(),
+                                       plotlyOutput("binImp")
+                              )
                           )
                       )
+                    )
              ),
              tabPanel("Run prediction",
                       sidebarLayout(

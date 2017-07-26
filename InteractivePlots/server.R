@@ -348,8 +348,9 @@ shinyServer(
   
     output$normText<-renderText({
       if(! is.null(input$method)&!is.null(input$datasets)){
-        return(paste("Also the normalization influences the performance of the data.",
-                     "..."))
+        return(paste("Also the normalization influences the performance of the data. We compared the performance ",
+                     "after no normalization, scaling of the data and normalization of the data.",
+                     "The scaling ...Say what the scaling does."))
       }
       else{
         return(NULL)
@@ -432,7 +433,7 @@ shinyServer(
       
       p<-ggplot(data = reshapedData, aes(x = reshapedData$variable, y = reshapedData$names)) +
         geom_tile(aes(fill = normalized_p_Value))+
-        scale_fill_gradient2(low = "white", high = "steelblue")+
+        scale_fill_gradient2(low = "white",mid="yellow", high = "red", midpoint=0.0)+
         ggtitle("Signal Pattern")+
         labs(x="Bins",y="Histone")+
         scale_x_discrete(breaks=c(20,41,60,100,121,140),
@@ -455,7 +456,7 @@ shinyServer(
       
       p<-ggplot(data = reshapedData, aes(x = reshapedData$variable, y = reshapedData$names)) +
         geom_tile(aes(fill = Spearman))+
-        scale_fill_gradient2(low = "white",mid="yellow", high = "red")+
+        scale_fill_gradient2(low = "white",mid="yellow", high = "red", midpoint=0.0)+
         ggtitle("Correlation Pattern")+
         labs(x="Bins",y="Histone")+
         scale_x_discrete(breaks=c(20,41,60,100,121,140),
@@ -701,13 +702,14 @@ shinyServer(
         plottedData<-plottedData[matches,]
         
         #Rename variables
-        colnames(plottedData)<-c("Method","Dataset1","Dataset2","Score")
+        colnames(plottedData)<-c("Method","Trainset","Testset","Score")
         #Create heatmap
-        p<-ggplot(data = plottedData, aes(x = Dataset1, y = Dataset2)) +
+        p<-ggplot(data = plottedData, aes(x = Trainset, y = Testset)) +
           geom_tile(aes(fill = Score))+
-          scale_fill_gradient(low = "white", high = "red")+
-          ggtitle("Predicting another data set")+
-          labs(x="Training set",y="Prediction set")
+          scale_fill_gradient2(low = "white",mid="yellow", high = "red",midpoint=0.5, limits=c(0.0,1.0))+
+          ggtitle("Training on set 1, prediction set 2")+
+          labs(x="Training Set",y="Test Set")
+
         
         ggplotly(p)
 
@@ -747,6 +749,32 @@ shinyServer(
                  title = "Auc score"
                )
         )
+    })
+    
+    output$binImp<-renderPlotly({
+      data<-read.csv("PlotInput/deepLearningBins.txt",sep="\t",header=F)
+      matches <- grepl(paste(input$dataset_deep,collapse="|"), data$V1)
+      plottedData<-data[matches,]
+      
+      #Create interactive line plots
+      color1<-c("blue","red")
+      plot_ly(y = plottedData$V3,
+              x = plottedData$V2, type="scatter", 
+              color=plottedData$V1,
+              colors = color1,
+              mode="lines")%>%
+        layout(title = paste('Performance for each bin'),
+               xaxis = list(
+                 title = "Bin",
+                 tickvals = c(20,40,60,100,120,140),
+                 ticktext = c("-20","TSS","+20","-20","TTS","+20")
+               ),
+               yaxis = list(
+                 title = "AUC Score"
+               )
+        )
+      
+      
     })
     
     ####################################################################################
