@@ -19,16 +19,13 @@ parser.add_option("-l",dest="labelsTest", help="This gives the path to the file 
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
 parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
 parser.add_option("-m",dest="modelFile", help="Model file where the trained classificator is saved in.")
-parser.add_option("-o",dest="output", help="The name of the outputfile", default="regression.txt")
 parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
-parser.add_option("-t",dest="trainset", help="The name of the trainset", default="")
 
 (options, args) = parser.parse_args()
 
 testFile= options.testset
 labelTest=options.labelsTest
 modelFile=options.modelFile
-trainset=options.trainset
 
 testfile=open(testFile)
 if options.newFormat :
@@ -87,10 +84,5 @@ if str(clf).split("(")[0] == "RandomForestClassifier":
 else:
 	method = "SVM"
 
-#write the output into a file but don't delete the previous text
-fileHandle = open ( options.output, 'a')
-
-fileHandle.write(method+"\t"+trainset+"\t"+testset+"\t"+str(score) +"\n")
-fileHandle.close()
 print(score)
 
