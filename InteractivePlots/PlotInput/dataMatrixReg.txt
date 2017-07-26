@@ -1,0 +1,108 @@
+SVM	Endo	Endo	0.628720637579
+SVM	Endo	K562	0.532909872515
+SVM	Endo	keratinocyte	0.467312145743
+SVM	Endo	gastrocnemius medialis	0.254278027224
+SVM	Endo	SK-N-SH	0.464190567867
+SVM	Endo	thyroid gland	0.436792171908
+SVM	K562	Endo	0.437195351868
+SVM	K562	K562	0.701328361029
+SVM	K562	keratinocyte	0.40950657505
+SVM	K562	gastrocnemius medialis	0.0989116992691
+SVM	K562	SK-N-SH	0.423858516734
+SVM	K562	thyroid gland	0.433320101778
+SVM	keratinocyte	Endo	0.48980362407
+SVM	keratinocyte	K562	0.543988273223
+SVM	keratinocyte	keratinocyte	0.64598019642
+SVM	keratinocyte	gastrocnemius medialis	0.300066440026
+SVM	keratinocyte	SK-N-SH	0.425468918612
+SVM	keratinocyte	thyroid gland	0.400659119526
+SVM	gastrocnemius medialis	Endo	0.35735701413
+SVM	gastrocnemius medialis	K562	0.412897997691
+SVM	gastrocnemius medialis	keratinocyte	0.405774717025
+SVM	gastrocnemius medialis	gastrocnemius medialis	0.63601273141
+SVM	gastrocnemius medialis	SK-N-SH	0.398157080798
+SVM	gastrocnemius medialis	thyroid gland	0.283071152282
+SVM	SK-N-SH	Endo	0.445707715203
+SVM	SK-N-SH	K562	0.539283194231
+SVM	SK-N-SH	keratinocyte	0.407241840257
+SVM	SK-N-SH	gastrocnemius medialis	0.312157701941
+SVM	SK-N-SH	SK-N-SH	0.666937875924
+SVM	SK-N-SH	thyroid gland	0.427937913163
+SVM	thyroid gland	Endo	0.459900233541
+SVM	thyroid gland	K562	0.518456541964
+SVM	thyroid gland	keratinocyte	0.4126942285
+SVM	thyroid gland	gastrocnemius medialis	0.27247205669
+SVM	thyroid gland	SK-N-SH	0.468703562897
+SVM	thyroid gland	thyroid gland	0.664584253475
+RF	Endo	Endo	0.919403951443
+RF	Endo	K562	0.534680165517
+RF	Endo	keratinocyte	0.4222074691
+RF	Endo	gastrocnemius medialis	0.327408861858
+RF	Endo	SK-N-SH	0.423448408707
+RF	Endo	thyroid gland	0.224080180903
+RF	K562	Endo	0.466212197744
+RF	K562	K562	0.934946909851
+RF	K562	keratinocyte	0.337497132961
+RF	K562	gastrocnemius medialis	0.0260650048013
+RF	K562	SK-N-SH	0.478236835531
+RF	K562	thyroid gland	0.154769314148
+RF	keratinocyte	Endo	0.349456096785
+RF	keratinocyte	K562	0.368693004239
+RF	keratinocyte	keratinocyte	0.914925448684
+RF	keratinocyte	gastrocnemius medialis	0.427495937737
+RF	keratinocyte	SK-N-SH	0.393500872682
+RF	keratinocyte	thyroid gland	0.367017159892
+RF	gastrocnemius medialis	Endo	0.337874748062
+RF	gastrocnemius medialis	K562	0.402364140319
+RF	gastrocnemius medialis	keratinocyte	0.396261455713
+RF	gastrocnemius medialis	gastrocnemius medialis	0.923027137625
+RF	gastrocnemius medialis	SK-N-SH	0.421261908539
+RF	gastrocnemius medialis	thyroid gland	0.192339988873
+RF	SK-N-SH	Endo	0.373498111699
+RF	SK-N-SH	K562	0.415632765464
+RF	SK-N-SH	keratinocyte	0.404612000651
+RF	SK-N-SH	gastrocnemius medialis	0.324043887615
+RF	SK-N-SH	SK-N-SH	0.922264294914
+RF	SK-N-SH	thyroid gland	0.306101515167
+RF	thyroid gland	Endo	0.481088372503
+RF	thyroid gland	K562	0.515048924309
+RF	thyroid gland	keratinocyte	0.487286749679
+RF	thyroid gland	gastrocnemius medialis	0.363986551812
+RF	thyroid gland	SK-N-SH	0.453170344389
+RF	thyroid gland	thyroid gland	0.911044898665
+LR	Endo	Endo	0.51496019409
+LR	Endo	K562	0.460500533767
+LR	Endo	keratinocyte	0.415450993899
+LR	Endo	gastrocnemius medialis	0.221620438153
+LR	Endo	SK-N-SH	0.407250721743
+LR	Endo	thyroid gland	0.246092780904
+LR	K562	Endo	0.397349639007
+LR	K562	K562	0.584973156053
+LR	K562	keratinocyte	0.427556310195
+LR	K562	gastrocnemius medialis	0.159169136357
+LR	K562	SK-N-SH	0.414823450854
+LR	K562	thyroid gland	0.269801997536
+LR	keratinocyte	Endo	0.42641224333
+LR	keratinocyte	K562	0.503741997292
+LR	keratinocyte	keratinocyte	0.531204829663
+LR	keratinocyte	gastrocnemius medialis	0.194858043893
+LR	keratinocyte	SK-N-SH	0.38806429102
+LR	keratinocyte	thyroid gland	0.250798799002
+LR	gastrocnemius medialis	Endo	0.232388177217
+LR	gastrocnemius medialis	K562	0.315382806428
+LR	gastrocnemius medialis	keratinocyte	0.227738324918
+LR	gastrocnemius medialis	gastrocnemius medialis	0.495634996078
+LR	gastrocnemius medialis	SK-N-SH	0.240569576833
+LR	gastrocnemius medialis	thyroid gland	-0.0339190529925
+LR	SK-N-SH	Endo	0.367044608856
+LR	SK-N-SH	K562	0.433904215875
+LR	SK-N-SH	keratinocyte	0.330313650462
+LR	SK-N-SH	gastrocnemius medialis	0.159849586577
+LR	SK-N-SH	SK-N-SH	0.528565448967
+LR	SK-N-SH	thyroid gland	0.180720316361
+LR	thyroid gland	Endo	0.419562639345
+LR	thyroid gland	K562	0.479317482656
+LR	thyroid gland	keratinocyte	0.39318166464
+LR	thyroid gland	gastrocnemius medialis	0.156763178259
+LR	thyroid gland	SK-N-SH	0.407578138821
+LR	thyroid gland	thyroid gland	0.462306091983
