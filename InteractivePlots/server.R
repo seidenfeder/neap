@@ -158,6 +158,18 @@ shinyServer(
       }
     })
     
+    output$flexibelSetOptionsDL<-renderUI({
+      if (input$DLtab == "Learning rates" | input$DLtab == "Graph layout") {
+        checkboxGroupInput("sets_DL", label="Shown curves",
+                           choices = c("Training set" = "train", 
+                                       "Test set" = "test"),
+                           selected = c("train"))
+      } else {
+        NULL
+      }
+      
+    })
+    
     output$flexibelCheckDL<-renderUI({
       if (input$DLtab == "Learning rates") {
         checkboxGroupInput("learnrate_DL", label="Learning rates",
@@ -165,12 +177,14 @@ shinyServer(
                                        "0.005",
                                        "0.0005"),
                            selected = c("0.005"))
-      } else {
+      } else if (input$DLtab == "Graph layout") {
         checkboxGroupInput("graph_DL", label="Graph layout",
                            choices = c("1 Convolution layer" = "C1", 
                                        "2 Convolution layers" = "C2",
                                        "5 Convolution layers" = "C5"),
                            selected = c("C2"))
+      } else {
+        NULL
       }
     })
       
@@ -211,7 +225,7 @@ shinyServer(
                  yaxis = list(
                    title = "AUC Score"
                  ),
-                 margin = list(b = 100, r=50)
+                 margin = list(b = 100, r=50, t=30)
           )
       }
       else{
@@ -275,7 +289,8 @@ shinyServer(
                    ticktext = c("-20","TSS","+20","-20","TTS","+20")),
                  yaxis = list(
                    title = yAxisTitle
-                 )
+                 ),
+                 margin = list(t=30)
           )
       }
       else{
@@ -337,7 +352,7 @@ shinyServer(
                  yaxis = list(
                    title = yaxisTitle
                  ),
-                 margin = list(b = 100, r=50)
+                 margin = list(b = 100, r=50, t=30)
           )
       }
       else{
@@ -717,6 +732,37 @@ shinyServer(
 
     ####################################################################################
     # Plots for the deep learning tab
+
+    output$dl_Layout<-renderPlotly({
+      
+      data<-read.csv("PlotInput/deepLearning_graphLayout.txt",sep="\t",header=F)
+      
+      #Filter data set
+      matches <- grepl(paste(input$datasets_DL,collapse="|"), data$V1)
+      plottedData<-data[matches,]
+      
+      #Filter train - test set
+      matches <- grepl(paste(input$sets_DL,collapse="|"), plottedData$V3)
+      plottedData<-plottedData[matches,]
+      
+      #Filter the learning rate
+      matches <- grepl(paste0(input$graph_DL,collapse="|"), plottedData$V2)
+      plottedData<-plottedData[matches,]
+      
+      plot_ly(y = as.numeric(plottedData$V5),
+              x = as.numeric(plottedData$V4),
+              color = paste(plottedData$V1,plottedData$V2,plottedData$V3,sep="-"),
+              type="scatter",
+              mode="lines")%>%
+        layout(title = 'Influence of the learning rate',
+               xaxis = list(
+                 title = "Step"),
+               yaxis = list(
+                 title = "Auc score"
+               )
+        )
+    })
+    
     
     output$dl_learningRates<-renderPlotly({
       
@@ -753,7 +799,7 @@ shinyServer(
     
     output$binImp<-renderPlotly({
       data<-read.csv("PlotInput/deepLearningBins.txt",sep="\t",header=F)
-      matches <- grepl(paste(input$dataset_deep,collapse="|"), data$V1)
+      matches <- grepl(paste(input$datasets_DL,collapse="|"), data$V1)
       plottedData<-data[matches,]
       
       #Create interactive line plots

@@ -236,10 +236,7 @@ shinyUI(
                                                          "Endothelial cell of umbilical vein" = "Endo",
                                                          "Keratinocyte"="Kera"),
                                              selected = c("K562")),
-                          checkboxGroupInput("sets_DL", label="Shown curves",
-                                             choices = c("Training set" = "train", 
-                                                         "Test set" = "test"),
-                                             selected = c("train")),
+                          uiOutput("flexibelSetOptionsDL"),
                           uiOutput("flexibelCheckDL")
                           ),
                           mainPanel(
@@ -255,7 +252,8 @@ shinyUI(
                               tabPanel("Bin Importance",
                                        br(),
                                        plotlyOutput("binImp")
-                              )
+                              ),
+                              tabPanel("Histone Importance")
                           )
                       )
                     )
