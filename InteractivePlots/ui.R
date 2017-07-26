@@ -51,7 +51,20 @@ shinyUI(
                                  h2("Run Prediction"),
                                  p(paste("In this tab you are able to compare your own dataset with our datasets. You are able to predict the gene expression ",
                                          "by using our trained models and compare the performance with the performance of our models.
-                                         "))
+                                         ")),
+                                 h5("Data Formats:"),
+                                 p("To run your prediction you need a binning file and if you use a classification also a label file as input. 
+                                   These files follow the following format:"),
+                                 strong("Binning File:"),
+                                 div("##name of the dataset"),
+                                 div("##used histone modifications"),
+                                 div("#Genename1"),
+                                 div("Tab separated scores for histone modification 1 for all bins"),
+                                 div("Tab separated scores for histone modification 2 for all bins"),
+                                 div("..."),
+                                 div("#Genename2"),
+                                 div("..."),
+                                 strong("Labels File")
                                  
                           ),
                           column(2,
