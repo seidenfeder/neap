@@ -12,25 +12,41 @@ shinyServer(
     #Dynamically change avaliable methods (in the second panel Model development)
     observe({
       if(input$type == "c"){
-        updateCheckboxGroupInput(session, "method", label="Methods", 
-                                 choices = c("Random Forest" = "RF", 
-                                             "Support Vector Machine" = "SVM"),
-                                 selected = "RF")
-      }
-      else{
+       if(is.null(input$developmentTab)){
+         updateCheckboxGroupInput(session, "method", label="Methods", 
+                                  choices = c("Random Forest" = "RF", 
+                                              "Support Vector Machine" = "SVM"),
+                                  selected = "RF")
+       } else {
+         if(input$developmentTab == "Bin importance per bin"){
+           updateCheckboxGroupInput(session, "method", label="Methods", 
+                                    choices = c("Random Forest" = "RF", 
+                                                "Support Vector Machine" = "SVM",
+                                                "Deep Learning" = "DL"),
+                                    selected = "RF")
+          } else {
+            updateCheckboxGroupInput(session, "method", label="Methods", 
+                                     choices = c("Random Forest" = "RF", 
+                                                 "Support Vector Machine" = "SVM"),
+                                     selected = "RF")
+          }
+       }
+      } else{
         updateCheckboxGroupInput(session, "method", label="Methods", 
                                  choices = c("Linear Regression" = "LR",
                                              "RF Regression" = "RF", 
                                              "SVM Regression" = "SVM"),
                                  selected = "RF")
       }
-    })
+   })
+    
     #Dynamical change for spatial information tap
     observe({
       if(input$type_spa == "c"){
         updateCheckboxGroupInput(session, "method_spa", label="Methods", 
                                  choices = c("Random Forest" = "RF", 
-                                             "Support Vector Machine" = "SVM"),
+                                             "Support Vector Machine" = "SVM",
+                                             "Deep Learning" = "DL"),
                                  selected = "RF")
       }
       else{
@@ -41,6 +57,7 @@ shinyServer(
                                  selected = "RF")
       }
     })
+    
     #Dynamically change avaliable methods (in the third panel Dataset comparison)
     observe({
       if(input$type_2 == "c"){
@@ -109,11 +126,11 @@ shinyServer(
                            selected = "RF")
       }
     })
-    
+
     output$dynamic <- renderUI({
       
       if (input$type == "c") { 
-        tabsetPanel(
+        tabsetPanel(id="developmentTab",
           tabPanel("Gene labels",
                    br(),
                    plotlyOutput("labelPlot"),
@@ -134,7 +151,7 @@ shinyServer(
           )
         )
       } else {
-        tabsetPanel(
+        tabsetPanel(id="developmentTab",
           tabPanel("Bin importance per bin",
                    br(),
                    plotlyOutput("binsPlot"),
@@ -157,18 +174,6 @@ shinyServer(
       } else {
         NULL
       }
-    })
-    
-    output$flexibelSetOptionsDL<-renderUI({
-      if (input$DLtab == "Learning rates" | input$DLtab == "Graph layout") {
-        checkboxGroupInput("sets_DL", label="Shown curves",
-                           choices = c("Training set" = "train", 
-                                       "Test set" = "test"),
-                           selected = c("train"))
-      } else {
-        NULL
-      }
-      
     })
     
     output$flexibelCheckDL<-renderUI({
@@ -252,12 +257,21 @@ shinyServer(
       #Display the plot only for the classification task and if at least one method is selected
       if(!is.null(input$method)&!is.null(input$datasets)){
         #Read input data
-        if(input$type=="c"){
-          dataBinsC<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+        if(input$type_spa=="c"){
+          data<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+          
+          #Load also the data from the Deep Learning tab
+          dataDL<-read.csv("PlotInput/deepLearningBins.txt",sep="\t",header=F)
+          
+          dataBinsC<-data.frame(V1=data$V1, V2=data$V2, V3=data$V3, V4=rowMeans(data[,4:ncol(data)]))
+          dataBinsC<-rbind(dataBinsC,data.frame(V1=dataDL$V1,V2="DL",V3=dataDL$V2,V4=dataDL$V3))
+          
           yAxisTitle<-"AUC Score"
         }
         else{
-          dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
+          data<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
+          dataBinsC<-data.frame(V1=data$V1, V2=data$V2, V3=data$V3, V4=rowMeans(data[,4:ncol(data)]))
+          
           yAxisTitle<-"R2 Score"
         }
         
@@ -277,7 +291,7 @@ shinyServer(
         
         #Create interactive line plots
         color1<-c("blue","red")
-        plot_ly(y = rowMeans(plottedDataCell[,4:ncol(plottedDataCell)]),
+        plot_ly(y = plottedDataCell$V4,
                 x = plottedDataCell$V3, type="scatter", 
                 color=NeededColors,
                 colors = color1,
@@ -507,11 +521,20 @@ shinyServer(
       if(!is.null(input$method_spa)&!is.null(input$dataset_spatial)){
         #Read input data
         if(input$type_spa=="c"){
-          dataBinsC<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+          data<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
+          
+          #Load also the data from the Deep Learning tab
+          dataDL<-read.csv("PlotInput/deepLearningBins.txt",sep="\t",header=F)
+          
+          dataBinsC<-data.frame(V1=data$V1, V2=data$V2, V3=data$V3, V4=rowMeans(data[,4:ncol(data)]))
+          dataBinsC<-rbind(dataBinsC,data.frame(V1=dataDL$V1,V2="DL",V3=dataDL$V2,V4=dataDL$V3))
+          
           yAxisTitle<-"AUC Score"
         }
         else{
-          dataBinsC<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
+          data<-read.csv("PlotInput/evalBinsReg.txt", sep="\t", header=F)
+          dataBinsC<-data.frame(V1=data$V1, V2=data$V2, V3=data$V3, V4=rowMeans(data[,4:ncol(data)]))
+          
           yAxisTitle<-"R2 Score"
         }
         
@@ -531,7 +554,7 @@ shinyServer(
         
         #Create interactive line plots
         color1<-c("blue","red")
-        plot_ly(y = rowMeans(plottedDataCell[,4:ncol(plottedDataCell)]),
+        plot_ly(y = plottedDataCell$V4,
                 x = plottedDataCell$V3, type="scatter", 
                 color=NeededColors,
                 colors = color1,

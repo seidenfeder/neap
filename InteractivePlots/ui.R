@@ -92,7 +92,6 @@ shinyUI(
                                                          "Keratinocyte"="keratinocyte"),
                                              selected = "K562")
                         ),
-                        
                         mainPanel(
                           uiOutput("dynamic")
                         )
@@ -129,7 +128,8 @@ shinyUI(
                           ),
                           checkboxGroupInput("method_spa", label="Methods", 
                                              choices = c("Random Forest" = "RF", 
-                                                         "Support Vector Machine" = "SVM"),
+                                                         "Support Vector Machine" = "SVM",
+                                                         "Deep Learning" = "DL"),
                                              selected = "RF"),
                           radioButtons("dataset_spatial", label="Data sets",
                                        choices = c("K562_short"="K562_short",
@@ -270,7 +270,10 @@ shinyUI(
                                                          "Endothelial cell of umbilical vein" = "Endo",
                                                          "Keratinocyte"="Kera"),
                                              selected = c("K562")),
-                          uiOutput("flexibelSetOptionsDL"),
+                          checkboxGroupInput("sets_DL", label="Shown curves",
+                                             choices = c("Training set" = "train", 
+                                                         "Test set" = "test"),
+                                             selected = c("train")),
                           uiOutput("flexibelCheckDL")
                           ),
                           mainPanel(
@@ -290,8 +293,7 @@ shinyUI(
                               tabPanel("Bin Importance",
                                        br(),
                                        plotlyOutput("binImp")
-                              ),
-                              tabPanel("Histone Importance")
+                              )
                           )
                       )
                     )
