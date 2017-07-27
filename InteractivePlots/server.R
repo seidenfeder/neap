@@ -409,11 +409,12 @@ shinyServer(
         
         #Filter data according to the selected methods
         matches <- grepl(paste(input$method,collapse="|"), data$V2)
-        plottedData<-data[matches,]        
+        plottedData<-data[matches,] 
+        Density <- plottedData$dens
         
         plot_ly(y = plottedData$V4, 
                 x = plottedData$V3,
-                color=~plottedData$dens
+                color=~ Density
         )%>%
           layout(title = paste('Regression with',input$method,"without expression values of 0",sep=" "),
                  xaxis = list(
@@ -438,11 +439,12 @@ shinyServer(
         
         #Filter data according to the selected methods
         matches <- grepl(paste(input$method,collapse="|"), data$V2)
-        plottedData<-data[matches,]        
+        plottedData<-data[matches,] 
+        Density <- plottedData$dens
         
         plot_ly(y = plottedData$V4, 
                 x = plottedData$V3,
-                color=~plottedData$dens
+                color=~Density
         )%>%
           layout(title = paste('Regression with',input$method, "with expression values of 0",sep=" "),
                  xaxis = list(
@@ -998,6 +1000,16 @@ shinyServer(
       }
       else{
         NULL
+      }
+    })
+    
+    output$labelTextRun<-renderText({
+      if(is.numeric(calculateScore())){
+        return(paste("This plot shows the performance of your own test set and on different other test sets after training it ",
+                     "on the choosed dataset."))
+      }
+      else{
+        return(NULL)
       }
     })
     

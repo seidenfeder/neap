@@ -116,7 +116,10 @@ shinyUI(
                         mainPanel(
                           plotlyOutput("regressionScatterplot"),
                           br(),
-                          plotlyOutput("regressionScatterplotZeros")
+                          plotlyOutput("regressionScatterplotZeros"),
+                          div("This tab shows the predicted gen expression value for every single gene. Top the genes with a expression value of 0 were deleted.
+                              Down we have the prediction for all genes also the ones with a expression value of 0. To get better inside where many points are plotted 
+                              we used a density scatter plot. You can clearly see that many points are around a logarithmed expression value of 3")
                         )
                       )
              ),
@@ -331,8 +334,12 @@ shinyUI(
                           
                         ),
                         mainPanel(
-                          p("In this tab you are able to run your own predictions. Just insert the data in the corresponding format. ... "),
-                          plotlyOutput("comparePredicton")
+                          p("In this tab you are able to run your own predictions. Just insert the data in the corresponding format. 
+                            You find a description of the needed format under the project description.  "),
+                          br(),
+                          plotlyOutput("comparePredicton"),
+                          br(),
+                          textOutput("labelTextRun")
 
                         )
                       )#,
