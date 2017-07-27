@@ -363,9 +363,15 @@ shinyServer(
   
     output$normText<-renderText({
       if(! is.null(input$method)&!is.null(input$datasets)){
-        return(paste("Also the normalization influences the performance of the data. We compared the performance ",
-                     "after no normalization, scaling of the data and normalization of the data.",
-                     "The scaling ...Say what the scaling does."))
+        return(paste("Some machine learning methods such as Support Vector Machines are known to perform significantly better,",
+                "if the input data is normalized. We thought about many different normalization methods,",
+                "but restricted our detailed analysis on two variants where the performance increased significantly for some of the methods.",
+                "Both methods normalize the data over all genes for each bin and histone modification.",
+                "The first approach, which we call scale in the following , uses Z scores for normalization.",
+                "The mean of the column is subtracted from each data points and the result divided by the standard deviation of the column.",
+                "In the second approach, which is called normalize in the following, the data is scaled to have unit norm using the L1 norm.\n\n",
+                "The results show clearly that Support Vector Machine improves clearly when normalizating the data, for most the option of Z scores works best.",
+                "In contrast, Random Forest is not influenced, which is not suprising, when looking at how the two methods work."))
       }
       else{
         return(NULL)
@@ -459,6 +465,14 @@ shinyServer(
         
     })
     
+    output$signalPatternText<-renderText({
+      return(paste("The signal pattern shows the average distribution of each histone modification over the bins.",
+                    "Therefore, simply the average feature value for each bin and histone modification over all genes is calculated.",
+                    "To be able to compare the different histones, which have partly signal values in different amplitudes the result is scaled",
+                    "over each histone row, using Z scores."))
+    })
+    
+    
     output$corrPattern<-renderPlotly({
       
       #Read input data
@@ -480,6 +494,11 @@ shinyServer(
       ggplotly(p)%>%
         layout(margin = list(l = 110))
       
+    })
+    
+    output$corrPatternText<-renderText({
+      return(paste("The correlation pattern shows the correlation between the binning values and the expression values.", 
+                   "For each bin and histone modification the Spearman correlation of the feature vector to the expression vector is calculated."))
     })
     
     output$binsPlot2<-renderPlotly({
@@ -524,7 +543,8 @@ shinyServer(
                    ),
                  yaxis = list(
                    title = yAxisTitle
-                 )
+                 ),
+                 margin(t=50)
           )
       }
       else{
@@ -780,8 +800,9 @@ shinyServer(
       options(scipen=4)
       
       #Filter the learning rate
-      matches <- grepl(paste0(input$learnrate_DL,collapse="|"), plottedData$V2)
-      plottedData<-plottedData[matches,]
+      plottedData<-plottedData[plottedData$V2 %in% input$learnrate_DL,]
+      #matches <- grepl(paste0(input$learnrate_DL,collapse="|"), plottedData$V2)
+      #plottedData<-plottedData[matches,]
       
       plot_ly(y = as.numeric(plottedData$V5),
               x = as.numeric(plottedData$V4),
