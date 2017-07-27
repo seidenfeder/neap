@@ -142,14 +142,24 @@ shinyUI(
                              tabsetPanel(
                                tabPanel("Signal Pattern",
                                         br(),
-                                        plotlyOutput("signalPattern")
+                                        plotlyOutput("signalPattern"),
+                                        br(),
+                                        textOutput("signalPatternText")
                                         ),
                                tabPanel("Correlation Pattern",
                                         br(),
-                                        plotlyOutput("corrPattern")  
+                                        plotlyOutput("corrPattern"),
+                                        br(),
+                                        textOutput("corrPatternText")  
                               )
                             ),
                             br(),
+                            p(paste("When comparing the performance of the individual bins, it is also interesting to see",
+                                    "how the general signal and correlation pattern looks like. Because comparing these pattern of",
+                                    "different datasets can explain differences in the bin plot, especially for K562 and K562_short.",
+                                    "The performance in the gene body is better for K562 than for K562_short, but the performance around at the TSS",
+                                    "nearly identical. This can be explained, as in K562 there is additionally the histone modification H3K79me2,",
+                                    "which has a strong signal in the gene body.")),
                             br(),
                             plotlyOutput("binsPlot2")
                           )
@@ -189,7 +199,14 @@ shinyUI(
                         ),
                         mainPanel(
                           plotlyOutput("histonePlot"),
-                          tableOutput('histoneComparison')
+                          p(),
+                          tableOutput('histoneComparison'),
+                          p(paste("The table shows the number of occurrences of each histone modification in the top x%",
+                                  "of the run subsets of one and two histone modifications, when ordering them according to their performance",
+                                  "(see barplot at the top of the line). The factor x is regulated via the slider on the right.",
+                                  "All occurences of each histone modification are counted - in subsets with one or two histone modifications - ",
+                                  "how often it occurs in subsets of one histone modification, is shown in brakes behind the first number.",
+                                  "Different datasets and methods can be compared, shown in the header in the format <dataset> - <method>."))
                         )
                       )
              ),
