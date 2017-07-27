@@ -174,7 +174,8 @@ shinyUI(
                           ),
                           radioButtons("method_histone", label="Methods", 
                                        choices = c("Random Forest" = "RFC", 
-                                                   "Support Vector Machine" = "SVC"),
+                                                   "Support Vector Machine" = "SVC",
+                                                   "Deep Learning" = "DL"),
                                        selected = "RFC"),
                           radioButtons("dataset_histone", label="Data sets",
                                        choices = c("K562" = "K562", 
@@ -191,6 +192,7 @@ shinyUI(
                           checkboxGroupInput("methods_comp_histone", label="Methods for comparison",
                                              choices = c("Random Forest" = "RFC", 
                                                          "Support Vector Machine" = "SVC",
+                                                         "Deep Learning" = "DL",
                                                          "Linear Regression" = "LR",
                                                          "RF Regression" = "RFR", 
                                                          "SVM Regression" = "SVR"),
@@ -202,8 +204,10 @@ shinyUI(
                           p(paste("To test the influence of each histone modification on the complete performance, we run subsets of the data",
                                   "containing always only one or two histone modifications. The barplot above shows the results for one dataset and",
                                   "one method, where the performance results are ordered descending. It can be seen cleary that with only two histone",
-                                  "modifications nearly the same performance than with the complete data set can be achieved. So the information",
-                                  "between the histone modifications seems to be quite redundant. ")),
+                                  "modifications nearly the same performance than with the complete data set can be achieved. The performance of multiple",
+                                  "pairs is nearly identical, so it is not possible to see if there is a or a few histone modifications which is clearly more",
+                                  "important. Furthermore, the most important histone modification differ more between the methods than between the data sets.",
+                                  "So the information between the histone modifications seems to be quite redundant.")),
                           tableOutput('histoneComparison'),
                           p(paste("The table shows the number of occurrences of each histone modification in the top x%",
                                   "of the run subsets of one and two histone modifications, when ordering them according to their performance",
@@ -243,12 +247,17 @@ shinyUI(
                           p(paste0("Choosing the optimal parameters, which were detected during the model development, ",
                                    "different data sets were tested using all possible classification and regression ",
                                    "methods in a 10-fold cross validation. The best determined parameters were thereby ",
-                                   "a normalized data set, usisng all bins and all histone modifications, which were ",
+                                   "a scaled data set, using all bins and all histone modifications, which were ",
                                    "in common for all data sets, and for classification the labeling method median.")
                           ),
                           plotlyOutput("dataMatrix"),
                           br(),
-                          p("The matrix above ")
+                          p(paste("The matrix above shows how the methods perform, if they were trained on one data set and tested",
+                                  "on another data set. The performance in the diagonal, when training and predicting on the same",
+                                  "data set, is clearly the best, of course. Off the diagonal, the performs varys between the methods clearly.",
+                                  "The results for SVM stay good, which would indicate that the histone signal connected with gene expression",
+                                  "is very similar across different cell types",
+                                  "in human, while for Random Forest the performs drops significantly."))
                         )
                       )
                       
@@ -268,11 +277,15 @@ shinyUI(
                             tabsetPanel(id="DLtab",
                               tabPanel("Graph layout",
                                        br(),
-                                       plotlyOutput("dl_Layout")
+                                       plotlyOutput("dl_Layout"),
+                                       br(),
+                                       p("The layout of the graph influences the ...")
                               ),
                               tabPanel("Learning rates",
                                        br(),
-                                       plotlyOutput("dl_learningRates")
+                                       plotlyOutput("dl_learningRates"),
+                                       br(),
+                                       p("TODO ...")
                               ),
                               tabPanel("Bin Importance",
                                        br(),
