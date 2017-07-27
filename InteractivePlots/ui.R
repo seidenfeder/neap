@@ -230,7 +230,7 @@ shinyUI(
                                                          "Gastrocnemius medialis"="gastrocnemius medialis",
                                                          "SK-N-SH"="SK-N-SH",
                                                          "Thyroid gland"="thyroid gland",
-                                                         "Merged big data set" = "bigData"),
+                                                         "Merged big data set" = "BigData"),
                                              selected = c("K562","Endo","keratinocyte")),
                           radioButtons("method_2_comp", label="Method shown in the comparison matrix",
                                        c("Random Forest" = "RF",
