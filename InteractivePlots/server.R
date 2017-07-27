@@ -982,7 +982,7 @@ shinyServer(
     
     output$labelTextRun<-renderText({
       if(is.numeric(calculateScore())){
-        return(paste("This plot shows the performance of your own test set and on different other test sets after training it ",
+        return(paste("This plot shows the performance of your own test set and on different other test sets after training the mode ",
                      "on the choosed dataset."))
       }
       else{
