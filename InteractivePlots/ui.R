@@ -292,10 +292,6 @@ shinyUI(
                                        plotlyOutput("dl_learningRates"),
                                        br(),
                                        p("TODO ...")
-                              ),
-                              tabPanel("Bin Importance",
-                                       br(),
-                                       plotlyOutput("binImp")
                               )
                           )
                       )

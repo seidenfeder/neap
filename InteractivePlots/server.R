@@ -862,32 +862,6 @@ shinyServer(
         )
     })
     
-    output$binImp<-renderPlotly({
-      data<-read.csv("PlotInput/deepLearningBins.txt",sep="\t",header=F)
-      matches <- grepl(paste(input$datasets_DL,collapse="|"), data$V1)
-      plottedData<-data[matches,]
-      
-      #Create interactive line plots
-      color1<-c("blue","red")
-      plot_ly(y = plottedData$V3,
-              x = plottedData$V2, type="scatter", 
-              color=plottedData$V1,
-              colors = color1,
-              mode="lines")%>%
-        layout(title = paste('Performance for each bin'),
-               xaxis = list(
-                 title = "Bin",
-                 tickvals = c(20,40,60,100,120,140),
-                 ticktext = c("-20","TSS","+20","-20","TTS","+20")
-               ),
-               yaxis = list(
-                 title = "AUC Score"
-               )
-        )
-      
-      
-    })
-    
     ####################################################################################
     # Plots for the run prediction tab
     
