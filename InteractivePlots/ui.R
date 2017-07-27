@@ -64,7 +64,10 @@ shinyUI(
                                  div("..."),
                                  div("#Genename2"),
                                  div("..."),
-                                 strong("Labels File")
+                                 strong("Labels File:"),
+                                 div("## Additional Inforamtion"),
+                                 div("Genename   Expression_Value    Class"),
+                                 br()
                                  
                           ),
                           column(2,
@@ -312,7 +315,16 @@ shinyUI(
                           plotlyOutput("comparePredicton")
 
                         )
-                      )
+                      ),
+                      tags$footer("My footer", align = "center", style = "
+              position:absolute;
+              bottom:0;
+              width:100%;
+              height:50px;   /* Height of the footer */
+              color: white;
+              padding: 10px;
+              background-color: black;
+              z-index: 1000;")
             )
   )
 )
