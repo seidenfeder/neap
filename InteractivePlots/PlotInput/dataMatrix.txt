@@ -76,7 +76,7 @@ RF	BigData	keratinocyte	0.604325236786
 RF	BigData	gastrocnemius medialis	0.899266772951
 RF	BigData	SK-N-SH	0.797428132984
 RF	BigData	thyroid gland	0.464131467921
-SVM	BigData	endothelial cell of umbilical vein	0.918651905457
+SVM	BigData	Endo	0.918651905457
 SVM	BigData	K562	0.938599316707
 SVM	BigData	keratinocyte	0.909256151895
 SVM	BigData	gastrocnemius medialis	0.919598651316
@@ -86,11 +86,11 @@ SVM	Endo	BigData	0.855518969951
 SVM	K562	BigData	0.857617645858
 SVM	SK-N-SH	BigData	0.857801083292
 SVM	keratinocyte	BigData	0.85479444537
-SVM	gastrocnemius_medialis	BigData	0.864505904879
-SVM	thyroid_gland	BigData	0.852920624055
+SVM	gastrocnemius medialis	BigData	0.864505904879
+SVM	thyroid gland	BigData	0.852920624055
 RF	Endo	BigData	0.685406529892
 RF	K562	BigData	0.470877442556
 RF	SK-N-SH	BigData	0.745028540728
 RF	keratinocyte	BigData	0.789452442978
-RF	gastrocnemius_medialis	BigData	0.863553105769
-RF	thyroid_gland	BigData	0.812260119683
+RF	gastrocnemius medialis	BigData	0.863553105769
+RF	thyroid gland	BigData	0.812260119683
