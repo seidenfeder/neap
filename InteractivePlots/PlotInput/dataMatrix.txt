@@ -70,3 +70,18 @@ SVM	thyroid gland	keratinocyte	0.910648146421
 SVM	thyroid gland	gastrocnemius medialis	0.92025785036
 SVM	thyroid gland	SK-N-SH	0.89730333822
 SVM	thyroid gland	thyroid gland	0.963188215836
+RF	BigData	Endo	0.742218227246
+RF	BigData	K562	0.723585854724
+RF	BigData	keratinocyte	0.604325236786
+RF	BigData	gastrocnemius medialis	0.899266772951
+RF	BigData	SK-N-SH	0.797428132984
+RF	BigData	thyroid gland	0.464131467921
+SVM	BigData	endothelial cell of umbilical vein	0.918651905457
+SVM	BigData	K562	0.938599316707
+SVM	BigData	keratinocyte	0.909256151895
+SVM	BigData	gastrocnemius medialis	0.919598651316
+SVM	BigData	SK-N-SH	0.896297888353
+SVM	BigData	thyroid gland	0.894937710324
+SVM	Endo	BigData	0.855518969951
+SVM	K562	BigData	0.857617645858
+SVM	SK-N-SH	BigData	0.857801083292
