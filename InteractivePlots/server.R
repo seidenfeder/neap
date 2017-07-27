@@ -394,7 +394,7 @@ shinyServer(
                 x = plottedData$V3,
                 color=~plottedData$dens
         )%>%
-          layout(title = paste('Regression with',input$method,sep=" "),
+          layout(title = paste('Regression with',input$method,"without expression values of 0",sep=" "),
                  xaxis = list(
                    title = "Measured"),
                  yaxis = list(
@@ -423,7 +423,7 @@ shinyServer(
                 x = plottedData$V3,
                 color=~plottedData$dens
         )%>%
-          layout(title = paste('Regression with',input$method,sep=" "),
+          layout(title = paste('Regression with',input$method, "with expression values of 0",sep=" "),
                  xaxis = list(
                    title = "Measured"),
                  yaxis = list(
