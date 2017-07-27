@@ -63,7 +63,8 @@ shinyServer(
       if(input$type_histone == "c"){
         updateRadioButtons(session, "method_histone", label="Methods", 
                                  choices = c("Random Forest" = "RFC", 
-                                             "Support Vector Machine" = "SVC"),
+                                             "Support Vector Machine" = "SVC",
+                                             "Deep Learning" = "DL"),
                                  selected = "RFC")
       }
       else{
@@ -546,7 +547,7 @@ shinyServer(
                  yaxis = list(
                    title = yAxisTitle
                  ),
-                 margin(t=50)
+                 margin = list(t=30)
           )
       }
       else{
@@ -584,12 +585,27 @@ shinyServer(
       return(dataNew)
     })
     
+    dlHistones <- reactive({
+      data<-read.csv("PlotInput/deepLearning_histonMod.txt",sep="\t",header=F)
+      
+      dataNew<-data.frame(dataset=data$V1,
+                          method="DL",
+                          histone=gsub("-human","",data$V2),
+                          performanceMean=as.numeric(data$V3),
+                          type='Single')
+      dataNew$type <- factor(dataNew$type, levels=c(levels(dataNew$type), 'All', 'Pair'))
+      dataNew$type[dataNew$histone=='All']<-'All'
+      dataNew$type[grepl("-",dataNew$histone)]<-'Pair'
+      
+      return(dataNew)
+    })
     output$histonePlot<-renderPlotly({
       
       dataSingle<-singleHistons()
       dataPairs<-pairsHistons()
+      dataDL<-dlHistones()
       
-      dataAll<-rbind(dataSingle, dataPairs)
+      dataAll<-rbind(dataSingle, dataPairs,dataDL)
       
       #Filter data according to the selected datasets
       dataAll<-dataAll[dataAll$dataset==input$dataset_histone,]
@@ -616,7 +632,7 @@ shinyServer(
                  title = "AUC Score",
                  tickangle = 90
                ),
-               margin=list(b=230)
+               margin=list(b=120)
         )
     })
     
@@ -625,8 +641,9 @@ shinyServer(
       
       dataSingle<-singleHistons()
       dataPairs<-pairsHistons()
+      dataDL<-dlHistones()
       
-      dataAll<-rbind(dataSingle, dataPairs)
+      dataAll<-rbind(dataSingle, dataPairs,dataDL)
       
       #Filter data according to the selected methods
       matches <- grepl(paste(input$methods_comp_histone,collapse="|"), dataAll$method)
@@ -776,12 +793,13 @@ shinyServer(
               color = paste(plottedData$V1,plottedData$V2,plottedData$V3,sep="-"),
               type="scatter",
               mode="lines")%>%
-        layout(title = 'Influence of the learning rate',
+        layout(title = 'Influence of the number of convolution layer',
                xaxis = list(
                  title = "Step"),
                yaxis = list(
                  title = "Auc score"
-               )
+               ),
+               margin = list(t=30)
         )
     })
     
@@ -816,7 +834,8 @@ shinyServer(
                  title = "Step"),
                yaxis = list(
                  title = "Auc score"
-               )
+               ),
+               margin = list(t=30)
         )
     })
     
