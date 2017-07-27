@@ -544,7 +544,7 @@ shinyServer(
                  yaxis = list(
                    title = yAxisTitle
                  ),
-                 margin(t=50)
+                 margin = list(t=30)
           )
       }
       else{
@@ -774,12 +774,13 @@ shinyServer(
               color = paste(plottedData$V1,plottedData$V2,plottedData$V3,sep="-"),
               type="scatter",
               mode="lines")%>%
-        layout(title = 'Influence of the learning rate',
+        layout(title = 'Influence of the number of convolution layer',
                xaxis = list(
                  title = "Step"),
                yaxis = list(
                  title = "Auc score"
-               )
+               ),
+               margin = list(t=30)
         )
     })
     
@@ -814,7 +815,8 @@ shinyServer(
                  title = "Step"),
                yaxis = list(
                  title = "Auc score"
-               )
+               ),
+               margin = list(t=30)
         )
     })
     

@@ -199,7 +199,11 @@ shinyUI(
                         ),
                         mainPanel(
                           plotlyOutput("histonePlot"),
-                          p(),
+                          p(paste("To test the influence of each histone modification on the complete performance, we run subsets of the data",
+                                  "containing always only one or two histone modifications. The barplot above shows the results for one dataset and",
+                                  "one method, where the performance results are ordered descending. It can be seen cleary that with only two histone",
+                                  "modifications nearly the same performance than with the complete data set can be achieved. So the information",
+                                  "between the histone modifications seems to be quite redundant. ")),
                           tableOutput('histoneComparison'),
                           p(paste("The table shows the number of occurrences of each histone modification in the top x%",
                                   "of the run subsets of one and two histone modifications, when ordering them according to their performance",
@@ -225,7 +229,8 @@ shinyUI(
                                                          "Keratinocyte"="keratinocyte",
                                                          "Gastrocnemius medialis"="gastrocnemius medialis",
                                                          "SK-N-SH"="SK-N-SH",
-                                                         "Thyroid gland"="thyroid gland"),
+                                                         "Thyroid gland"="thyroid gland",
+                                                         "Merged big data set" = "bigData"),
                                              selected = c("K562","Endo","keratinocyte")),
                           radioButtons("method_2_comp", label="Method shown in the comparison matrix",
                                        c("Random Forest" = "RF",
@@ -315,16 +320,16 @@ shinyUI(
                           plotlyOutput("comparePredicton")
 
                         )
-                      ),
-                      tags$footer("My footer", align = "center", style = "
-              position:absolute;
-              bottom:0;
-              width:100%;
-              height:50px;   /* Height of the footer */
-              color: white;
-              padding: 10px;
-              background-color: black;
-              z-index: 1000;")
+                      )#,
+                      #tags$footer("My footer", align = "center", style = "
+#               position:absolute;
+#               bottom:0;
+#               width:100%;
+#               height:50px;   /* Height of the footer */
+#               color: white;
+#               padding: 10px;
+#               background-color: black;
+#               z-index: 1000;")
             )
   )
 )
