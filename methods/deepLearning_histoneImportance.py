@@ -158,13 +158,13 @@ def run_training(datasets, chkptfile=None):
     kprob = 0.5
 
     #For naming the mode file
-    k_toSTr = ",".join(map(str,FLAGS["conv"]))
-    Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
-    m_toStr = ",".join(map(str,FLAGS["mpool"]))
+    #k_toSTr = ",".join(map(str,FLAGS["conv"]))
+    #Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
+    #m_toStr = ",".join(map(str,FLAGS["mpool"]))
     
     print("starting to train")
     with tf.Graph().as_default():
-        start_time = time.time()
+        #start_time = time.time()
 
         # build the graph
         bins = tf.placeholder(tf.float32, [None, numBins, numHistons])
@@ -188,16 +188,15 @@ def run_training(datasets, chkptfile=None):
         sess = tf.Session()
 
         
-        mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob) + "_c"+k_toSTr + "_Nout"+Nout_toStr + "_m" + m_toStr
-        if(FLAGS["batchnorm"]):
-            mod_dir = mod_dir + "_batchnorm"
+        #mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob) + "_c"+k_toSTr + "_Nout"+Nout_toStr + "_m" + m_toStr
+        #if(FLAGS["batchnorm"]):
+        #   mod_dir = mod_dir + "_batchnorm"
             
         #write the summary to the folder logdir
-        mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
+        #mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
 
-        train_writer = tf.summary.FileWriter(mod_dir + '/train',
-                                      sess.graph)
-        test_writer = tf.summary.FileWriter(mod_dir + '/test')
+        #train_writer = tf.summary.FileWriter(mod_dir + '/train',sess.graph)
+        #test_writer = tf.summary.FileWriter(mod_dir + '/test')
 
         init = tf.global_variables_initializer()
         initLocal = tf.local_variables_initializer()
@@ -206,8 +205,7 @@ def run_training(datasets, chkptfile=None):
        
 
         #Create an output file to store the AUC performance results for the website
-        if FLAGS["outputfile"] != "None":
-            outFile = open(FLAGS["outputfile"], 'a')
+        outFile = open(FLAGS["outputfile"], 'a')
         
         #restore trained data if chkptfile is given
         startv = 0
@@ -230,35 +228,33 @@ def run_training(datasets, chkptfile=None):
             _ , loss_value = sess.run([train_op, los], feed_dict=feed_dict)
 
 
-            duration = time.time() - start_time
+            #duration = time.time() - start_time
 
             #print current loss value
-            if i%100 == 0:
-                print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
-                feed_dict[keep_prob] = 1.0
+            #if i%100 == 0:
+                #print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
+                #feed_dict[keep_prob] = 1.0
                 
-                sess.run(initLocal)
-                summary_str, auc = sess.run([summary,eval_correct], feed_dict=feed_dict)
-                
-                   
+                #sess.run(initLocal)
+                #summary_str, auc = sess.run([summary,eval_correct], feed_dict=feed_dict)
+                    
                 #Update the events file
-                train_writer.add_summary(summary_str, i)
-                train_writer.flush()
+                #train_writer.add_summary(summary_str, i)
+                #train_writer.flush()
 
             #check performance based on validation set
             #if (i + 1) % 1000 == 0 or (i + 1) == niter:
-                checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
-                saver.save(sess, checkpoint_file, global_step=global_step)
+                #checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
+                #saver.save(sess, checkpoint_file, global_step=global_step)
                 
-                tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
-                sess.run(initLocal)
-                summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
+                #tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
+                #sess.run(initLocal)
+                #summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
                 
-                print('AUC score at step %s: %s' % (i, auc[1]))
-                
-                   
-                test_writer.add_summary(summary_str, i)
-                test_writer.flush()
+                #print('AUC score at step %s: %s' % (i, auc[1]))
+                    
+                #test_writer.add_summary(summary_str, i)
+                #test_writer.flush()
 
 
 
@@ -269,14 +265,11 @@ def run_training(datasets, chkptfile=None):
 
         summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
         print('Auc score of %s' % (auc[1]))
-        if FLAGS["outputfile"] != "None":
-                    outFile.write(FLAGS["outputtag"] + "\t"+FLAGS["bin"]+"\t"+str(auc[1])+"\n")
-                 
-        test_writer.close()
-        train_writer.close()
-        
-        if FLAGS["outputfile"] != "None":
-            outFile.close()
+
+        #test_writer.close()
+        #train_writer.close()
+        outFile.write(FLAGS["dataset"] + "\t" + FLAGS["outputtag"] + "\t"+str(auc[1])+"\n")
+        outFile.close()
 
 #Split a data set random into two parts in a specific ratio
 def splitRandom(ratio, windows, labels):
@@ -392,9 +385,10 @@ if __name__ == "__main__":
     parser.add_argument("--saveFastdatadir", help="Directory to save parsed data, which is splitted into training, validation and test, for fast loading the next time (the directory need to exists already).",default="")
     parser.add_argument("--plot", help="Plot the distribution of the 0/1 labels in the training, validation and test set", action='store_true')
     parser.add_argument("--batchnorm", help="If set performs batch normalization instead of drop-out", action='store_true')
-    parser.add_argument("--outputfile", help="Save the last auc score in this file",default ="None")
-    parser.add_argument("-b", help="give a bin for the case you want to train only on one bin", dest="bin",default=-1)
+    parser.add_argument("--outputfile", help="Save the output AUC scores in a text file (to insert plots into the web browser)",default ="None")
+
     parser.add_argument("--outputtag", help="String to identify different runs in the output file.")
+    parser.add_argument("--dataset",help="Dataset displayed in the outputfile.")
 
     args = parser.parse_args()
 
@@ -404,8 +398,6 @@ if __name__ == "__main__":
     saveFastdatadir = args.saveFastdatadir
     testfile = args.test
     labelsTest = args.labelsTest
-    FLAGS["bin"]=args.bin
-    oneBin = FLAGS["bin"]
     
     FLAGS["logdir"] = args.logdir
     FLAGS["learnrate"] = args.learnrate
@@ -413,7 +405,7 @@ if __name__ == "__main__":
     FLAGS["batchsize"] = args.batchsize
     FLAGS["batchnorm"] = args.batchnorm
     FLAGS["outputfile"] = args.outputfile
-    FLAGS["outputtag"] = args.outputtag
+    FLAGS["dataset"] = args.dataset
     
     FLAGS["mpool"]=args.mpool
     
@@ -460,6 +452,14 @@ if __name__ == "__main__":
         FLAGS["numHistons"]=len(train[0][0])
         FLAGS["numBins"]=len(train[0])
         
+        #To get the name of the histone modifications
+        trainingData = args.data
+        with open(trainingData) as featureFile:
+            #Name of the data set (from the header)
+            dataset=featureFile.readline().rstrip()[2:]
+            #All modifications
+            modifications=featureFile.readline().rstrip()[2:].split(" ")
+            
         print("finished reading in data!")
         
     else:
@@ -546,6 +546,7 @@ if __name__ == "__main__":
                         labelDict2[lineSplit[0]]=[0,1]
                     else:
                         print("Fehler beim Parsen des Input-Files.")
+                        
             with open(testfile) as test:
                 #Name of the data set (from the header)
                 datasetTest=test.readline().rstrip()[2:]
@@ -595,21 +596,48 @@ if __name__ == "__main__":
             np.save(os.path.join(saveFastdatadir, "test1_win.npz.npy"),test)
             np.save(os.path.join(saveFastdatadir, "test1_lab.npz.npy"),testL)
             print("saving parsed data to the directory")
-    # For the case you want only one bin extract that one bin
-    if(int(oneBin)>-1):
-        test= test[:,oneBin]
-        train= train[:,oneBin]
-        valid= valid[:,oneBin]
-        
-    datasets = {}
-    datasets["train"]= Dataset(train,trainL)
-    datasets["validate"] = Dataset(valid,validL)
-    datasets["test"] = Dataset(test,testL)
-
+            
     #Plot distribution of the labels in the three sets
     if(args.plot):
         print("Plotting the label distribution")
         plotStateDistribution(trainL, validL, testL)
-    run_training(datasets)
+    
+    #Save result when using all modifications
+    print("All")
+    FLAGS["outputtag"] = "All"
+    datasets = {}
+    datasets["train"]= Dataset(train,trainL)
+    datasets["validate"] = Dataset(valid,validL)
+    datasets["test"] = Dataset(test,testL)
+    
+    run_training(datasets)    
+    
+    #Get results when using only a single histone modification
+    FLAGS["numHistons"]=1
+    for i in range(0,len(modifications)):
+        FLAGS["outputtag"] = modifications[i]
+        
+        print(modifications[i])
+        
+        #Split the data into training and test set
+        datasets = {}
+        datasets["train"]= Dataset(train[:,:,[i]],trainL)
+        datasets["validate"] = Dataset(valid[:,:,[i]],validL)
+        datasets["test"] = Dataset(test[:,:,[i]],testL)
 
+        run_training(datasets)
 
+    #Get the results when using two histone modifications
+    FLAGS["numHistons"]=2
+    for i in range(0,len(modifications)):
+        for j in range(i+1,len(modifications)):
+            FLAGS["outputtag"] = modifications[i]+"-"+modifications[j] 
+            print(FLAGS["outputtag"])
+            
+            #Split the data into training and test set
+            datasets = {}
+            datasets["train"]= Dataset(train[:,:,[i,j]],trainL)
+            datasets["validate"] = Dataset(valid[:,:,[i,j]],validL)
+            datasets["test"] = Dataset(test[:,:,[i,j]],testL)
+    
+            run_training(datasets)
