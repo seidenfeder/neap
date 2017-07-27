@@ -157,6 +157,36 @@ shinyServer(
         NULL
       }
     })
+    
+    output$flexibelSetOptionsDL<-renderUI({
+      if (input$DLtab == "Learning rates" | input$DLtab == "Graph layout") {
+        checkboxGroupInput("sets_DL", label="Shown curves",
+                           choices = c("Training set" = "train", 
+                                       "Test set" = "test"),
+                           selected = c("train"))
+      } else {
+        NULL
+      }
+      
+    })
+    
+    output$flexibelCheckDL<-renderUI({
+      if (input$DLtab == "Learning rates") {
+        checkboxGroupInput("learnrate_DL", label="Learning rates",
+                           choices = c("0.05", 
+                                       "0.005",
+                                       "0.0005"),
+                           selected = c("0.005"))
+      } else if (input$DLtab == "Graph layout") {
+        checkboxGroupInput("graph_DL", label="Graph layout",
+                           choices = c("1 Convolution layer" = "C1", 
+                                       "2 Convolution layers" = "C2",
+                                       "5 Convolution layers" = "C5"),
+                           selected = c("C2"))
+      } else {
+        NULL
+      }
+    })
       
     ####################################################################################
     # Plots for the model development tab
@@ -195,7 +225,7 @@ shinyServer(
                  yaxis = list(
                    title = "AUC Score"
                  ),
-                 margin = list(b = 100, r=50)
+                 margin = list(b = 100, r=50, t=30)
           )
       }
       else{
@@ -259,7 +289,8 @@ shinyServer(
                    ticktext = c("-20","TSS","+20","-20","TTS","+20")),
                  yaxis = list(
                    title = yAxisTitle
-                 )
+                 ),
+                 margin = list(t=30)
           )
       }
       else{
@@ -321,7 +352,7 @@ shinyServer(
                  yaxis = list(
                    title = yaxisTitle
                  ),
-                 margin = list(b = 100, r=50)
+                 margin = list(b = 100, r=50, t=30)
           )
       }
       else{
@@ -701,13 +732,60 @@ shinyServer(
 
     ####################################################################################
     # Plots for the deep learning tab
+
+    output$dl_Layout<-renderPlotly({
+      
+      data<-read.csv("PlotInput/deepLearning_graphLayout.txt",sep="\t",header=F)
+      
+      #Filter data set
+      matches <- grepl(paste(input$datasets_DL,collapse="|"), data$V1)
+      plottedData<-data[matches,]
+      
+      #Filter train - test set
+      matches <- grepl(paste(input$sets_DL,collapse="|"), plottedData$V3)
+      plottedData<-plottedData[matches,]
+      
+      #Filter the learning rate
+      matches <- grepl(paste0(input$graph_DL,collapse="|"), plottedData$V2)
+      plottedData<-plottedData[matches,]
+      
+      plot_ly(y = as.numeric(plottedData$V5),
+              x = as.numeric(plottedData$V4),
+              color = paste(plottedData$V1,plottedData$V2,plottedData$V3,sep="-"),
+              type="scatter",
+              mode="lines")%>%
+        layout(title = 'Influence of the learning rate',
+               xaxis = list(
+                 title = "Step"),
+               yaxis = list(
+                 title = "Auc score"
+               )
+        )
+    })
+    
     
     output$dl_learningRates<-renderPlotly({
+      
       data<-read.csv("PlotInput/deepLearning_learningrates.txt",sep="\t",header=F)
       
-      plot_ly(y = as.numeric(data$V4),
-              x = as.numeric(data$V3),
-              color = paste(data$V1,data$V2,sep="-"),
+      #Filter data set
+      matches <- grepl(paste(input$datasets_DL,collapse="|"), data$V1)
+      plottedData<-data[matches,]
+      
+      #Filter train - test set
+      matches <- grepl(paste(input$sets_DL,collapse="|"), plottedData$V3)
+      plottedData<-plottedData[matches,]
+      
+      #Display for digits of the numbers without exponentaion notation
+      options(scipen=4)
+      
+      #Filter the learning rate
+      matches <- grepl(paste0(input$learnrate_DL,collapse="|"), plottedData$V2)
+      plottedData<-plottedData[matches,]
+      
+      plot_ly(y = as.numeric(plottedData$V5),
+              x = as.numeric(plottedData$V4),
+              color = paste(plottedData$V1,plottedData$V2,plottedData$V3,sep="-"),
               type="scatter",
               mode="lines")%>%
       layout(title = 'Influence of the learning rate',
@@ -721,7 +799,7 @@ shinyServer(
     
     output$binImp<-renderPlotly({
       data<-read.csv("PlotInput/deepLearningBins.txt",sep="\t",header=F)
-      matches <- grepl(paste(input$dataset_deep,collapse="|"), data$V1)
+      matches <- grepl(paste(input$datasets_DL,collapse="|"), data$V1)
       plottedData<-data[matches,]
       
       #Create interactive line plots
@@ -751,10 +829,20 @@ shinyServer(
     #Calculate the auc score for the loaded data
     calculateScore <- eventReactive(input$action, {
 
-      if (is.null(input$binningFile) | is.null(input$labelFile)){
+      #Check if all necessary files are uploaded
+      if (input$type_3 == "c" & (is.null(input$binningFile) | is.null(input$labelFile))){
         showModal(modalDialog(
           title = "Error!",
           "Please upload a feature and a lable file!"
+        ))
+        
+        return(NULL)
+      }
+      
+      if (input$type_3 == "r" & is.null(input$binningFile)){
+        showModal(modalDialog(
+          title = "Error!",
+          "Please upload a feature file!"
         ))
         
         return(NULL)
@@ -783,11 +871,7 @@ shinyServer(
                              "-i",input$binningFile$datapath,"-m", model,"-a -n")
       }
 
-      
-      print(systemCommand)
       score<-withProgress(message="Prediction",value=0.5,expr={system(systemCommand, intern=T)})
-      
-      print(score)
       return(as.numeric(score))
     })
     

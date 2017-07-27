@@ -232,35 +232,34 @@ shinyUI(
                       
              ),
              tabPanel("Deep Learning",
-                      tabsetPanel(
-                        tabPanel("Graph layout",
-                                 br(),
-                                 plotlyOutput("dl_Layout")
-                        ),
-                        tabPanel("Learning rates",
-                                 br(),
-                                 plotlyOutput("dl_learningRates")
-                        ),
-                        tabPanel("Data sets",
-                                 br(),
-                                 plotlyOutput("dl_datasets")
-                        ),
-                        tabPanel("Bin Importance",
-                                 sidebarLayout(
-                                   sidebarPanel(
-                                     radioButtons("dataset_deep", label="Dataset",
-                                                  choices = c("K562" = "K562", 
-                                                              "Endothelial cell of umbilical vein" = "Endo",
-                                                              "Keratinocyte"="keratinocyte"),
-                                                  selected = "K562")
-                                     ),
-                                   mainPanel(
-                                     br(),
-                                     plotlyOutput("binImp")
-                                     )
-                                   )
-                                 
-                                 ))
+                      sidebarLayout(
+                        sidebarPanel(
+                          checkboxGroupInput("datasets_DL", label="Data sets",
+                                             choices = c("K562" = "K562", 
+                                                         "Endothelial cell of umbilical vein" = "Endo",
+                                                         "Keratinocyte"="Kera"),
+                                             selected = c("K562")),
+                          uiOutput("flexibelSetOptionsDL"),
+                          uiOutput("flexibelCheckDL")
+                          ),
+                          mainPanel(
+                            tabsetPanel(id="DLtab",
+                              tabPanel("Graph layout",
+                                       br(),
+                                       plotlyOutput("dl_Layout")
+                              ),
+                              tabPanel("Learning rates",
+                                       br(),
+                                       plotlyOutput("dl_learningRates")
+                              ),
+                              tabPanel("Bin Importance",
+                                       br(),
+                                       plotlyOutput("binImp")
+                              ),
+                              tabPanel("Histone Importance")
+                          )
+                      )
+                    )
              ),
              tabPanel("Run prediction",
                       sidebarLayout(

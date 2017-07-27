@@ -241,7 +241,7 @@ def run_training(datasets, chkptfile=None):
                 summary_str, auc = sess.run([summary,eval_correct], feed_dict=feed_dict)
                 
                 if FLAGS["outputfile"] != "None":
-                    outFile.write(FLAGS["outputtag"] + "\ttrain\t"+str(i)+"\t"+str(auc[1])+"\n")
+                    outFile.write(FLAGS["dataset"] + "\t" + FLAGS["outputtag"] + "\ttrain\t"+str(i)+"\t"+str(auc[1])+"\n")
                     
                 #Update the events file
                 train_writer.add_summary(summary_str, i)
@@ -259,7 +259,7 @@ def run_training(datasets, chkptfile=None):
                 print('AUC score at step %s: %s' % (i, auc[1]))
                 
                 if FLAGS["outputfile"] != "None":
-                    outFile.write(FLAGS["outputtag"] + "\ttest\t"+str(i)+"\t"+str(auc[1])+"\n")
+                    outFile.write(FLAGS["dataset"] + "\t" + FLAGS["outputtag"] + "\ttest\t"+str(i)+"\t"+str(auc[1])+"\n")
                     
                 test_writer.add_summary(summary_str, i)
                 test_writer.flush()
@@ -397,6 +397,7 @@ if __name__ == "__main__":
     parser.add_argument("--outputfile", help="Save the output AUC scores in a text file (to insert plots into the web browser)",default ="None")
 
     parser.add_argument("--outputtag", help="String to identify different runs in the output file.")
+    parser.add_argument("--dataset",help="Dataset displayed in the outputfile.")
 
     args = parser.parse_args()
 
@@ -414,6 +415,7 @@ if __name__ == "__main__":
     FLAGS["batchnorm"] = args.batchnorm
     FLAGS["outputfile"] = args.outputfile
     FLAGS["outputtag"] = args.outputtag
+    FLAGS["dataset"] = args.dataset
     
     FLAGS["mpool"]=args.mpool
     
