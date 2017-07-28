@@ -257,7 +257,7 @@ shinyServer(
       #Display the plot only for the classification task and if at least one method is selected
       if(!is.null(input$method)&!is.null(input$datasets)){
         #Read input data
-        if(input$type_spa=="c"){
+        if(input$type=="c"){
           data<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
           
           #Load also the data from the Deep Learning tab
