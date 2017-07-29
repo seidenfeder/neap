@@ -158,13 +158,13 @@ def run_training(datasets, chkptfile=None):
     kprob = 0.5
 
     #For naming the mode file
-    k_toSTr = ",".join(map(str,FLAGS["conv"]))
-    Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
-    m_toStr = ",".join(map(str,FLAGS["mpool"]))
+    #k_toSTr = ",".join(map(str,FLAGS["conv"]))
+    #Nout_toStr = ",".join(map(str,FLAGS["Nout"]))
+    #m_toStr = ",".join(map(str,FLAGS["mpool"]))
     
     print("starting to train")
     with tf.Graph().as_default():
-        start_time = time.time()
+        #start_time = time.time()
 
         # build the graph
         bins = tf.placeholder(tf.float32, [None, numBins, numHistons])
@@ -188,16 +188,15 @@ def run_training(datasets, chkptfile=None):
         sess = tf.Session()
 
         
-        mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob) + "_c"+k_toSTr + "_Nout"+Nout_toStr + "_m" + m_toStr
-        if(FLAGS["batchnorm"]):
-            mod_dir = mod_dir + "_batchnorm"
+        #mod_dir = "mod_%.1e_%d_%.2f"%(learning_rate, niter, kprob) + "_c"+k_toSTr + "_Nout"+Nout_toStr + "_m" + m_toStr
+        #if(FLAGS["batchnorm"]):
+        #    mod_dir = mod_dir + "_batchnorm"
             
         #write the summary to the folder logdir
-        mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
+        #mod_dir = os.path.join(FLAGS["logdir"], mod_dir) 
 
-        train_writer = tf.summary.FileWriter(mod_dir + '/train',
-                                      sess.graph)
-        test_writer = tf.summary.FileWriter(mod_dir + '/test')
+        #train_writer = tf.summary.FileWriter(mod_dir + '/train', sess.graph)
+        #test_writer = tf.summary.FileWriter(mod_dir + '/test')
 
         init = tf.global_variables_initializer()
         initLocal = tf.local_variables_initializer()
@@ -230,11 +229,11 @@ def run_training(datasets, chkptfile=None):
             _ , loss_value = sess.run([train_op, los], feed_dict=feed_dict)
 
 
-            duration = time.time() - start_time
+            #duration = time.time() - start_time
 
             #print current loss value
             if i%100 == 0:
-                print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
+                #print('Step %d: loss = %.2f (%.3f sec)' % (i, loss_value, duration))
                 feed_dict[keep_prob] = 1.0
                 
                 sess.run(initLocal)
@@ -242,23 +241,23 @@ def run_training(datasets, chkptfile=None):
                 
                    
                 #Update the events file
-                train_writer.add_summary(summary_str, i)
-                train_writer.flush()
+                #train_writer.add_summary(summary_str, i)
+                #train_writer.flush()
 
             #check performance based on validation set
-            #if (i + 1) % 1000 == 0 or (i + 1) == niter:
-                checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
-                saver.save(sess, checkpoint_file, global_step=global_step)
+            if (i + 1) % 1000 == 0 or (i + 1) == niter:
+                #checkpoint_file = os.path.join(mod_dir, 'model.ckpt')
+                #saver.save(sess, checkpoint_file, global_step=global_step)
                 
                 tmp_feed_dict = {bins : datasets["validate"].getFlatWindow(), labels_ph : datasets["validate"].labels, keep_prob:1.0}
                 sess.run(initLocal)
                 summary_str, auc = sess.run([summary,eval_correct], feed_dict=tmp_feed_dict)
                 
-                print('AUC score at step %s: %s' % (i, auc[1]))
+                #print('AUC score at step %s: %s' % (i, auc[1]))
                 
                    
-                test_writer.add_summary(summary_str, i)
-                test_writer.flush()
+                #test_writer.add_summary(summary_str, i)
+                #test_writer.flush()
 
 
 
@@ -272,8 +271,8 @@ def run_training(datasets, chkptfile=None):
         if FLAGS["outputfile"] != "None":
                     outFile.write(FLAGS["outputtag"] + "\t"+FLAGS["bin"]+"\t"+str(auc[1])+"\n")
                  
-        test_writer.close()
-        train_writer.close()
+        #test_writer.close()
+        #train_writer.close()
         
         if FLAGS["outputfile"] != "None":
             outFile.close()
@@ -596,10 +595,11 @@ if __name__ == "__main__":
             np.save(os.path.join(saveFastdatadir, "test1_lab.npz.npy"),testL)
             print("saving parsed data to the directory")
     # For the case you want only one bin extract that one bin
+    print(oneBin)
     if(int(oneBin)>-1):
-        test= test[:,oneBin]
-        train= train[:,oneBin]
-        valid= valid[:,oneBin]
+        test= test[:,int(oneBin)]
+        train= train[:,int(oneBin)]
+        valid= valid[:,int(oneBin)]
         
     datasets = {}
     datasets["train"]= Dataset(train,trainL)
