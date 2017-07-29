@@ -257,7 +257,7 @@ shinyServer(
       #Display the plot only for the classification task and if at least one method is selected
       if(!is.null(input$method)&!is.null(input$datasets)){
         #Read input data
-        if(input$type_spa=="c"){
+        if(input$type=="c"){
           data<-read.csv("PlotInput/evalBins.txt", sep="\t", header=F)
           
           #Load also the data from the Deep Learning tab
@@ -502,7 +502,7 @@ shinyServer(
       
       p<-ggplot(data = reshapedData, aes(x = reshapedData$variable, y = reshapedData$names)) +
         geom_tile(aes(fill = Spearman))+
-        scale_fill_gradient2(low = "white",mid="yellow", high = "red", midpoint=0.0)+
+        scale_fill_gradient2(low = "blue",mid="white", high = "red", midpoint=0.0)+
         ggtitle("Correlation Pattern")+
         labs(x="Bins",y="Histone")+
         scale_x_discrete(breaks=c(20,41,60,100,121,140),
@@ -655,7 +655,7 @@ shinyServer(
                  title = "AUC Score",
                  tickangle = 90
                ),
-               margin=list(b=120)
+               margin=list(b=200, t=30)
         )
     })
     
@@ -748,7 +748,7 @@ shinyServer(
                  yaxis = list(
                    title = titleString
                  ),
-                 margin = list(b=120)
+                 margin = list(b=120, t=30)
           )
       }
     })
@@ -785,7 +785,7 @@ shinyServer(
         p<-ggplot(data = plottedData, aes(x = Trainset, y = Testset)) +
           geom_tile(aes(fill = Score))+
           scale_fill_gradient2(low = "white",mid="yellow", high = "red",midpoint=0.5, limits=c(0.0,1.0))+
-          ggtitle("Training on set 1, prediction set 2")+
+          ggtitle("Predicting on a different data set")+
           labs(x="Training Set",y="Test Set")
 
         
