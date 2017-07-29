@@ -94,3 +94,5 @@ RF	SK-N-SH	BigData	0.745028540728
 RF	keratinocyte	BigData	0.789452442978
 RF	gastrocnemius medialis	BigData	0.863553105769
 RF	thyroid gland	BigData	0.812260119683
+RF	BigData	BigData	0.999556498742
+SVM	BigData	BigData	0.922811884714

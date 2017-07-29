@@ -142,3 +142,6 @@ LR	keratinocyte	BigData	0.194858043893
 LR	gastrocnemius medialis	BigData	0.495634996078
 LR	SK-N-SH	BigData	0.159849586577
 LR	thyroid gland	BigData	0.156763178259
+LR	BigData	BigData	0.495634996078
+RF	BigData	BigData	0.92245068686
+SVM	BigData	BigData	0.63601273141
