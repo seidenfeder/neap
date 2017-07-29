@@ -285,13 +285,22 @@ shinyUI(
                                        br(),
                                        plotlyOutput("dl_Layout"),
                                        br(),
-                                       p("The layout of the graph influences the ...")
+                                       p(paste("The layout of the graph influences the performance of the method and the learning curve.",
+                                                "We tested three different layouts, each with a different number of convolution layers.",
+                                                "The network with one convolution layer (with filter size 10 and 50 output channels) had",
+                                                "also one maxpooling layer (with a maxpool parameter of 2), the network with 2 convolution layers",
+                                                "(each filter size 10 and output channels 20 and 50) 2 maxpooling layers after each convolution layer (each with parameter 2)",
+                                                "while the network with 5 convolution layers (each filter size 10 and output channels 20, 30, 40, 50 and 60) contained also",
+                                                "after each convolution a maxpooling layer (each with parameter 2).",
+                                                "General, no big differences can be observed between the layouts."))
                               ),
                               tabPanel("Learning rates",
                                        br(),
                                        plotlyOutput("dl_learningRates"),
                                        br(),
-                                       p("TODO ...")
+                                       p(paste("Of course, also the learning rate influences the learning curve. Choosing the graph layout with 2 convolution layers, we tested",
+                                                "different learning rates. The rate of 0.05 is clearly to huge, as the AUC values of the training set become also much worse again,",
+                                                "between the rate of 0.05 and 0.005 no big differences can be observed."))
                               )
                           )
                       )

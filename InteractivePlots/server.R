@@ -739,7 +739,7 @@ shinyServer(
         plottedData<-droplevels(plottedData)
         
         #Create interactive box plots
-        plot_ly(y = plottedData$value, 
+        plot_ly(y = as.numeric(plottedData$value), 
                 x = paste(plottedData$V1, " - ", plottedData$V2), 
                 type="box")%>%
           layout(title = paste('Cross evaluation of different data sets using different methods'),
@@ -747,7 +747,8 @@ shinyServer(
                    title = "Data set - method"),
                  yaxis = list(
                    title = titleString
-                 )
+                 ),
+                 margin = list(b=120)
           )
       }
     })
