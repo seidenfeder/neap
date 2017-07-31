@@ -123,8 +123,10 @@ shinyUI(
                           plotlyOutput("regressionScatterplotZeros"),
                           div("This tab shows the predicted gen expression value for every single gene. Top the genes with a expression value of 0 were deleted.
                               Down we have the prediction for all genes also the ones with a expression value of 0. To get better inside where many points are plotted 
-                              we used a density scatter plot. You can clearly see that many points are around a logarithmed expression value of 3")
+                              we used a density scatter plot. You can clearly see that many points are around a logarithmed expression value of 3"),
+                          br()
                         )
+                        
                       )
              ),
              tabPanel("Spatial information",
@@ -151,13 +153,15 @@ shinyUI(
                                         br(),
                                         plotlyOutput("signalPattern"),
                                         br(),
-                                        textOutput("signalPatternText")
+                                        textOutput("signalPatternText"),
+                                        br()
                                         ),
                                tabPanel("Correlation Pattern",
                                         br(),
                                         plotlyOutput("corrPattern"),
                                         br(),
-                                        textOutput("corrPatternText")  
+                                        textOutput("corrPatternText"),
+                                        br()
                               )
                             ),
                             br(),
@@ -168,7 +172,8 @@ shinyUI(
                                     "nearly identical. This can be explained, as in K562 there is additionally the histone modification H3K79me2,",
                                     "which has a strong signal in the gene body.")),
                             br(),
-                            plotlyOutput("binsPlot2")
+                            plotlyOutput("binsPlot2"),
+                            br()
                           )
                         )
              ),
@@ -221,7 +226,8 @@ shinyUI(
                                   "(see barplot at the top of the line). The factor x is regulated via the slider on the right.",
                                   "All occurences of each histone modification are counted - in subsets with one or two histone modifications - ",
                                   "how often it occurs in subsets of one histone modification, is shown in brakes behind the first number.",
-                                  "Different datasets and methods can be compared, shown in the header in the format <dataset> - <method>."))
+                                  "Different datasets and methods can be compared, shown in the header in the format <dataset> - <method>.")),
+                          br()
                         )
                       )
              ),
@@ -251,7 +257,7 @@ shinyUI(
                         mainPanel(
                           plotlyOutput("cvData"),
                           br(),
-                          p(paste0("Choosing the optimal parameters, which were detected during the model development, ",
+                          p(paste("Choosing the optimal parameters, which were detected during the model development, ",
                                    "different data sets were tested using all possible classification and regression ",
                                    "methods in a 10-fold cross validation. The best determined parameters were thereby ",
                                    "a scaled data set, using all bins and all histone modifications, which were ",
@@ -264,7 +270,8 @@ shinyUI(
                                   "data set, is clearly the best, of course. Off the diagonal, the performs varys between the methods clearly.",
                                   "The results for SVM stay good, which would indicate that the histone signal connected with gene expression",
                                   "is very similar across different cell types",
-                                  "in human, while for Random Forest the performs drops significantly."))
+                                  "in human, while for Random Forest the performs drops significantly.")),
+                          br()
                         )
                       )
                       
@@ -296,7 +303,8 @@ shinyUI(
                                                 "(each filter size 10 and output channels 20 and 50) 2 maxpooling layers after each convolution layer (each with parameter 2)",
                                                 "while the network with 5 convolution layers (each filter size 10 and output channels 20, 30, 40, 50 and 60) contained also",
                                                 "after each convolution a maxpooling layer (each with parameter 2).",
-                                                "General, no big differences can be observed between the layouts."))
+                                                "General, no big differences can be observed between the layouts.")),
+                                       br()
                               ),
                               tabPanel("Learning rates",
                                        br(),
@@ -304,7 +312,8 @@ shinyUI(
                                        br(),
                                        p(paste("Of course, also the learning rate influences the learning curve. Choosing the graph layout with 2 convolution layers, we tested",
                                                 "different learning rates. The rate of 0.05 is clearly to huge, as the AUC values of the training set become also much worse again,",
-                                                "between the rate of 0.05 and 0.005 no big differences can be observed."))
+                                                "between the rate of 0.05 and 0.005 no big differences can be observed.")),
+                                       br()
                               )
                           )
                       )
@@ -348,19 +357,19 @@ shinyUI(
                           br(),
                           plotlyOutput("comparePredicton"),
                           br(),
-                          textOutput("labelTextRun")
+                          textOutput("labelTextRun"),
+                          br()
 
                         )
-                      )#,
-                      #tags$footer("My footer", align = "center", style = "
-#               position:absolute;
-#               bottom:0;
-#               width:100%;
-#               height:50px;   /* Height of the footer */
-#               color: white;
-#               padding: 10px;
-#               background-color: black;
-#               z-index: 1000;")
-            )
+                      )
+            ),
+            tags$footer("Authors: Nicola Palandt and Kartharina Schmid, Supervisor: Markus Gruber", align = "center", style = "
+               position:absolute;
+                        width:100%;
+                        height:50px;   
+                        color: white;
+                        padding: 10px;
+                        background-color: #3e3f3a;
+                        z-index: 1000;")
   )
 )
