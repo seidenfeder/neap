@@ -135,19 +135,22 @@ shinyServer(
                    br(),
                    plotlyOutput("labelPlot"),
                    br(),
-                   textOutput("labelText")
+                   textOutput("labelText"),
+                   br()
           ),
           tabPanel("Bin importance per bin",
                    br(),
                    plotlyOutput("binsPlot"),
                    br(),
-                   textOutput("binsText")
+                   textOutput("binsText"),
+                   br()
           ),
           tabPanel("Normalization",
                    br(),
                    plotlyOutput("normPlot"),
                    br(),
-                   textOutput("normText")
+                   textOutput("normText"),
+                   br()
           )
         )
       } else {
