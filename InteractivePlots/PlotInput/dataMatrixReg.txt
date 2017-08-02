@@ -106,42 +106,42 @@ LR	thyroid gland	keratinocyte	0.39318166464
 LR	thyroid gland	gastrocnemius medialis	0.156763178259
 LR	thyroid gland	SK-N-SH	0.407578138821
 LR	thyroid gland	thyroid gland	0.462306091983
-RF	BigData	Endo	0.317256359963
-RF	BigData	K562	0.238593106108
-RF	BigData	keratinocyte	0.382862109007
-RF	BigData	gastrocnemius medialis	0.92245068686
-RF	BigData	SK-N-SH	0.396966730759
-RF	BigData	thyroid gland	0.203802799425
-SVM	BigData	Endo	0.35735701413
-SVM	BigData	K562	0.412897997691
-SVM	BigData	keratinocyte	0.405774717025
-SVM	BigData	gastrocnemius medialis	0.63601273141
-SVM	BigData	SK-N-SH	0.398157080798
-SVM	BigData	thyroid gland	0.283071152282
-LR	BigData	Endo	0.232388177217
-LR	BigData	K562	0.315382806428
-LR	BigData	keratinocyte	0.227738324918
-LR	BigData	gastrocnemius medialis	0.495634996078
-LR	BigData	SK-N-SH	0.240569576833
-LR	BigData	thyroid gland	-0.0339190529925
-RF	Endo	BigData	0.366127190058
-RF	K562	BigData	0.29544149671
-RF	keratinocyte	BigData	0.434959890349
-RF	gastrocnemius medialis	BigData	0.923224658128
-RF	SK-N-SH	BigData	0.308725918915
-RF	thyroid gland	BigData	0.363846632354
-SVM	Endo	BigData	0.254278027224
-SVM	K562	BigData	0.0989116992691
-SVM	keratinocyte	BigData	0.300066440026
-SVM	gastrocnemius medialis	BigData	0.63601273141
-SVM	SK-N-SH	BigData	0.312157701941
-SVM	thyroid gland	BigData	0.27247205669
-LR	Endo	BigData	0.221620438153
-LR	K562	BigData	0.159169136357
-LR	keratinocyte	BigData	0.194858043893
-LR	gastrocnemius medialis	BigData	0.495634996078
-LR	SK-N-SH	BigData	0.159849586577
-LR	thyroid gland	BigData	0.156763178259
-LR	BigData	BigData	0.495634996078
-RF	BigData	BigData	0.92245068686
-SVM	BigData	BigData	0.63601273141
+LR	BigData	Endo	0.463247520982
+LR	BigData	K562	0.544974169575
+LR	BigData	keratinocyte	0.459820041316
+LR	BigData	gastrocnemius medialis	0.375782222248
+LR	BigData	SK-N-SH	0.431779541756
+LR	BigData	thyroid gland	0.295520704352
+LR	BigData	BigData	0.489132133584
+RF	BigData	Endo	0.91819724919
+RF	BigData	K562	0.933844659582
+RF	BigData	keratinocyte	0.360008956209
+RF	BigData	gastrocnemius medialis	0.920999076329
+RF	BigData	SK-N-SH	0.455656485422
+RF	BigData	thyroid gland	0.0617666160544
+RF	BigData	BigData	0.927679129765
+LR	Endo	BigData	0.427770792195
+LR	K562	BigData	0.431619280881
+LR	keratinocyte	BigData	0.414140857125
+LR	gastrocnemius medialis	BigData	0.354975317921
+LR	SK-N-SH	BigData	0.358007080818
+LR	thyroid gland	BigData	0.391825699513
+RF	Endo	BigData	0.610881905711
+RF	K562	BigData	0.64273965905
+RF	keratinocyte	BigData	0.355039325705
+RF	gastrocnemius medialis	BigData	0.502174609415
+RF	SK-N-SH	BigData	0.392436153605
+RF	thyroid gland	BigData	0.486708759011
+SVM	Endo	BigData	0.49998603887
+SVM	K562	BigData	0.477635079778
+SVM	keratinocyte	BigData	0.476782310805
+SVM	gastrocnemius medialis	BigData	0.469008086028
+SVM	SK-N-SH	BigData	0.465243245182
+SVM	thyroid gland	BigData	0.450095384843
+SVM	BigData	Endo	0.630311131235
+SVM	BigData	K562	0.700223317811
+SVM	BigData	keratinocyte	0.503941163492
+SVM	BigData	gastrocnemius medialis	0.589188505991
+SVM	BigData	SK-N-SH	0.527423447742
+SVM	BigData	thyroid gland	0.471686669242
+SVM	BigData	BigData	0.65894226255

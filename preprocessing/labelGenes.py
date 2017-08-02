@@ -6,13 +6,13 @@
 # Script to assign the genes to different classes according to their expression value:
 # Method 1 (Cheng et al): use the median value as cut-off (values bigger than the median get the label 1)
 # Method 2 (Dong et al): use zero values (no expression) as cut-off (values bigger than 0 get the label 1)
-# Method 3 (Cheng et al): use the mean value as cut-off (values bigger than the mean get the label 1)
+# Method 3: use the mean value as cut-off (values bigger than the mean get the label 1)
 #
 ##########################################################################################################
 import numpy as np
-
 #Command line parameters
 from optparse import OptionParser
+
 parser = OptionParser()
 parser.add_option("-a", type="string", dest="fileRep1", help = "gene expression file (replicate 1)")
 parser.add_option("-b", type="string", dest="fileRep2", help = "gene expression file (replicate 2)")

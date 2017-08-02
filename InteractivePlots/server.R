@@ -782,6 +782,9 @@ shinyServer(
         matches <- grepl(paste(input$datasets_2,collapse="|"), plottedData$V3)
         plottedData<-plottedData[matches,]
         
+        #For the linear regression there are also negative values possible, set them to 0
+        plottedData$V4[plottedData$V4<0]<-0
+        
         #Rename variables
         colnames(plottedData)<-c("Method","Trainset","Testset","Score")
         #Create heatmap

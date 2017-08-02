@@ -8,7 +8,6 @@
 ####################################################################################################
 
 import numpy as np
-from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from optparse import OptionParser

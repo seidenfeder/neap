@@ -4,7 +4,7 @@
 ##################################################################################################################
 #
 # Script to evaluate the classification and regression performance of the different normalization methods 
-# in normlaization.py using 10-fold cross-validation
+# in normalization.py using 10-fold cross-validation
 #
 ##################################################################################################################
 

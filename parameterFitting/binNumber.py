@@ -3,7 +3,7 @@
 
 ####################################################################################
 #
-# This script tests how the Performance variert with a diffent number of total bins
+# This script tests how the performance is influenced by diffent numbers of total bins
 #
 ####################################################################################
 

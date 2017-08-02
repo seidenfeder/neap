@@ -4,7 +4,8 @@
 ####################################################################################################
 #
 # Script to evaluate the classification performance of the different label methods in labelGenes.py
-# Uses RF and 10-fold crossvalidation
+# It runs Random Forest and Support Vector machines each with a 10-fold crossvalidation for each
+# labeling method
 #
 ####################################################################################################
 

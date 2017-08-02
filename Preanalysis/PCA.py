@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 20 15:21:42 2017
-
-@author: schmidka
-"""
 
 from sklearn.decomposition import PCA
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 from optparse import OptionParser
 parser = OptionParser()

@@ -4,6 +4,8 @@
 #############################################################################################
 #
 # This Method calculates the bins
+# In contrast to bins_adapted here also an annotation file of ENCODE is required to create a
+# header with the cell type and the histone modifications.
 #
 ############################################################################################# 
 

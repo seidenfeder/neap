@@ -3,6 +3,9 @@
 
 ####################################################################################################
 #
+# Adaption of the method regression_storeModel to run on our big merged dataset
+# In the feature file only one header at the beginning of all cell types is allowed
+#
 # This script is able to run the three Regression methods:
 # Linear Regression, Support Vector Machine and Random Forest
 # The output is the r2 scores of the cross validation with the chosen method
@@ -45,19 +48,22 @@ if options.newFormat :
     
 genesModis=dict()
 values = dict()
+#Gene id not unique anymore for the big data set, use a counter instead
+c=0
 for line in featureFile.readlines():
     line=line.rstrip()
     if(line.startswith('#')):
+        c=c+1
         lineSplit=line.split(" ")
         geneID=lineSplit[0]
         #Remove the hashtag at the beginning of the line
         geneID=geneID[1:]
-        genesModis[geneID]=[]
-        values[geneID]=float(lineSplit[1])
+        genesModis[c]=[]
+        values[c]=float(lineSplit[1])
     else:
         valueList=line.split(",")
         valueList=list(map(float,valueList))
-        genesModis[geneID].append(valueList)
+        genesModis[c].append(valueList)
 
         
 

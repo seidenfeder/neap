@@ -11,8 +11,6 @@
 ####################################################################################################
 
 import numpy as np
-from sklearn import svm, linear_model
-from sklearn.ensemble import RandomForestRegressor
 from optparse import OptionParser
 from sklearn.metrics import r2_score
 from math import log
@@ -106,7 +104,7 @@ rg = joblib.load(modelFile)
 pred = rg.predict(X)
 score=r2_score(y, pred)
 
-print(str(rg).split("(")[0])
+print(score)
 
 #get the used method
 if str(rg).split("(")[0] == "RandomForestRegressor":
