@@ -154,7 +154,7 @@ def run_training(datasets, chkptfile=None):
     numBins = FLAGS["numBins"]
     numHistons = FLAGS["numHistons"]
     
-    niter = 5000
+    niter = 1000
     kprob = 0.5
 
     #For naming the mode file
@@ -259,7 +259,7 @@ def run_training(datasets, chkptfile=None):
                 print('AUC score at step %s: %s' % (i, auc[1]))
                 
                 if FLAGS["outputfile"] != "None":
-                    outFile.write(FLAGS["dataset"] + "\t" + FLAGS["outputtag"] + "\ttest\t"+str(i)+"\t"+str(auc[1])+"\n")
+                    outFile.write(FLAGS["dataset"] + "\t" + FLAGS["outputtag"] + "\tvalidate\t"+str(i)+"\t"+str(auc[1])+"\n")
                     
                 test_writer.add_summary(summary_str, i)
                 test_writer.flush()
@@ -278,6 +278,7 @@ def run_training(datasets, chkptfile=None):
         train_writer.close()
         
         if FLAGS["outputfile"] != "None":
+            outFile.write(FLAGS["dataset"] + "\t" + FLAGS["outputtag"] + "\ttest\t"+str(i)+"\t"+str(auc[1])+"\n")
             outFile.close()
 
 #Split a data set random into two parts in a specific ratio

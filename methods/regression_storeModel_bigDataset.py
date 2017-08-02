@@ -45,19 +45,22 @@ if options.newFormat :
     
 genesModis=dict()
 values = dict()
+#Gene id not unique anymore for the big data set, use a counter instead
+c=0
 for line in featureFile.readlines():
     line=line.rstrip()
     if(line.startswith('#')):
+        c=c+1
         lineSplit=line.split(" ")
         geneID=lineSplit[0]
         #Remove the hashtag at the beginning of the line
         geneID=geneID[1:]
-        genesModis[geneID]=[]
-        values[geneID]=float(lineSplit[1])
+        genesModis[c]=[]
+        values[c]=float(lineSplit[1])
     else:
         valueList=line.split(",")
         valueList=list(map(float,valueList))
-        genesModis[geneID].append(valueList)
+        genesModis[c].append(valueList)
 
         
 
