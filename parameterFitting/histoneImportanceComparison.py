@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-###########################################################################################################
+####################################################################################################################
 #
 # Method to compare performance when using only one histone modification with performance
 # when using pairs of histne modifications
-# (First the performance need to be calculate with the corresponding scripts, only the plotting part)
+# (First the performance need to be calculate with the corresponding scripts, only the plotting part is done here)
 #
-#########################################################################################################
+####################################################################################################################
 
 import numpy as np
 #from optparse import OptionParser

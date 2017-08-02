@@ -3,10 +3,8 @@
 
 ####################################################################################################
 #
-# This script is able to run the three Regression methods:
-# Linear Regression, Support Vector Machine and Random Forest
-# The output is the r2 scores of the cross validation with the chosen method
-# If wanted the regression will be plotted
+# This script is able to run the three regression methods
+# on a training set and save the gotten model.
 #
 ####################################################################################################
 

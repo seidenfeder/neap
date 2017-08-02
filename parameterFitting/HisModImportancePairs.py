@@ -67,8 +67,6 @@ for line in featureFile.readlines():
 		valueList=list(map(float,valueList))
 		genesModis[geneID].append(valueList)
 
-##Before deleting once every Histone Modification we want to check the verformance with all Histone Modifications
-
 ##Sort labels according to the feature list
 ##Maybe for some genes no GENCODE entry could be found, these are only in the features list
 #y=[]

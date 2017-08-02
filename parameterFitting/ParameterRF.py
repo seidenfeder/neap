@@ -3,7 +3,7 @@
 
 ####################################################################################################
 #
-#This script test which is the best number of trees for the Random Forest
+# This script test which is the best number of trees for the Random Forest
 #
 ####################################################################################################
 

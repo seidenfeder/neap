@@ -4,6 +4,7 @@
 ####################################################################################################
 #
 # This script is able to run a classification task if the trained model is stored in a file.
+# Implemented to be called by the interactive server to predict a new data set.
 #
 ####################################################################################################
 

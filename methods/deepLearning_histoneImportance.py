@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+####################################################################################################
+#
+# This script runs our deep learning approach with only each single histone modification
+# and each pairwise combination of histone modifications to assess the relative importance
+# of each histone modification-
+#
+####################################################################################################
+
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
@@ -7,7 +18,6 @@ import os
 import numpy as np
 import argparse
 import tensorflow as tf
-import time
 import matplotlib.pyplot as plt
 
 

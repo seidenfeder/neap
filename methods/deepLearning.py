@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+####################################################################################################
+#
+# This script runs our deep learning approach with a convolutional neuronal network.
+#
+####################################################################################################
+
+
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import

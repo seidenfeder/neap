@@ -4,7 +4,7 @@
 ####################################################################################################
 #
 # This script is able to run the two classification methods Support Vector Machine and Random Forest 
-# on a training set and save the gotten model
+# on a training set and save the gotten model.
 #
 ####################################################################################################
 
