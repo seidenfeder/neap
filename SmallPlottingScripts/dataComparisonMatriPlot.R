@@ -5,7 +5,7 @@ library(ggplot2)
 #setwd("C:/Users/kathi/Documents/neap/InteractivePlots/")
 setwd("/home/sch/schmidka/Dokumente/GeneExpressionPrediction/neap/InteractivePlots/")
 type <- "c" #c or r
-method <- "RF" #Possible SVM, RF, LR
+method <- "SVM" #Possible SVM, RF, LR
 plotName <- paste0("dataComparison_",method,".png")
 
 if(type=="c"){

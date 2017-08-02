@@ -70,10 +70,10 @@ fileHandle = open(outputfile, 'a' )
 
 #Validate different kernel functions of SVM
 scores=[]
-kernels=['linear', 'rbf', 'sigmoid'] 
+kernels=['poly','linear', 'rbf', 'sigmoid'] 
 for kernelTyp in kernels:
     print(kernelTyp)
-    clf=svm.SVC(cache_size=1000, kernel=kernelTyp)
+    clf=svm.SVC(cache_size=1000, kernel=kernelTyp, degree=2)
     result=cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
     scores.append(result)
     print(result)

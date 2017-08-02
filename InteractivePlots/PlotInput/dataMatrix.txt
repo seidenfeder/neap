@@ -70,29 +70,29 @@ SVM	thyroid gland	keratinocyte	0.910648146421
 SVM	thyroid gland	gastrocnemius medialis	0.92025785036
 SVM	thyroid gland	SK-N-SH	0.89730333822
 SVM	thyroid gland	thyroid gland	0.963188215836
-RF	BigData	Endo	0.742218227246
-RF	BigData	K562	0.723585854724
-RF	BigData	keratinocyte	0.604325236786
-RF	BigData	gastrocnemius medialis	0.899266772951
-RF	BigData	SK-N-SH	0.797428132984
-RF	BigData	thyroid gland	0.464131467921
-SVM	BigData	Endo	0.918651905457
-SVM	BigData	K562	0.938599316707
-SVM	BigData	keratinocyte	0.909256151895
-SVM	BigData	gastrocnemius medialis	0.919598651316
-SVM	BigData	SK-N-SH	0.896297888353
-SVM	BigData	thyroid gland	0.894937710324
-SVM	Endo	BigData	0.855518969951
-SVM	K562	BigData	0.857617645858
-SVM	SK-N-SH	BigData	0.857801083292
-SVM	keratinocyte	BigData	0.85479444537
-SVM	gastrocnemius medialis	BigData	0.864505904879
-SVM	thyroid gland	BigData	0.852920624055
-RF	Endo	BigData	0.685406529892
-RF	K562	BigData	0.470877442556
-RF	SK-N-SH	BigData	0.745028540728
-RF	keratinocyte	BigData	0.789452442978
-RF	gastrocnemius medialis	BigData	0.863553105769
-RF	thyroid gland	BigData	0.812260119683
-RF	BigData	BigData	0.999556498742
-SVM	BigData	BigData	0.922811884714
+RF	BigData	BigData	0.999386711902
+RF	BigData	Endo	0.9993070271
+RF	BigData	K562	0.999251960545
+RF	BigData	keratinocyte	0.800409650549
+RF	BigData	gastrocnemius medialis	0.999630937999
+RF	BigData	SK-N-SH	0.881397548916
+RF	BigData	thyroid gland	0.450291375837
+RF	Endo	BigData	0.87698122337
+RF	K562	BigData	0.876531888695
+RF	keratinocyte	BigData	0.829922270023
+RF	gastrocnemius medialis	BigData	0.861944632523
+RF	SK-N-SH	BigData	0.808651961192
+RF	thyroid gland	BigData	0.910393108909
+SVM	BigData	BigData	0.960200150837
+SVM	Endo	BigData	0.941536343617
+SVM	K562	BigData	0.93598026531
+SVM	keratinocyte	BigData	0.929925518206
+SVM	gastrocnemius medialis	BigData	0.940534261602
+SVM	SK-N-SH	BigData	0.92124461846
+SVM	thyroid gland	BigData	0.925598756994
+SVM	BigData	Endo	0.957847870221
+SVM	BigData	K562	0.974547053668
+SVM	BigData	keratinocyte	0.922899956658
+SVM	BigData	gastrocnemius medialis	0.951620537128
+SVM	BigData	SK-N-SH	0.90895327668
+SVM	BigData	thyroid gland	0.912586108984
