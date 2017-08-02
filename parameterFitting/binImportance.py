@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-##############################################################################
+##################################################################################################
 #
-# This script runs the Rnadom Forest method with every bin 
+# This script runs the specified prediction method (regression or classification) with every bin 
 # to evaluate which is the most important bin
 #
-##############################################################################
+############################################################################################
 
 import os
 import matplotlib.pyplot as plt

@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jun 21 11:35:53 2017
 
-@author: schmidka
-"""
 ####################################################################################################
 #
 # This script scales or normalizes the binned feature data after different ideas:
@@ -19,7 +15,6 @@ Created on Wed Jun 21 11:35:53 2017
 
 import numpy as np
 from sklearn import preprocessing
-
 from optparse import OptionParser
 
 #this is necessary to get the parameters from the comand line

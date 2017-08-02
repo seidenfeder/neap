@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-####################################################################################################
+#######################################################################################################################
 #
 # Adaption of the method classification_withStoredModel to run on our big merged dataset (with option mergedData)
 # The merged file need a line ##<datasetname> before each cell type in the labelfile
@@ -9,7 +9,7 @@
 #
 # This script is able to run a classification task if the trained model is stored in a file.
 #
-####################################################################################################
+#########################################################################################################################
 
 import numpy as np
 from optparse import OptionParser
