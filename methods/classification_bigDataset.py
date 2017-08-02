@@ -3,36 +3,37 @@
 
 ####################################################################################################
 #
-# Adaption of the method classification_storeModel to run on our big merged dataset
+# Adaption of the method classification to run on our big merged dataset
 # The merged file need a line ##<datasetname> before each cell type in the labelfile
 # and also the typical binning header before each cell type in the feature file
 #
-#
-# This script is able to run the two classification methods Support Vector Machine and Random Forest 
-# on a training set and save the gotten model
+# This script is able to run the two classification methods Support Vector Machine and Random Forest
+# Output gives the AUROC scores of the cross validation with the chosen method 
 #
 ####################################################################################################
 
 import numpy as np
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
 from optparse import OptionParser
-from sklearn.externals import joblib
 
+#this is necessary to get the parameters from the comand line
 parser = OptionParser()
 parser.add_option("-m", type="string", dest="method", help = "the method you want to use Support Vector Machine (SVM) or Random Forest (RF) default= RF", default="RF")
-parser.add_option("-i",dest="train", help="This gives the path to the file with the train dataset (binning file)")
-parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels fot´r the training data")
+parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
+parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
+parser.add_option("-c",type = "int",dest="crossVal", help="Number of iterations in the cross validation", default=5)
 parser.add_option("-a", action="store_true", dest="allBins", help = "Tells if all bins should be used", default=False)
-parser.add_option("-o",dest="output", help="The name of the outputfile to store the model in", default="model.pkl")
-parser.add_option("-n", action="store_true", dest="newFormat", help="Feature file created by bins annotated, containing ENCODE metadata infos", default=False)
+parser.add_option("-o",dest="output", help="The name of the outputfile", default="classification.txt")
+parser.add_option("--add",dest="addition", help="Iff you want a additional column in the output file for necessary additonal information (e.g. when you used the median for labeling write median)", default="")
 
 (options, args) = parser.parse_args()
 method=options.method
 labelFilename=options.labels
-featureFilename=options.train
-modelFilename=options.output
+featureFilename=options.input
+zusatz=options.addition
 
 #Read labels
 labelFile = open(labelFilename)
@@ -65,7 +66,8 @@ for line in featureFile.readlines():
         valueList=line.split(",")
         valueList=list(map(float,valueList))
         genesModis[dataset+geneID].append(valueList)
-    
+
+        
 
 #Sort labels according to the feature list
 #Maybe for some genes no GENCODE entry could be found, these are only in the features list
@@ -86,18 +88,21 @@ else:
 	    valueMatrix=np.array(genesModis[geneID])
 	    X.append(valueMatrix.flatten())
 
-
 #Support Vector Machines
 if(method=="SVM"):
-    clf=svm.SVC(kernel='rbf', probability=True)
+    clf=svm.SVC(cache_size=500)
 #Random Forest
 elif(method=="RF"):
     clf=RandomForestClassifier(n_estimators=12)
-#Train the model
-clf.fit(X,y)  
-
-#Save the model
-joblib.dump(clf, modelFilename) 
 
 
+scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
 
+#write the output into a file but don't delete the previous text
+#this is necessary that we can compare different data sets or binnings or methods
+fileHandle = open ( options.output, 'a' )
+if(not options.allBins):
+    fileHandle.write(dataset+"\t"+method+"\t"+zusatz+"\t"+str(binNumber)+"\t"+'\t'.join(map(str,scores))+"\n")
+else:
+    fileHandle.write(dataset+"\t"+method+"\t"+zusatz+"\tall\t"+'\t'.join(map(str,scores))+"\n")
+fileHandle.close()

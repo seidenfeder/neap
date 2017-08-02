@@ -3,6 +3,10 @@
 
 ####################################################################################################
 #
+# Adaption of the method classification_withStoredModel to run on our big merged dataset (with option mergedData)
+# The merged file need a line ##<datasetname> before each cell type in the labelfile
+# and also the typical binning header before each cell type in the feature file
+#
 # This script is able to run a classification task if the trained model is stored in a file.
 #
 ####################################################################################################
@@ -44,9 +48,9 @@ if(options.mergedData):
             labelDict[dataset+lineSplit[0]] = int(lineSplit[2])
 
     #Read features
-    testGenes=open(testFile)
-    genesModis=dict()
-    for line in testGenes.readlines():
+    testfile=open(testFile)
+    testGenes=dict()
+    for line in testfile.readlines():
         line=line.rstrip()
         if(line.startswith('##')):
             #line with the histone modification
@@ -57,11 +61,13 @@ if(options.mergedData):
             geneID=lineSplit[0]
             #Remove the hashtag at the beginning of the line
             geneID=geneID[1:]
-            genesModis[dataset+geneID]=[]
+            testGenes[dataset+geneID]=[]
         else:
             valueList=line.split(",")
             valueList=list(map(float,valueList))
-            genesModis[dataset+geneID].append(valueList)
+            testGenes[dataset+geneID].append(valueList)
+     
+    testset="BigData"
 else:
     testfile=open(testFile)
     if options.newFormat :

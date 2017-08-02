@@ -3,6 +3,9 @@
 
 ####################################################################################################
 #
+# Adaption of the method regression_withStoredModel to run on our big merged dataset
+# In the feature file only one header at the beginning of all cell types is allowed
+#
 # This script is able to run the three Regression methods:
 # Linear Regression, Support Vector Machine and Random Forest
 # The output is the r2 scores of the cross validation with the chosen method
