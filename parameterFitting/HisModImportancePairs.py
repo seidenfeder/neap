@@ -5,6 +5,7 @@
 #
 # This script tests the relative Importance of all tested Histone Modifications
 # by running the classification with different subsets of the Histone Modifications 
+# Runs all pairs of modifiactions
 #
 #####################################################################################
 
@@ -17,7 +18,7 @@ import matplotlib.pyplot as plt
 
 #this is necessary to get the parameters from the comand line
 parser = OptionParser()
-parser.add_option("-m", type="string", dest="method", help = "the method you want to use Support Vector Machine (SVM) or Random Forest (RF) default= RF", default="RF")
+parser.add_option("-m", type="string", dest="method", help = "the method you want to use: classification: Support Vector Machine (SVC) or Random Forest (RFC) or Regression: Support Vector Machine (SVR) or Random Forest (RFR) or Linear Regression LR default= RFC", default="RFC")
 parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
 parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
@@ -69,40 +70,40 @@ for line in featureFile.readlines():
 
 ##Sort labels according to the feature list
 ##Maybe for some genes no GENCODE entry could be found, these are only in the features list
-#y=[]
-#X=[]
-##If not all bins should be used
-#if(not options.allBins):
-#	binNumber=options.bin
-#	#Create feature matrix of the given bin 
-#	for geneID in genesModis:
-#	    y.append(labelDict[geneID])
-#	    valueMatrix=np.array(genesModis[geneID])
-#	    X.append(valueMatrix[:,binNumber])
-##if you want the classification with all bins
-#else:
-#	for geneID in genesModis:
-#	    y.append(labelDict[geneID])
-#	    valueMatrix=np.array(genesModis[geneID])
-#	    X.append(valueMatrix.flatten())
-#
-##Support Vector Machines
-#if(method=="SVM"):
-#    clf=svm.SVC(kernel="rbf")
-##Random Forest
-#elif(method=="RF"):
-#    clf=RandomForestClassifier(n_estimators=12)
-#
-#scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
-#
-##write the output into a file but don't delete the previous text
-##this is necessary that we can compare different data sets or binnings or methods
-#fileHandle = open ( options.output, 'a' )
-#if(not options.allBins):
-#    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\tNone\t"+'\t'.join(map(str,scores))+"\n")
-#else:
-#    fileHandle.write(dataset+"\t"+method+"\tall\tNone\t"+'\t'.join(map(str,scores))+"\n")
-#fileHandle.close()
+y=[]
+X=[]
+#If not all bins should be used
+if(not options.allBins):
+	binNumber=options.bin
+	#Create feature matrix of the given bin 
+	for geneID in genesModis:
+	    y.append(labelDict[geneID])
+	    valueMatrix=np.array(genesModis[geneID])
+	    X.append(valueMatrix[:,binNumber])
+#if you want the classification with all bins
+else:
+	for geneID in genesModis:
+s	    y.append(labelDict[geneID])
+	    valueMatrix=np.array(genesModis[geneID])
+	    X.append(valueMatrix.flatten())
+
+#Support Vector Machines
+if(method=="SVM"):
+    clf=svm.SVC(kernel="rbf")
+#Random Forest
+elif(method=="RF"):
+    clf=RandomForestClassifier(n_estimators=12)
+
+scores = cross_val_score(clf, X, y, cv=options.crossVal, scoring='roc_auc')
+
+#write the output into a file but don't delete the previous text
+#this is necessary that we can compare different data sets or binnings or methods
+fileHandle = open ( options.output, 'a' )
+if(not options.allBins):
+    fileHandle.write(dataset+"\t"+method+"\t"+str(binNumber)+"\tNone\t"+'\t'.join(map(str,scores))+"\n")
+else:
+    fileHandle.write(dataset+"\t"+method+"\tall\tNone\t"+'\t'.join(map(str,scores))+"\n")
+fileHandle.close()
 
 #Now we iterate through all Histone Modifications and run the classification method without the histone modification
 for i in range(0,len(modifications)):

@@ -353,7 +353,8 @@ shinyUI(
                         ),
                         mainPanel(
                           p("In this tab you are able to run your own predictions. Just insert the data in the corresponding format. 
-                            You find a description of the needed format under the project description.  "),
+                            You find a description of the needed format under the project description."),
+                          div("Be aware that you should have the following histone modifications in your binning file in this order: H3K27ac, H3K36me3, H3K9me3, H3K4me3 and H3K27me3"),
                           br(),
                           plotlyOutput("comparePredicton"),
                           br(),
@@ -363,12 +364,13 @@ shinyUI(
                         )
                       )
             ),
-            tags$footer("Authors: Nicola Palandt and Kartharina Schmid, Supervisor: Markus Gruber", align = "center", style = "
+            tags$footer("Authors: Nicola Palandt and Kartharina Schmid, Supervisor: Markus Gruber",align = "center", style = "
                position:absolute;
                         width:100%;
                         height:50px;   
                         color: white;
                         padding: 10px;
+                        text-alignment:center;
                         background-color: #3e3f3a;
                         z-index: 1000;")
   )
