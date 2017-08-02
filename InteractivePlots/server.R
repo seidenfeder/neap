@@ -787,7 +787,7 @@ shinyServer(
         #Create heatmap
         p<-ggplot(data = plottedData, aes(x = Trainset, y = Testset)) +
           geom_tile(aes(fill = Score))+
-          scale_fill_gradient2(low = "white",mid="yellow", high = "red",midpoint=0.5, limits=c(0.0,1.0))+
+          scale_fill_gradient2(low = "#dd2288",mid="#3300ee", high = "#33dd00",midpoint=0.5, limits=c(0.0,1.0))+
           ggtitle("Predicting on a different data set")+
           labs(x="Training Set",y="Test Set")
 
