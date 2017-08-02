@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-## TESTVERSION FOR SINGLE HISTONE MODIFICATIONS
 
 #####################################################################################
 #
 # This script tests the relative Importance of all tested Histone Modifications
 # by running the classification with different subsets of the Histone Modifications 
+# runs with deleting each histone modification once
 #
 #####################################################################################
 

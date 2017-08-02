@@ -5,6 +5,7 @@
 #
 # This script tests the relative Importance of all tested Histone Modifications
 # by running the classification with different subsets of the Histone Modifications 
+# runs the method once for each histone mod with one modification
 #
 #####################################################################################
 
@@ -18,7 +19,7 @@ import re
 
 #this is necessary to get the parameters from the comand line
 parser = OptionParser()
-parser.add_option("-m", type="string", dest="method", help = "the method you want to use Support Vector Machine (SVM) or Random Forest (RF) default= RF", default="RF")
+parser.add_option("-m", type="string", dest="method", help = "the method you want to use: classification: Support Vector Machine (SVC) or Random Forest (RFC) or Regression: Support Vector Machine (SVR) or Random Forest (RFR) or Linear Regression LR default= RFC", default="RFC")
 parser.add_option("-i",dest="input", help="This gives the path to the file with the input data (the output of the binning)")
 parser.add_option("-l",dest="labels", help="This gives the path to the file with the labels")
 parser.add_option("-b",type = "int",dest="bin", help="Tells which bin should be used for the classification")
