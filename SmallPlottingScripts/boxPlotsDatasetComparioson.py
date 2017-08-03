@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 
-#fileName="C:/Users/kathi/Documents/neap/InteractivePlots/PlotInput/performanceDatasets.txt"
-fileName="C:/Users/kathi/Documents/neap/InteractivePlots/PlotInput/performanceDatasetsRegression.txt"
+#fileName="/home/sch/schmidka/Dokumente/GeneExpressionPrediction/neap/InteractivePlots/PlotInput/performanceDatasets.txt"
+fileName="/home/sch/schmidka/Dokumente/GeneExpressionPrediction/neap/InteractivePlots/PlotInput/performanceDatasetsRegression.txt"
 method="LR" #"LR","RF"
-scoreName="R2 Score" #"AUC score"
+scoreName="R2 Score" #"AUC score", "R2 Score"
 
 score=[]
 dataset=[]
